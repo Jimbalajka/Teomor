@@ -6,44 +6,31 @@
 <title>Teomor — Текстовая RPG</title>
 <style>
 /* ========================================
-   ДИЗАЙН UI — МЕНЯЙТЕ ЗДЕСЬ
-   Все переменные цветов в :root
+   ДИЗАЙН UI — МЕНЯЙ ЗДЕСЬ
    ======================================== */
-
-/* --- ПОДКЛЮЧЕНИЕ ШРИФТА --- */
 @font-face {
   font-family: 'InkFont';
   src: local('Georgia'), local('Times New Roman');
-  /* Замените на свой рукописный шрифт:
-     Положите файл .woff2 в папку /assets/fonts/
-     и раскомментируйте строку ниже */
-  /* src: url('assets/fonts/ink-font.woff2') format('woff2'); */
 }
 
-/* --- ЦВЕТОВАЯ ПАЛИТРА --- */
 :root {
-  --parchment: #f4e4c1;       /* Основной цвет пергамента */
-  --parchment-dark: #e8d5a3;  /* Тёмный пергамент (кнопки, ячейки) */
-  --ink: #2c1810;             /* Цвет чернил (текст) */
-  --ink-light: #5a3a28;       /* Светлые чернила (подсказки) */
-  --red-wax: #8b1a1a;         /* Цвет сургуча (акценты, ссылки) */
-  --gold: #b8860b;            /* Золото (кубы, важное) */
-  --border-color: #3a2a1a;   /* Цвет рамок */
-  --slot-bg: #e8d5a3;        /* Фон ячейки инвентаря */
-  --slot-border: #3a2a1a;    /* Рамка ячейки */
+  --parchment: #f4e4c1;
+  --parchment-dark: #e8d5a3;
+  --ink: #2c1810;
+  --ink-light: #5a3a28;
+  --red-wax: #8b1a1a;
+  --gold: #b8860b;
+  --border-color: #3a2a1a;
+  --slot-bg: #e8d5a3;
+  --slot-border: #3a2a1a;
+  --disabled-bg: #c4b896;
+  --disabled-text: #8a7a6a;
 }
 
-/* --- СБРОС СТИЛЕЙ --- */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* --- ФОН СТРАНИЦЫ (тёмный, чтобы пергамент выделялся) --- */
 body {
   background: #1a1a1a;
-  /* Замените на свою текстуру: background: url('assets/ui/table_bg.png'); */
   font-family: 'InkFont', 'Georgia', 'Times New Roman', serif;
   color: var(--ink);
   display: flex;
@@ -53,14 +40,12 @@ body {
   padding: 20px;
 }
 
-/* --- ОСНОВНОЙ КОНТЕЙНЕР ИГРЫ (пергамент) --- */
 #game-container {
   width: 100%;
   max-width: 1000px;
   min-height: 700px;
   background: var(--parchment);
-  /* Замените на текстуру: background: url('assets/ui/parchment_bg.png'); */
-  border: 12px solid #3a2a1a;  /* Толстая рамка как у книги */
+  border: 12px solid #3a2a1a;
   border-radius: 4px;
   box-shadow: 0 0 40px rgba(0,0,0,0.8), inset 0 0 100px rgba(139,90,43,0.3);
   padding: 30px;
@@ -69,7 +54,6 @@ body {
   gap: 20px;
 }
 
-/* --- ПЯТНА НА ПЕРГАМЕНТЕ (декоративные) --- */
 #game-container::before {
   content: '';
   position: absolute;
@@ -79,21 +63,30 @@ body {
   z-index: 0;
 }
 
-/* --- ПАНЕЛЬ СЦЕНЫ (текст и выборы) --- */
+/* Панель сцены */
 #scene-panel {
   flex: 1;
   min-width: 0;
   position: relative;
   z-index: 1;
   padding: 20px;
-  background: rgba(244,228,193,0.7); /* Полупрозрачный пергамент */
+  background: rgba(244,228,193,0.7);
   border: 2px solid var(--border-color);
   border-radius: 3px;
   overflow-y: auto;
   max-height: 650px;
 }
 
-/* --- ЗАГОЛОВОК СЦЕНЫ --- */
+#scene-image {
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  border: 3px solid var(--border-color);
+  border-radius: 3px;
+  margin-bottom: 15px;
+  display: none;
+}
+
 #scene-title {
   font-size: 28px;
   font-weight: bold;
@@ -104,7 +97,6 @@ body {
   padding-bottom: 10px;
 }
 
-/* --- ТЕКСТ СЦЕНЫ --- */
 #scene-text {
   font-size: 18px;
   line-height: 1.8;
@@ -112,18 +104,17 @@ body {
   white-space: pre-wrap;
 }
 
-/* --- ГЛОССАРИЙ-ССЫЛКИ В ТЕКСТЕ --- */
+/* Глоссарий-ссылки */
 #scene-text .glossary-link {
   color: var(--red-wax);
   border-bottom: 1px dotted var(--red-wax);
   cursor: pointer;
+  font-weight: bold;
   transition: color 0.3s;
 }
-#scene-text .glossary-link:hover {
-  color: #a00;
-}
+#scene-text .glossary-link:hover { color: #a00; }
 
-/* --- КНОПКИ ВЫБОРОВ --- */
+/* Кнопки выборов */
 #choices-container {
   display: flex;
   flex-direction: column;
@@ -140,26 +131,79 @@ body {
   cursor: pointer;
   text-align: left;
   transition: all 0.3s;
-  position: relative;
   color: var(--ink);
 }
-.choice-btn::before {
-  content: '➤';
-  margin-right: 8px;
-  color: var(--red-wax);
+.choice-btn::before { content: '➤'; margin-right: 8px; color: var(--red-wax); }
+.choice-btn:hover { background: #d4b896; border-color: var(--red-wax); }
+.choice-btn.dice-roll { border-color: var(--gold); }
+.choice-btn.dice-roll::after { content: ' 🎲'; }
+
+/* Кнопка-переключатель (черты) */
+.toggle-group {
+  display: flex;
+  gap: 0;
+  margin: 6px 0;
 }
-.choice-btn:hover {
-  background: #d4b896;
+.toggle-btn {
+  flex: 1;
+  padding: 10px;
+  background: var(--parchment-dark);
+  border: 2px solid var(--border-color);
+  font-family: inherit;
+  font-size: 15px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.3s;
+  color: var(--ink);
+}
+.toggle-btn:first-child { border-radius: 3px 0 0 3px; }
+.toggle-btn:last-child { border-radius: 0 3px 3px 0; border-left: none; }
+.toggle-btn.active {
+  background: #c4a060;
   border-color: var(--red-wax);
+  color: #000;
+  font-weight: bold;
 }
-.choice-btn.dice-roll {
-  border-color: var(--gold);
+.toggle-btn.inactive {
+  background: var(--disabled-bg);
+  color: var(--disabled-text);
 }
-.choice-btn.dice-roll::after {
-  content: ' 🎲';
+.toggle-btn:hover:not(.inactive) { background: #d4b896; }
+
+/* Предыстория — радиокнопки стилизованные */
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0;
+}
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: var(--parchment-dark);
+  border: 2px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 15px;
+}
+.radio-label:hover { background: #d4b896; }
+.radio-label input[type="radio"] { accent-color: var(--red-wax); width: 18px; height: 18px; }
+
+/* Поле ввода имени */
+.name-input {
+  width: 100%;
+  padding: 10px;
+  background: var(--parchment);
+  border: 2px solid var(--border-color);
+  font-family: inherit;
+  font-size: 18px;
+  color: var(--ink);
+  margin: 8px 0;
 }
 
-/* --- БОКОВАЯ ПАНЕЛЬ --- */
+/* Боковая панель */
 #side-panel {
   width: 280px;
   min-width: 280px;
@@ -181,12 +225,8 @@ body {
   color: var(--ink);
   text-align: center;
 }
-.side-btn:hover {
-  background: #d4b896;
-  border-color: var(--red-wax);
-}
+.side-btn:hover { background: #d4b896; border-color: var(--red-wax); }
 
-/* --- БЫСТРЫЕ ХАРАКТЕРИСТИКИ НА БОКОВОЙ ПАНЕЛИ --- */
 #quick-stats {
   background: rgba(244,228,193,0.7);
   border: 2px solid var(--border-color);
@@ -194,11 +234,9 @@ body {
   font-size: 14px;
   line-height: 1.6;
 }
-#quick-stats strong {
-  color: var(--red-wax);
-}
+#quick-stats strong { color: var(--red-wax); }
 
-/* --- МОДАЛЬНОЕ ОКНО (ДНЕВНИК) --- */
+/* Модальное окно дневника */
 .modal-overlay {
   display: none;
   position: fixed;
@@ -208,11 +246,8 @@ body {
   justify-content: center;
   align-items: center;
 }
-.modal-overlay.active {
-  display: flex;
-}
+.modal-overlay.active { display: flex; }
 
-/* --- КНИГА ДНЕВНИКА --- */
 .modal-journal {
   width: 90%;
   max-width: 800px;
@@ -226,7 +261,6 @@ body {
   overflow: hidden;
 }
 
-/* --- ВКЛАДКИ ДНЕВНИКА --- */
 .journal-tabs {
   display: flex;
   border-bottom: 2px solid var(--border-color);
@@ -244,59 +278,33 @@ body {
   color: var(--ink);
   transition: all 0.3s;
 }
-.journal-tab:last-child {
-  border-right: none;
-}
+.journal-tab:last-child { border-right: none; }
 .journal-tab.active {
   background: var(--parchment);
   border-bottom: 2px solid var(--parchment);
   font-weight: bold;
   color: var(--red-wax);
 }
-.journal-tab:hover {
-  background: #d4b896;
-}
+.journal-tab:hover { background: #d4b896; }
 
-/* --- СОДЕРЖИМОЕ ВКЛАДОК --- */
-.journal-content {
-  flex: 1;
-  padding: 20px;
-  overflow-y: auto;
-  max-height: 60vh;
-}
-.journal-pane {
-  display: none;
-}
-.journal-pane.active {
-  display: block;
-}
+.journal-content { flex: 1; padding: 20px; overflow-y: auto; max-height: 60vh; }
+.journal-pane { display: none; }
+.journal-pane.active { display: block; }
 
-/* --- ПОРТРЕТ ПЕРСОНАЖА --- */
+/* Портрет */
 #character-portrait-container {
-  width: 150px;
-  height: 150px;
+  width: 150px; height: 150px;
   border: 3px solid var(--border-color);
   margin: 0 auto 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   overflow: hidden;
   background: var(--parchment-dark);
   cursor: pointer;
-  position: relative;
-  /* Стиль дагерротипа: рваные края можно добавить через clip-path */
 }
-#character-portrait-container img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-#portrait-placeholder {
-  font-size: 48px;
-  color: var(--ink-light);
-}
+#character-portrait-container img { width: 100%; height: 100%; object-fit: cover; }
+#portrait-placeholder { font-size: 48px; color: var(--ink-light); }
 
-/* --- ИНВЕНТАРЬ: СЕТКА --- */
+/* Инвентарь */
 #inventory-grid {
   display: grid;
   grid-template-columns: repeat(4, 55px);
@@ -306,162 +314,90 @@ body {
   justify-content: center;
 }
 .inventory-slot {
-  width: 55px;
-  height: 55px;
+  width: 55px; height: 55px;
   background: var(--slot-bg);
   border: 2px solid var(--slot-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s;
-  word-break: break-word;
-  padding: 2px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; text-align: center;
+  cursor: pointer; transition: all 0.3s;
+  word-break: break-word; padding: 2px;
 }
-.inventory-slot.occupied {
-  background: #d4b896;
-  border-color: var(--red-wax);
-}
-.inventory-slot:hover {
-  background: #c4a882;
-}
+.inventory-slot.occupied { background: #d4b896; border-color: var(--red-wax); }
+.inventory-slot:hover { background: #c4a882; }
 
-/* --- КВЕСТОВЫЙ ПОДСУМОК --- */
 #quest-items-list {
   border: 2px dashed var(--border-color);
-  padding: 10px;
-  min-height: 40px;
-  margin-top: 10px;
+  padding: 10px; min-height: 40px; margin-top: 10px;
 }
 #quest-items-list .quest-item {
-  padding: 5px;
-  background: var(--parchment-dark);
-  margin: 3px 0;
-  font-size: 13px;
+  padding: 5px; background: var(--parchment-dark);
+  margin: 3px 0; font-size: 13px;
 }
 
-/* --- СОХРАНЕНИЯ --- */
+/* Сохранения */
 .save-slot {
-  padding: 12px;
-  border: 2px solid var(--border-color);
-  margin: 8px 0;
-  background: var(--parchment-dark);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: all 0.3s;
-  gap: 10px;
+  padding: 12px; border: 2px solid var(--border-color);
+  margin: 8px 0; background: var(--parchment-dark);
+  display: flex; justify-content: space-between; align-items: center;
+  transition: all 0.3s; gap: 10px;
 }
-.save-slot:hover {
-  border-color: var(--red-wax);
-  background: #d4b896;
-}
-.save-slot .save-info {
-  font-size: 12px;
-  color: var(--ink-light);
-}
+.save-slot:hover { border-color: var(--red-wax); background: #d4b896; }
+.save-slot .save-info { font-size: 12px; color: var(--ink-light); }
 .save-btn-small {
-  padding: 6px 12px;
-  background: var(--parchment);
-  border: 1px solid var(--border-color);
-  font-family: inherit;
-  font-size: 12px;
-  cursor: pointer;
-  color: var(--ink);
+  padding: 6px 12px; background: var(--parchment);
+  border: 1px solid var(--border-color); font-family: inherit;
+  font-size: 12px; cursor: pointer; color: var(--ink);
 }
-.save-btn-small:hover {
-  background: var(--red-wax);
-  color: var(--parchment);
-}
+.save-btn-small:hover { background: var(--red-wax); color: var(--parchment); }
 
-/* --- ОКНО БРОСКА КУБА --- */
+/* Окно броска */
 #dice-overlay {
-  display: none;
-  position: fixed;
+  display: none; position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.85);
-  z-index: 200;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
+  background: rgba(0,0,0,0.85); z-index: 200;
+  justify-content: center; align-items: center; flex-direction: column;
 }
-#dice-overlay.active {
-  display: flex;
-}
-#dice-result {
-  font-size: 72px;
-  color: var(--gold);
-  font-family: 'InkFont', serif;
-  margin-top: 20px;
-}
-#dice-canvas {
-  border: 3px solid var(--border-color);
-  background: var(--parchment);
-  border-radius: 5px;
-}
+#dice-overlay.active { display: flex; }
+#dice-result { font-size: 72px; color: var(--gold); font-family: 'InkFont', serif; margin-top: 20px; }
+#dice-canvas { border: 3px solid var(--border-color); background: var(--parchment); border-radius: 5px; }
 
-/* --- КНОПКА ЗАКРЫТИЯ --- */
 .close-btn {
-  position: absolute;
-  top: 10px;
-  right: 15px;
-  font-size: 24px;
-  cursor: pointer;
-  color: var(--ink);
-  z-index: 101;
+  position: absolute; top: 10px; right: 15px;
+  font-size: 24px; cursor: pointer; color: var(--ink); z-index: 101;
 }
-.close-btn:hover {
-  color: var(--red-wax);
-}
-
-/* --- КНОПКА ЗАКРЫТЬ ВНИЗУ ДНЕВНИКА --- */
+.close-btn:hover { color: var(--red-wax); }
 .close-journal-btn {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  margin-top: 15px;
-  background: var(--parchment-dark);
-  border: 2px solid var(--border-color);
-  font-family: inherit;
-  font-size: 16px;
-  cursor: pointer;
-  color: var(--ink);
-  text-align: center;
+  display: block; width: 100%; padding: 10px; margin-top: 15px;
+  background: var(--parchment-dark); border: 2px solid var(--border-color);
+  font-family: inherit; font-size: 16px; cursor: pointer; color: var(--ink); text-align: center;
 }
-.close-journal-btn:hover {
-  background: #d4b896;
-  border-color: var(--red-wax);
-}
+.close-journal-btn:hover { background: #d4b896; border-color: var(--red-wax); }
 </style>
 </head>
 <body>
 
-<!-- ОСНОВНОЙ КОНТЕЙНЕР -->
 <div id="game-container">
-  <!-- Панель сцены -->
   <div id="scene-panel">
+    <img id="scene-image" src="" alt="Изображение сцены">
     <div id="scene-title">Teomor</div>
     <div id="scene-text">Загрузка...</div>
     <div id="choices-container"></div>
   </div>
 
-  <!-- Боковая панель -->
   <div id="side-panel">
     <div id="quick-stats">
       <strong>Имя:</strong> <span id="stat-name">—</span><br>
-      <strong>СИЛ:</strong> <span id="stat-str">+1</span> |
-      <strong>ЛОВ:</strong> <span id="stat-dex">+1</span> |
-      <strong>МУД:</strong> <span id="stat-wis">+1</span><br>
-      <strong>ХАР:</strong> <span id="stat-cha">+1</span> |
-      <strong>ИНТ:</strong> <span id="stat-int">+1</span>
+      <strong>СИЛ:</strong> <span id="stat-str">0</span> |
+      <strong>ЛОВ:</strong> <span id="stat-dex">0</span> |
+      <strong>МУД:</strong> <span id="stat-wis">0</span><br>
+      <strong>ХАР:</strong> <span id="stat-cha">0</span> |
+      <strong>ИНТ:</strong> <span id="stat-int">0</span>
     </div>
     <button class="side-btn" onclick="openJournal()">📖 Дневник</button>
   </div>
 </div>
 
-<!-- МОДАЛЬНОЕ ОКНО ДНЕВНИКА -->
+<!-- Дневник -->
 <div class="modal-overlay" id="journal-modal" onclick="if(event.target === this) closeJournal()">
   <div class="modal-journal" onclick="event.stopPropagation()">
     <span class="close-btn" onclick="closeJournal()">✕</span>
@@ -475,78 +411,70 @@ body {
     </div>
     <div class="journal-content" id="journal-content">
 
-      <!-- Вкладка: Персонаж -->
       <div class="journal-pane active" id="pane-character">
         <div id="character-portrait-container" onclick="document.getElementById('portrait-upload').click()">
           <span id="portrait-placeholder">🖼</span>
           <img id="portrait-img" style="display:none" alt="Портрет">
         </div>
         <input type="file" id="portrait-upload" accept="image/*" style="display:none" onchange="uploadPortrait(event)">
-        <p style="text-align:center"><em>Нажмите на рамку, чтобы загрузить портрет</em></p>
+        <p style="text-align:center"><em>Нажмите для загрузки портрета</em></p>
         <p><strong>Имя:</strong> <span id="pane-name">—</span></p>
+        <p><strong>Пол:</strong> <span id="pane-gender">—</span></p>
         <p><strong>Предыстория:</strong> <span id="pane-background">—</span></p>
-        <p><strong>Сила:</strong> <span id="pane-str">12</span> (мод. <span id="pane-str-mod">+1</span>)</p>
-        <p><strong>Ловкость:</strong> <span id="pane-dex">12</span> (мод. <span id="pane-dex-mod">+1</span>)</p>
-        <p><strong>Мудрость:</strong> <span id="pane-wis">12</span> (мод. <span id="pane-wis-mod">+1</span>)</p>
-        <p><strong>Харизма:</strong> <span id="pane-cha">12</span> (мод. <span id="pane-cha-mod">+1</span>)</p>
-        <p><strong>Интеллект:</strong> <span id="pane-int">12</span> (мод. <span id="pane-int-mod">+1</span>)</p>
+        <p><strong>Черты:</strong> <span id="pane-traits">—</span></p>
+        <p><strong>Сила:</strong> <span id="pane-str">10</span> (<span id="pane-str-mod">0</span>)</p>
+        <p><strong>Ловкость:</strong> <span id="pane-dex">10</span> (<span id="pane-dex-mod">0</span>)</p>
+        <p><strong>Мудрость:</strong> <span id="pane-wis">10</span> (<span id="pane-wis-mod">0</span>)</p>
+        <p><strong>Харизма:</strong> <span id="pane-cha">10</span> (<span id="pane-cha-mod">0</span>)</p>
+        <p><strong>Интеллект:</strong> <span id="pane-int">10</span> (<span id="pane-int-mod">0</span>)</p>
       </div>
 
-      <!-- Вкладка: Инвентарь -->
       <div class="journal-pane" id="pane-inventory">
         <h3>🎒 Вещмешок (4×3)</h3>
         <div id="inventory-grid"></div>
-        <p style="font-size:12px;text-align:center"><em>Кликните по предмету для использования (если расходник)</em></p>
         <h3>📜 Квестовые предметы</h3>
         <div id="quest-items-list"></div>
       </div>
 
-      <!-- Вкладка: Глоссарий -->
       <div class="journal-pane" id="pane-glossary">
         <h3>📚 Глоссарий</h3>
-        <div id="glossary-list"><em>Термины появятся по мере исследования мира.</em></div>
+        <div id="glossary-list"></div>
       </div>
 
-      <!-- Вкладка: Квесты -->
       <div class="journal-pane" id="pane-quests">
         <h3>📋 Квесты</h3>
-        <div id="quests-list"><em>Задания появятся по мере продвижения.</em></div>
+        <div id="quests-list"></div>
       </div>
 
-      <!-- Вкладка: Заметки -->
       <div class="journal-pane" id="pane-notes">
         <h3>📝 Заметки</h3>
-        <div id="notes-list"><em>Заметки появятся автоматически.</em></div>
+        <div id="notes-list"></div>
       </div>
 
-      <!-- Вкладка: Сохранения -->
       <div class="journal-pane" id="pane-saves">
         <h3>💾 Сохранения</h3>
         <div id="saves-list"></div>
         <button class="close-journal-btn" onclick="closeJournal()">Закрыть дневник</button>
       </div>
-
     </div>
   </div>
 </div>
 
-<!-- ОКНО БРОСКА КУБА -->
+<!-- Окно броска -->
 <div class="modal-overlay" id="dice-overlay" onclick="closeDiceOverlay()">
   <canvas id="dice-canvas" width="200" height="200"></canvas>
   <div id="dice-result"></div>
-  <p style="color:var(--parchment);margin-top:10px;font-family:'InkFont',serif">Нажмите в любом месте, чтобы закрыть</p>
+  <p style="color:var(--parchment);margin-top:10px">Нажмите, чтобы закрыть</p>
 </div>
 
 <script>
 // ========================================
-// ДВИЖОК ИГРЫ TEOMOR v2
+// ДВИЖОК TEOMOR v3
 // ========================================
 
-// --- Модификатор ДнД ---
 function getModifier(statValue) {
   return Math.floor((statValue - 10) / 2);
 }
-
 function formatMod(mod) {
   return mod >= 0 ? '+' + mod : '' + mod;
 }
@@ -556,11 +484,15 @@ const GameState = {
   player: {
     name: '',
     portrait: null,
-    background: null, // 'warrior' | 'thief' | 'mage'
-    // Значения характеристик
-    stats: {
-      STR: 12, DEX: 12, WIS: 12, CHA: 12, INT: 12
+    background: null,
+    gender: 'male',
+    traits: {
+      beautiful: true,
+      tall: true,
+      fat: false,
+      cool: true
     },
+    stats: { STR: 10, DEX: 10, WIS: 10, CHA: 10, INT: 10 },
     inventory: [],
     questItems: [],
   },
@@ -568,15 +500,40 @@ const GameState = {
   glossary: {},
   quests: [],
   notes: [],
-  currentScene: 'start',
+  currentScene: 'intro_map',
   lastRoll: null,
-  diceCallback: null, // колбэк после закрытия окна куба
+  diceCallback: null,
 };
 
-// --- Scene Database ---
+// --- База глоссария (все 15 терминов) ---
+const GLOSSARY_BASE = {
+  'faidych': { name: 'Фаидыч', description: 'Легендарная фигура в истории Теомора, самый известный работник Биржи Наемничества, символ целой Эпохи и идеал, к которому стремятся все наёмники Биржи.' },
+  'birzha_naemn': { name: 'Биржа Наемничества', description: 'Коллегия, которая занимается контрактным трудоустройством десов. Будь то умелый боец, волшебник или уборщица — все найдут работу и плату. Биржа принимает заказы от дворян до сельских бедняков.\n\nИстория: основана в начале 5 Эры после смерти Зюбания IV Стремительного для предотвращения Хаоса. В 6 Эре пережила кризис, но после реорганизации стала монополистом к 10 Эре.' },
+  'des': { name: 'Десы', description: 'Раса разумных существ, населяющая Теомор.' },
+  'zyubaniy': { name: 'Зюбаний', description: 'Имя Великого Зверя и первого Императора СА.' },
+  'imperia_sa': { name: 'Империя СА', description: '[Описание появится позже]' },
+  'era': { name: 'Эра', description: '[Описание появится позже]' },
+  'klany_tuo': { name: 'Кланы Туо', description: '[Описание появится позже]' },
+  'kongregacia': { name: 'Конгрегация Лосана', description: '[Описание появится позже]' },
+  'suhodzhuy_el': { name: 'Сухожуйный эль', description: '[Описание появится позже]' },
+  'gornoe_vino': { name: 'Горное вино', description: '[Описание появится позже]' },
+  'sferidy': { name: 'Сфериды', description: '[Описание появится позже]' },
+  'vastersa': { name: 'Вастерса', description: 'Прекрасный многоярусный город посреди озера, через который проходит множество искусственных каналов. Контраст между богатыми и бедными кварталами огромен.' },
+  'troynoy_sultanat': { name: 'Тройной Султанат Туо', description: '[Описание появится позже]' },
+  'vsegrib': { name: 'Всегриб', description: 'Тип грибов, растущих преимущественно в Вастерса. Могут прорасти где угодно: в камне, на земле, на лице. Требуют постоянного приёма лекарств. Вкус зависит от места: Каменные всегрибы ценятся поварами, Дес-всегрибы запрещены (приравниваются к каннибализму).' },
+  'nikchemysh': { name: 'Никчемыш', description: 'Проклятый от рождения дес, который не обладает и никогда не сможет обладать магией. Не может пользоваться кристаллами, свитками, магическими предметами. Зелья действуют намного слабее.' }
+};
+
+// --- Инициализация глоссария при старте ---
+function initGlossary() {
+  GameState.glossary = JSON.parse(JSON.stringify(GLOSSARY_BASE));
+}
+initGlossary();
+
+// --- Scenes ---
 const Scenes = {};
 
-// --- Рендеринг сцены ---
+// --- Рендеринг ---
 function renderScene(sceneId) {
   const scene = Scenes[sceneId];
   if (!scene) {
@@ -584,7 +541,6 @@ function renderScene(sceneId) {
     return;
   }
 
-  // Перед рендером выполняем action если есть
   if (scene.action && typeof scene.action === 'function') {
     scene.action();
   }
@@ -592,14 +548,31 @@ function renderScene(sceneId) {
   GameState.currentScene = sceneId;
   document.getElementById('scene-title').textContent = scene.title || 'Teomor';
 
+  // Картинка сцены
+  const img = document.getElementById('scene-image');
+  if (scene.image) {
+    img.src = scene.image;
+    img.style.display = 'block';
+  } else {
+    img.style.display = 'none';
+  }
+
   let text = scene.text || '';
-  text = text.replace(/\{name\}/g, GameState.player.name || 'Кассиан Вейл');
+  text = text.replace(/\{name\}/g, GameState.player.name || '...');
+
+  // Подстановка черт
+  const t = GameState.player.traits;
+  text = text.replace(/\{gender\}/g, GameState.player.gender === 'male' ? 'мужчина' : 'женщина');
+  text = text.replace(/\{beauty\}/g, t.beautiful ? 'красивое' : 'некрасивое');
+  text = text.replace(/\{height\}/g, t.tall ? 'высокий' : 'низкий');
+  text = text.replace(/\{build\}/g, t.fat ? 'толстый' : 'худой');
+  text = text.replace(/\{coolness\}/g, t.cool ? 'крутой' : 'некрутой');
 
   // Условный текст по предыстории
   if (scene.conditional_text && GameState.player.background) {
-    const condKey = 'background_' + GameState.player.background;
-    if (scene.conditional_text[condKey]) {
-      text += '\n\n' + scene.conditional_text[condKey];
+    const key = 'background_' + GameState.player.background;
+    if (scene.conditional_text[key]) {
+      text += '\n\n' + scene.conditional_text[key];
     }
   }
 
@@ -638,17 +611,11 @@ function renderScene(sceneId) {
   updateAllPanels();
 }
 
-// --- Обработка выбора ---
 function handleChoice(choice) {
   if (choice.action && typeof choice.action === 'function') {
     choice.action();
   }
-
-  if (choice.check) {
-    rollDice(choice);
-    return;
-  }
-
+  if (choice.check) { rollDice(choice); return; }
   if (choice.giveItem) addToInventory(choice.giveItem);
   if (choice.giveQuestItem) addQuestItem(choice.giveQuestItem);
   if (choice.setFlag) GameState.flags[choice.setFlag] = true;
@@ -658,28 +625,22 @@ function handleChoice(choice) {
   }
   if (choice.addQuest) GameState.quests.push(choice.addQuest);
   if (choice.addNote) GameState.notes.push(choice.addNote);
-
   if (choice.next) renderScene(choice.next);
-  else if (choice.success) renderScene(choice.success);
 }
 
-// --- Бросок куба ---
+// --- Кубы ---
 function rollDice(choice) {
   const stat = choice.check.stat;
   const dc = choice.check.dc;
-  const statValue = GameState.player.stats[stat] || 12;
+  const statValue = GameState.player.stats[stat] || 10;
   const modifier = getModifier(statValue);
 
-  // Поиск расходников
   let bonusItem = null;
-  const consumables = GameState.player.inventory.filter(
-    item => item.consumable && item.bonusStat === stat
-  );
+  const consumables = GameState.player.inventory.filter(item => item.consumable && item.bonusStat === stat);
   if (consumables.length > 0) {
-    const useItem = confirm(
-      `Использовать "${consumables[0].name}" для бонуса +${consumables[0].bonus} к броску?\n(Предмет будет потрачен)`
-    );
-    if (useItem) bonusItem = consumables[0];
+    if (confirm(`Использовать "${consumables[0].name}" (+${consumables[0].bonus})?`)) {
+      bonusItem = consumables[0];
+    }
   }
 
   const bonus = bonusItem ? bonusItem.bonus : 0;
@@ -697,27 +658,20 @@ function rollDice(choice) {
     if (total >= dc) {
       if (choice.successGiveItem) addToInventory(choice.successGiveItem);
       if (choice.successSetFlag) GameState.flags[choice.successSetFlag] = true;
-      if (choice.successAddGlossary) {
-        const g = choice.successAddGlossary;
-        GameState.glossary[g.id] = { name: g.name, description: g.description };
-      }
       if (choice.success) renderScene(choice.success);
     } else {
       if (choice.failureSetFlag) GameState.flags[choice.failureSetFlag] = true;
-      if (choice.failureAddNote) GameState.notes.push(choice.failureAddNote);
       if (choice.failure) renderScene(choice.failure);
       else alert(`Провал! ${roll} + ${modifier}${bonus ? ' + ' + bonus : ''} = ${total}. Нужно ${dc}.`);
     }
   });
 }
 
-// --- Анимация куба ---
 function showDiceAnimation(result, callback) {
   const overlay = document.getElementById('dice-overlay');
   const canvas = document.getElementById('dice-canvas');
   const ctx = canvas.getContext('2d');
   const resultDiv = document.getElementById('dice-result');
-
   overlay.classList.add('active');
   resultDiv.textContent = '';
   GameState.diceCallback = callback;
@@ -726,66 +680,40 @@ function showDiceAnimation(result, callback) {
   const maxFrames = 14;
   const interval = setInterval(() => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#f4e4c1';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = '#3a2a1a';
-    ctx.lineWidth = 4;
+    ctx.fillStyle = '#f4e4c1'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = '#3a2a1a'; ctx.lineWidth = 4;
     ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
-
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
+    const cx = canvas.width / 2, cy = canvas.height / 2;
     const size = 45 + Math.random() * 25;
-
-    ctx.fillStyle = '#e8d5a3';
-    ctx.strokeStyle = '#2c1810';
-    ctx.lineWidth = 2;
+    ctx.fillStyle = '#e8d5a3'; ctx.strokeStyle = '#2c1810'; ctx.lineWidth = 2;
     ctx.beginPath();
     for (let i = 0; i < 6; i++) {
       const angle = (Math.PI * 2 / 6) * i + frame * 0.4;
-      const x = cx + Math.cos(angle) * size;
-      const y = cy + Math.sin(angle) * size;
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
+      if (i === 0) ctx.moveTo(cx + Math.cos(angle) * size, cy + Math.sin(angle) * size);
+      else ctx.lineTo(cx + Math.cos(angle) * size, cy + Math.sin(angle) * size);
     }
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
+    ctx.closePath(); ctx.fill(); ctx.stroke();
     if (frame < maxFrames - 1) {
-      ctx.fillStyle = '#2c1810';
-      ctx.font = 'bold 40px Georgia';
-      ctx.textAlign = 'center';
+      ctx.fillStyle = '#2c1810'; ctx.font = 'bold 40px Georgia'; ctx.textAlign = 'center';
       ctx.fillText(Math.floor(Math.random() * 20) + 1, cx, cy + 14);
     }
-
     frame++;
     if (frame >= maxFrames) {
       clearInterval(interval);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#f4e4c1';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.strokeStyle = '#3a2a1a';
-      ctx.lineWidth = 4;
+      ctx.fillStyle = '#f4e4c1'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = '#3a2a1a'; ctx.lineWidth = 4;
       ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
-      ctx.fillStyle = '#e8d5a3';
-      ctx.strokeStyle = '#2c1810';
-      ctx.lineWidth = 2;
+      ctx.fillStyle = '#e8d5a3'; ctx.strokeStyle = '#2c1810'; ctx.lineWidth = 2;
       ctx.beginPath();
       for (let i = 0; i < 6; i++) {
         const angle = (Math.PI * 2 / 6) * i;
-        const x = cx + Math.cos(angle) * 55;
-        const y = cy + Math.sin(angle) * 55;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+        const x = cx + Math.cos(angle) * 55, y = cy + Math.sin(angle) * 55;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
       }
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = '#2c1810';
-      ctx.font = 'bold 48px Georgia';
-      ctx.textAlign = 'center';
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#2c1810'; ctx.font = 'bold 48px Georgia'; ctx.textAlign = 'center';
       ctx.fillText(result, cx, cy + 16);
-
       resultDiv.textContent = result;
     }
   }, 80);
@@ -793,31 +721,22 @@ function showDiceAnimation(result, callback) {
 
 function closeDiceOverlay() {
   document.getElementById('dice-overlay').classList.remove('active');
-  if (GameState.diceCallback) {
-    const cb = GameState.diceCallback;
-    GameState.diceCallback = null;
-    cb();
-  }
+  if (GameState.diceCallback) { const cb = GameState.diceCallback; GameState.diceCallback = null; cb(); }
 }
 
 // --- Инвентарь ---
 function addToInventory(item) {
   if (!item) return false;
-  if (GameState.player.inventory.length >= 12) {
-    alert('Инвентарь полон! Освободите ячейку.');
-    return false;
-  }
+  if (GameState.player.inventory.length >= 12) { alert('Инвентарь полон!'); return false; }
   GameState.player.inventory.push(item);
   updateInventoryUI();
   return true;
 }
-
 function addQuestItem(item) {
   if (!item) return;
   GameState.player.questItems.push(item);
   updateInventoryUI();
 }
-
 function updateInventoryUI() {
   const grid = document.getElementById('inventory-grid');
   if (!grid) return;
@@ -828,63 +747,42 @@ function updateInventoryUI() {
     if (i < GameState.player.inventory.length) {
       slot.classList.add('occupied');
       const item = GameState.player.inventory[i];
-      slot.textContent = item.icon ? item.icon + ' ' + item.name : item.name;
-      slot.title = item.name + (item.consumable ? ' (расходник, кликните для использования)' : '');
-      if (item.consumable) {
-        slot.style.cursor = 'pointer';
-        slot.onclick = () => useConsumable(i);
-      }
+      slot.textContent = (item.icon || '') + ' ' + item.name;
+      slot.title = item.name + (item.consumable ? ' (расходник)' : '');
     }
     grid.appendChild(slot);
   }
-
-  const questList = document.getElementById('quest-items-list');
-  if (questList) {
-    questList.innerHTML = GameState.player.questItems.map(item =>
-      `<div class="quest-item">📜 ${item.name}</div>`
-    ).join('') || '<em>Пусто</em>';
-  }
-}
-
-function useConsumable(index) {
-  const item = GameState.player.inventory[index];
-  if (!item || !item.consumable) return;
-  alert(`Предмет "${item.name}" можно использовать только при проверке характеристики. Он будет автоматически предложен в нужный момент.`);
+  const ql = document.getElementById('quest-items-list');
+  if (ql) ql.innerHTML = GameState.player.questItems.map(i => `<div class="quest-item">📜 ${i.name}</div>`).join('') || '<em>Пусто</em>';
 }
 
 // --- Дневник ---
-function openJournal() {
-  document.getElementById('journal-modal').classList.add('active');
-  updateAllPanels();
-}
-
-function closeJournal() {
-  document.getElementById('journal-modal').classList.remove('active');
-}
-
+function openJournal() { document.getElementById('journal-modal').classList.add('active'); updateAllPanels(); }
+function closeJournal() { document.getElementById('journal-modal').classList.remove('active'); }
 function switchTab(tabName) {
   document.querySelectorAll('.journal-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.journal-pane').forEach(p => p.classList.remove('active'));
-
-  const tabMap = ['character', 'inventory', 'glossary', 'quests', 'notes', 'saves'];
-  const idx = tabMap.indexOf(tabName);
-  if (idx >= 0) {
-    document.querySelectorAll('.journal-tab')[idx].classList.add('active');
-  }
+  const idx = ['character','inventory','glossary','quests','notes','saves'].indexOf(tabName);
+  if (idx >= 0) document.querySelectorAll('.journal-tab')[idx].classList.add('active');
   const pane = document.getElementById('pane-' + tabName);
   if (pane) pane.classList.add('active');
-
   if (tabName === 'inventory') updateInventoryUI();
   if (tabName === 'glossary') updateGlossaryUI();
   if (tabName === 'quests') updateQuestsUI();
   if (tabName === 'notes') updateNotesUI();
   if (tabName === 'saves') updateSavesUI();
 }
-
 function updateAllPanels() {
   const p = GameState.player;
   document.getElementById('pane-name').textContent = p.name || '—';
+  document.getElementById('pane-gender').textContent = p.gender === 'male' ? 'Мужчина' : 'Женщина';
   document.getElementById('pane-background').textContent = getBackgroundName(p.background);
+  const traitNames = [];
+  if (p.traits.beautiful) traitNames.push('Красивый'); else traitNames.push('Некрасивый');
+  if (p.traits.tall) traitNames.push('Высокий'); else traitNames.push('Низкий');
+  if (p.traits.fat) traitNames.push('Толстый'); else traitNames.push('Худой');
+  if (p.traits.cool) traitNames.push('Крутой'); else traitNames.push('Некрутой');
+  document.getElementById('pane-traits').textContent = traitNames.join(', ');
 
   document.getElementById('pane-str').textContent = p.stats.STR;
   document.getElementById('pane-str-mod').textContent = formatMod(getModifier(p.stats.STR));
@@ -902,15 +800,8 @@ function updateAllPanels() {
     document.getElementById('portrait-img').style.display = 'block';
     document.getElementById('portrait-placeholder').style.display = 'none';
   }
-
-  updateInventoryUI();
-  updateGlossaryUI();
-  updateQuestsUI();
-  updateNotesUI();
-  updateSavesUI();
-  updateQuickStats();
+  updateInventoryUI(); updateGlossaryUI(); updateQuestsUI(); updateNotesUI(); updateSavesUI(); updateQuickStats();
 }
-
 function updateQuickStats() {
   const p = GameState.player;
   document.getElementById('stat-name').textContent = p.name || '—';
@@ -920,16 +811,12 @@ function updateQuickStats() {
   document.getElementById('stat-cha').textContent = formatMod(getModifier(p.stats.CHA));
   document.getElementById('stat-int').textContent = formatMod(getModifier(p.stats.INT));
 }
-
 function updateGlossaryUI() {
   const list = document.getElementById('glossary-list');
   if (!list) return;
   const entries = Object.values(GameState.glossary);
-  list.innerHTML = entries.length === 0
-    ? '<em>Термины появятся по мере исследования мира.</em>'
-    : entries.map(e => `<div style="margin-bottom:8px"><strong>${e.name}</strong>: ${e.description}</div>`).join('');
+  list.innerHTML = entries.map(e => `<div style="margin-bottom:8px"><strong>${e.name}</strong>: ${e.description}</div>`).join('');
 }
-
 function updateQuestsUI() {
   const list = document.getElementById('quests-list');
   if (!list) return;
@@ -937,7 +824,6 @@ function updateQuestsUI() {
     ? '<em>Задания появятся по мере продвижения.</em>'
     : GameState.quests.map(q => `<div style="margin-bottom:8px"><strong>${q.name}</strong> [${q.status}]<br>${q.description}</div>`).join('');
 }
-
 function updateNotesUI() {
   const list = document.getElementById('notes-list');
   if (!list) return;
@@ -945,7 +831,6 @@ function updateNotesUI() {
     ? '<em>Заметки появятся автоматически.</em>'
     : GameState.notes.map(n => `<div style="margin-bottom:8px;font-style:italic">${n.text}</div>`).join('');
 }
-
 function updateSavesUI() {
   const container = document.getElementById('saves-list');
   if (!container) return;
@@ -953,40 +838,28 @@ function updateSavesUI() {
   for (let i = 0; i < 3; i++) {
     const key = 'teomor_save_' + i;
     const data = localStorage.getItem(key);
-    let infoText = 'Пусто';
-    let hasData = false;
+    let infoText = 'Пусто', hasData = false;
     if (data) {
       try {
-        const parsed = JSON.parse(data);
-        infoText = `${parsed.player?.name || '—'} | Сцена: ${parsed.currentScene || '—'}`;
+        const p = JSON.parse(data);
+        infoText = `${p.player?.name || '—'} | ${p.currentScene || '—'}`;
         hasData = true;
-      } catch(e) {
-        infoText = 'Повреждено';
-      }
+      } catch(e) { infoText = 'Повреждено'; }
     }
-
-    const slotDiv = document.createElement('div');
-    slotDiv.className = 'save-slot';
-    slotDiv.innerHTML = `
-      <span>📌 Закладка ${i + 1}</span>
-      <span class="save-info">${infoText}</span>
-      <button class="save-btn-small" onclick="saveGame(${i})">💾 Сохр</button>
-      ${hasData ? `<button class="save-btn-small" onclick="loadGame(${i})">📂 Загр</button>` : ''}
-    `;
-    container.appendChild(slotDiv);
+    const div = document.createElement('div');
+    div.className = 'save-slot';
+    div.innerHTML = `<span>📌 Закладка ${i+1}</span><span class="save-info">${infoText}</span>
+      <button class="save-btn-small" onclick="saveGame(${i})">💾</button>
+      ${hasData ? `<button class="save-btn-small" onclick="loadGame(${i})">📂</button>` : ''}`;
+    container.appendChild(div);
   }
 }
-
-function openGlossaryTerm(termId) {
-  openJournal();
-  switchTab('glossary');
-}
-
+function openGlossaryTerm(termId) { openJournal(); switchTab('glossary'); }
 function getBackgroundName(bg) {
   const map = {
-    'warrior': '[ВОИН — название пропишешь сам]',
-    'thief': '[ВОР — название пропишешь сам]',
-    'mage': '[МАГ — название пропишешь сам]'
+    'worker': 'Разнорабочий сомнительного склада',
+    'seller': 'Продавец местной неизвестной газетёнки',
+    'librarian': 'Помощник занудного библиотекаря'
   };
   return map[bg] || 'Неизвестно';
 }
@@ -1006,213 +879,295 @@ function uploadPortrait(event) {
 }
 
 // --- Сохранения ---
-function saveGame(slot) {
-  const key = 'teomor_save_' + slot;
-  localStorage.setItem(key, JSON.stringify(GameState));
-  updateSavesUI();
-}
-
+function saveGame(slot) { localStorage.setItem('teomor_save_' + slot, JSON.stringify(GameState)); updateSavesUI(); }
 function loadGame(slot) {
-  const key = 'teomor_save_' + slot;
-  const data = localStorage.getItem(key);
-  if (!data) { alert('Эта закладка пуста.'); return; }
+  const data = localStorage.getItem('teomor_save_' + slot);
+  if (!data) { alert('Пусто.'); return; }
   try {
     const parsed = JSON.parse(data);
-    // Восстанавливаем состояние
     GameState.player = parsed.player;
     GameState.flags = parsed.flags || {};
     GameState.glossary = parsed.glossary || {};
     GameState.quests = parsed.quests || [];
     GameState.notes = parsed.notes || [];
     GameState.currentScene = parsed.currentScene;
-    GameState.lastRoll = parsed.lastRoll || null;
     closeJournal();
     renderScene(GameState.currentScene);
-  } catch(e) {
-    alert('Ошибка загрузки.');
-  }
+  } catch(e) { alert('Ошибка загрузки.'); }
 }
 
 // ========================================
 // СЦЕНЫ
 // ========================================
 
-// --- Стартовый экран: выбор предыстории ---
-Scenes['start'] = {
+// --- 1. Карта и интро ---
+Scenes['intro_map'] = {
   title: 'Teomor — Иллюзорное Героическое Фэнтези',
-  text: 'Добро пожаловать в Teomor.\n\nМир, где боги мертвы, а те, кто носит их имена — атеистические военные ордена, хранящие страшные тайны.\n\nВ ваших руках — <glossary id="key_ntfah">Ключ гробницы Нтфаха</glossary>, артефакт мёртвого бога, способного менять человеческую натуру.\n\nВыберите вашу предысторию.',
+  text: '10 Эра, 35 год.\n\nТеомор — прекрасное место, где полно возможностей. Каждый может подняться из низов в Герои, словно Великий <glossary id="faidych">Фаидыч</glossary>, свершая один за одним подвиги и получая всенародную любовь и славу. Или пойти изучать таинства магии, став великим волшебником, чья магия способна менять ландшафты и людей. Как и стать успешным торговцем, открыв процветающий бизнес, разливая путникам кружечки <glossary id="suhodzhuy_el">сухожуйного эля</glossary> или <glossary id="gornoe_vino">горного вина</glossary> в тёплом кабаке, или продавая старинные безделушки из древних руин, возя их из одного города в другой караванами...\n\nЕсли, конечно, ты родился в <glossary id="imperia_sa">Империи СА</glossary>. И если тебе повезло. И тебя не убили Конгрегаты за мнимую связь со <glossary id="sferidy">Сферидами</glossary>. Или если тебя не превратил в кусочек сыра с ушками очередной безумный маг с неподстриженными ногтями и бородавкой размером с мяч, которая перекрывает ему член... Или если вас случайно не убьёт очередная тварь, которая то ли сбежала из сферы, то ли из руин.\n\nДа, всё-таки мир этот до прискорбия и отчаяния ужасно раздражающий. Ты либо до безумия сильный, либо до тоски обречённый. Как раз ты из последних.',
   choices: [
-    {
-      text: '[НАЗВАНИЕ ВОИНА] — Сила +4, Ловкость +2',
-      next: 'ask_name',
-      setFlag: 'bg_warrior',
-      giveItem: { id: 'warrior_item', name: '[ПРЕДМЕТ ВОИНА]', icon: '⚔️', sizeW: 1, sizeH: 1, consumable: true, bonus: 3, bonusStat: 'STR' },
-      addGlossary: { id: 'key_ntfah', name: 'Ключ гробницы Нтфаха', description: 'Артефакт мёртвого бога Нтфаха, способного менять человеческую натуру. Выглядит как старинный ключ из чёрного металла с пульсирующей в темноте сердцевиной.' },
-      addQuest: { id: 'main_quest', name: 'Тайна Нтфаха', description: 'Узнать, зачем Орден Молчаливой Длани охотится за Ключом и что скрывается в гробнице мёртвого бога.', status: 'Активен' }
-    },
-    {
-      text: '[НАЗВАНИЕ ВОРА] — Ловкость +4, Харизма +2',
-      next: 'ask_name',
-      setFlag: 'bg_thief',
-      giveItem: { id: 'thief_item', name: '[ПРЕДМЕТ ВОРА]', icon: '🗝️', sizeW: 1, sizeH: 1, consumable: true, bonus: 3, bonusStat: 'DEX' },
-      addGlossary: { id: 'key_ntfah', name: 'Ключ гробницы Нтфаха', description: 'Артефакт мёртвого бога Нтфаха, способного менять человеческую натуру. Выглядит как старинный ключ из чёрного металла с пульсирующей в темноте сердцевиной.' },
-      addQuest: { id: 'main_quest', name: 'Тайна Нтфаха', description: 'Узнать, зачем Орден Молчаливой Длани охотится за Ключом и что скрывается в гробнице мёртвого бога.', status: 'Активен' }
-    },
-    {
-      text: '[НАЗВАНИЕ МАГА] — Интеллект +4, Мудрость +2',
-      next: 'ask_name',
-      setFlag: 'bg_mage',
-      giveItem: { id: 'mage_item', name: '[ПРЕДМЕТ МАГА]', icon: '📿', sizeW: 1, sizeH: 1, consumable: true, bonus: 3, bonusStat: 'INT' },
-      addGlossary: { id: 'key_ntfah', name: 'Ключ гробницы Нтфаха', description: 'Артефакт мёртвого бога Нтфаха, способного менять человеческую натуру. Выглядит как старинный ключ из чёрного металла с пульсирующей в темноте сердцевиной.' },
-      addQuest: { id: 'main_quest', name: 'Тайна Нтфаха', description: 'Узнать, зачем Орден Молчаливой Длани охотится за Ключом и что скрывается в гробнице мёртвого бога.', status: 'Активен' }
-    }
+    { text: 'Далее', next: 'intro_city' }
   ]
 };
 
-// --- Сцена: запрос имени ---
-Scenes['ask_name'] = {
-  title: 'Ваше имя',
-  text: 'Назовите себя.',
+// --- 2. Город Вастерса ---
+Scenes['intro_city'] = {
+  title: 'Вастерса',
+  image: 'assets/ui/vastersa.jpg',
+  text: 'Всю свою жизнь ты прожил в <glossary id="vastersa">Вастерса</glossary> — прекрасном многоярусном городе посреди озера, через который проходит множество искусственных каналов. Часто можно увидеть, как небольшие кораблики с пряностями и алкоголем из <glossary id="troynoy_sultanat">Тройного Султаната Туо</glossary> или столичные, везущие древесину и зерно, проходят по разным Ярусам.\n\nНо тебе больше знаком другой пейзаж — постоянно сырых улиц и заплесневелых переходов, в которых часто умирают от обычных болезней. Где каждый <glossary id="des">дес</glossary> больше походит на слизнеходок, чем на десов. Где сухие дрова ценнее, чем мать. Где грибы, растущие на каждом шагу, как продлевают жизнь, помогая не подохнуть с голоду, так и постепенно убивают, разрушая организм своими спорами, обрекая на мучительную смерть через прорастание <glossary id="vsegrib">всегриба</glossary>.\n\nНе самая худшая судьба, но... ты и тут стал исключением. С рождения ты проиграл: мало того, что ты не обладаешь никакими способностями и тебе по жизни никогда не везло, так ещё ты — <glossary id="nikchemysh">никчемыш</glossary>. Тот, кто с рождения обладает нулевым магическим потенциалом. Ты не можешь пользоваться ни кристаллами, ни свитками, ни магическими предметами. Даже зелья на тебя действуют намного слабее обычного.\n\nТо, что ты остался жив — это либо единственное везение в твоей жизни, либо крупное невезение.',
   choices: [
-    {
-      text: 'Ввести имя',
-      next: 'prologue',
-      action: function() {
-        const name = prompt('Введите имя вашего персонажа:');
-        if (name && name.trim()) {
-          GameState.player.name = name.trim();
-        } else {
-          GameState.player.name = 'Кассиан Вейл';
-        }
-      }
-    }
+    { text: 'Далее', next: 'intro_mirror' }
   ]
 };
 
-// --- Пролог ---
-Scenes['prologue'] = {
-  title: 'Пролог: Побег',
-  text: 'Библиотека горела. Дым ел глаза, а в коридоре слышались шаги дознавателей. В моей руке был свиток с упоминанием Нтфаха — мёртвого бога, чьё имя Орден Молчаливой Длани выжигал из памяти.\n\nУ меня было мгновение, чтобы решить, как бежать.',
-  conditional_text: {
-    'background_warrior': 'Пальцы сжались на рукояти клинка. Сила никогда не подводила — прорвусь с боем, если придётся.',
-    'background_thief': 'Тени здесь густые и глубокие. Я знал каждый закоулок этого места — сказывались годы тренировок.',
-    'background_mage': 'Я успел прочитать достаточно. Свиток содержал не только имя — в нём была схема катакомб под библиотекой.'
-  },
-  choices: [
-    {
-      text: 'Прорываться с боем (Сила, DC 12)',
-      check: { stat: 'STR', dc: 12 },
-      success: 'prologue_success',
-      failure: 'prologue_failure_warrior'
-    },
-    {
-      text: 'Скрыться в тенях (Ловкость, DC 12)',
-      check: { stat: 'DEX', dc: 12 },
-      success: 'prologue_success',
-      failure: 'prologue_failure_thief'
-    },
-    {
-      text: 'Использовать знания из свитка (Интеллект, DC 12)',
-      check: { stat: 'INT', dc: 12 },
-      success: 'prologue_success',
-      failure: 'prologue_failure_mage'
-    }
-  ]
-};
-
-Scenes['prologue_success'] = {
-  title: 'Пролог: Свобода',
-  text: 'Мне удалось уйти. Дознаватели остались ни с чем. Но теперь Орден знает, что кто-то охотится за тайной Нтфаха.\n\nВпереди лежал тракт на Вольные Земли — и начало долгого пути.',
-  choices: [
-    { text: 'Продолжить путь', next: 'chapter1_intro' }
-  ],
-  giveQuestItem: { id: 'key_ntfah_item', name: 'Ключ гробницы Нтфаха' }
-};
-
-Scenes['prologue_failure_warrior'] = {
-  title: 'Пролог: Тяжёлый бой',
-  text: 'Стражник успел ударить меня в плечо, прежде чем я вырвался. Рана неглубокая, но будет ныть к дождю. Я потерял немного времени, но всё же ушёл.',
-  choices: [
-    { text: 'Продолжить путь', next: 'chapter1_intro' }
-  ],
-  giveQuestItem: { id: 'key_ntfah_item', name: 'Ключ гробницы Нтфаха' },
-  addNote: { text: 'Рана в плече напоминает о побеге из библиотеки. К дождю ноет.' }
-};
-
-Scenes['prologue_failure_thief'] = {
-  title: 'Пролог: Почти попался',
-  text: 'Меня заметили в последний момент. Пришлось сбросить кошелёк с серебром, чтобы отвлечь погоню. Дорога без денег будет труднее.',
-  choices: [
-    { text: 'Продолжить путь', next: 'chapter1_intro' }
-  ],
-  giveQuestItem: { id: 'key_ntfah_item', name: 'Ключ гробницы Нтфаха' },
-  addNote: { text: 'Кошелёк остался в библиотеке. Придётся искать заработок в пути.' }
-};
-
-Scenes['prologue_failure_mage'] = {
-  title: 'Пролог: Упущенное знание',
-  text: 'Я не успел дочитать схему до конца. Путь через катакомбы занял больше времени, и я выбрался далеко от запланированного выхода. Часть свитка сгорела.',
-  choices: [
-    { text: 'Продолжить путь', next: 'chapter1_intro' }
-  ],
-  giveQuestItem: { id: 'key_ntfah_item', name: 'Ключ гробницы Нтфаха' },
-  addNote: { text: 'Схема катакомб утеряна. Придётся искать другой путь.' }
-};
-
-// --- Заглушка первой главы ---
-Scenes['chapter1_intro'] = {
-  title: 'Глава 1: Тракт',
-  text: 'Здесь начнётся первая глава. {name} стоит на распутье.\n\n[Заглушка — контент добавляется писателем]',
-  choices: [
-    { text: 'Вернуться в меню', next: 'start' }
-  ]
-};
-
-// --- Обработчик выбора предыстории ---
-const originalHandleChoice = handleChoice;
-handleChoice = function(choice) {
-  if (choice.setFlag && choice.setFlag.startsWith('bg_')) {
-    const bgMap = {
-      'bg_warrior': { bg: 'warrior', stats: { STR: 16, DEX: 14, WIS: 12, CHA: 12, INT: 12 } },
-      'bg_thief':   { bg: 'thief',   stats: { STR: 12, DEX: 16, WIS: 12, CHA: 14, INT: 12 } },
-      'bg_mage':    { bg: 'mage',    stats: { STR: 12, DEX: 12, WIS: 14, CHA: 12, INT: 16 } }
-    };
-    const bgData = bgMap[choice.setFlag];
-    if (bgData) {
-      GameState.player.background = bgData.bg;
-      GameState.player.stats = bgData.stats;
-      GameState.flags[choice.setFlag] = true;
-    }
+// --- 3. Зеркало (создание персонажа) ---
+Scenes['intro_mirror'] = {
+  title: 'Зеркало',
+  text: 'И опять новый тошнотворный день начинается в этом сыром до дрожи городе. Ты поднимаешься с холодной и заплесневелой кровати и с просонья ещё пару минут сидишь и оглядываешь свой маленький чердак, стены которого будто бы физически сдавливают тебя. От этого скованного ощущения тебе помогает зарядка, которая заодно и согревает тебя.\n\nПодойдя к зеркалу, чтобы привести себя в порядок, ты всматриваешься в отражение. Каждый твой вздох выпускает пар, замыливая отражение — приходится постоянно протирать зеркало.\n\nКто же смотрит на тебя из зеркала?',
+  choices: [],
+  next: null,
+  // Сцена рендерится специальным образом
+  action: function() {
+    renderMirrorScene();
   }
-  originalHandleChoice(choice);
+};
+
+function renderMirrorScene() {
+  const container = document.getElementById('choices-container');
+  container.innerHTML = '';
+
+  // Имя
+  const nameLabel = document.createElement('p');
+  nameLabel.innerHTML = '<strong>Имя:</strong>';
+  container.appendChild(nameLabel);
+
+  const nameInput = document.createElement('input');
+  nameInput.type = 'text';
+  nameInput.className = 'name-input';
+  nameInput.placeholder = 'Введите имя...';
+  nameInput.value = GameState.player.name || '';
+  nameInput.id = 'mirror-name-input';
+  container.appendChild(nameInput);
+
+  // Пол
+  const genderLabel = document.createElement('p');
+  genderLabel.innerHTML = '<strong>Пол:</strong>';
+  genderLabel.style.marginTop = '10px';
+  container.appendChild(genderLabel);
+  container.appendChild(createToggle('gender-male', 'Мужчина', 'Женщина', GameState.player.gender === 'male', (val) => {
+    GameState.player.gender = val ? 'male' : 'female';
+  }));
+
+  // Красивый/Некрасивый
+  container.appendChild(createToggle('beauty', 'Красивый', 'Некрасивый', GameState.player.traits.beautiful, (val) => {
+    GameState.player.traits.beautiful = val;
+  }));
+
+  // Высокий/Низкий
+  container.appendChild(createToggle('height', 'Высокий', 'Низкий', GameState.player.traits.tall, (val) => {
+    GameState.player.traits.tall = val;
+  }));
+
+  // Толстый/Худой
+  container.appendChild(createToggle('build', 'Толстый', 'Худой', GameState.player.traits.fat, (val) => {
+    GameState.player.traits.fat = val;
+  }));
+
+  // Крутой/Некрутой
+  container.appendChild(createToggle('coolness', 'Крутой', 'Некрутой', GameState.player.traits.cool, (val) => {
+    GameState.player.traits.cool = val;
+  }));
+
+  // Предыстория
+  const bgLabel = document.createElement('p');
+  bgLabel.innerHTML = '<strong>Предыстория:</strong>';
+  bgLabel.style.marginTop = '15px';
+  container.appendChild(bgLabel);
+
+  const bgGroup = document.createElement('div');
+  bgGroup.className = 'radio-group';
+  const backgrounds = [
+    { id: 'worker', label: 'Разнорабочий сомнительного склада (+1 Сила)', stat: 'STR' },
+    { id: 'seller', label: 'Продавец местной неизвестной газетёнки (+1 Харизма)', stat: 'CHA' },
+    { id: 'librarian', label: 'Помощник занудного библиотекаря (+1 Интеллект)', stat: 'INT' }
+  ];
+  backgrounds.forEach((bg, idx) => {
+    const lbl = document.createElement('label');
+    lbl.className = 'radio-label';
+    const radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.name = 'background';
+    radio.value = bg.id;
+    radio.id = 'bg-' + bg.id;
+    if (GameState.player.background === bg.id) radio.checked = true;
+    if (!GameState.player.background && idx === 0) radio.checked = true;
+    radio.onchange = () => selectBackground(bg.id, bg.stat);
+    lbl.appendChild(radio);
+    lbl.appendChild(document.createTextNode(bg.label));
+    bgGroup.appendChild(lbl);
+  });
+  container.appendChild(bgGroup);
+
+  // Если предыстория не выбрана — выбираем первую
+  if (!GameState.player.background) {
+    selectBackground('worker', 'STR');
+    document.getElementById('bg-worker').checked = true;
+  }
+
+  // Портрет
+  const portraitLabel = document.createElement('p');
+  portraitLabel.innerHTML = '<strong>Портрет:</strong>';
+  portraitLabel.style.marginTop = '10px';
+  container.appendChild(portraitLabel);
+
+  const uploadBtn = document.createElement('button');
+  uploadBtn.className = 'side-btn';
+  uploadBtn.textContent = '📷 Загрузить портрет';
+  uploadBtn.onclick = () => document.getElementById('portrait-upload').click();
+  container.appendChild(uploadBtn);
+
+  // Кнопка Продолжить
+  const continueBtn = document.createElement('button');
+  continueBtn.className = 'choice-btn';
+  continueBtn.textContent = 'Продолжить';
+  continueBtn.style.marginTop = '15px';
+  continueBtn.onclick = () => {
+    const nameVal = document.getElementById('mirror-name-input').value.trim();
+    if (nameVal) GameState.player.name = nameVal;
+    else if (!GameState.player.name) GameState.player.name = 'Безымянный';
+    renderScene('intro_morning');
+  };
+  container.appendChild(continueBtn);
+}
+
+function selectBackground(bgId, stat) {
+  GameState.player.background = bgId;
+  GameState.player.stats = { STR: 10, DEX: 10, WIS: 10, CHA: 10, INT: 10 };
+  GameState.player.stats[stat] = 12;
+}
+
+function createToggle(id, leftText, rightText, initialState, onChange) {
+  const group = document.createElement('div');
+  group.className = 'toggle-group';
+  group.id = 'toggle-' + id;
+
+  const leftBtn = document.createElement('button');
+  leftBtn.className = 'toggle-btn ' + (initialState ? 'active' : 'inactive');
+  leftBtn.textContent = leftText;
+
+  const rightBtn = document.createElement('button');
+  rightBtn.className = 'toggle-btn ' + (!initialState ? 'active' : 'inactive');
+  rightBtn.textContent = rightText;
+
+  function setState(val) {
+    if (val) {
+      leftBtn.className = 'toggle-btn active';
+      rightBtn.className = 'toggle-btn inactive';
+    } else {
+      leftBtn.className = 'toggle-btn inactive';
+      rightBtn.className = 'toggle-btn active';
+    }
+    onChange(val);
+  }
+
+  leftBtn.onclick = () => setState(true);
+  rightBtn.onclick = () => setState(false);
+
+  group.appendChild(leftBtn);
+  group.appendChild(rightBtn);
+  return group;
+}
+
+// --- 4. Утро, спуск ---
+Scenes['intro_morning'] = {
+  title: 'Утро',
+  image: 'assets/ui/start.jpg',
+  text: 'Умывая своё {beauty} лицо и одеваясь, ты вылезаешь из чердака на крышу через занавешенную дыру, не забывая свой дневник, и аккуратно спускаешься по лестнице на улицу.\n\nСегодня очередной рабочий день. Хотя, может, ну его — и просто пойти погулять по городу?',
+  choices: [
+    { text: 'Пойти на работу', next: 'choice_work' },
+    { text: 'Пойти гулять по городу', next: 'stub_walk' }
+  ],
+  addQuest: { id: 'quest_work', name: 'Опять Работа', description: 'Пойти на работу. Или не пойти.', status: 'Активен' }
+};
+
+// --- 5. Выбор работы ---
+Scenes['choice_work'] = {
+  title: 'Работа',
+  text: 'Куда направишься?',
+  choices: [],
+  action: function() {
+    const container = document.getElementById('choices-container');
+    container.innerHTML = '';
+
+    const options = [];
+    if (GameState.player.background === 'worker') {
+      options.push({ text: 'И снова надрывать спину на складе', next: 'stub_work_worker', bg: 'worker' });
+      options.push({ text: 'И снова испытывать унижение от игнорирования (газета)', next: 'stub_work_seller', bg: 'seller' });
+      options.push({ text: 'И снова слушать ворчанье плесневелого старика (библиотека)', next: 'stub_work_librarian', bg: 'librarian' });
+    } else if (GameState.player.background === 'seller') {
+      options.push({ text: 'И снова испытывать унижение от игнорирования', next: 'stub_work_seller', bg: 'seller' });
+      options.push({ text: 'И снова надрывать спину на складе', next: 'stub_work_worker', bg: 'worker' });
+      options.push({ text: 'И снова слушать ворчанье плесневелого старика (библиотека)', next: 'stub_work_librarian', bg: 'librarian' });
+    } else {
+      options.push({ text: 'И снова слушать ворчанье плесневелого старика', next: 'stub_work_librarian', bg: 'librarian' });
+      options.push({ text: 'И снова надрывать спину на складе', next: 'stub_work_worker', bg: 'worker' });
+      options.push({ text: 'И снова испытывать унижение от игнорирования (газета)', next: 'stub_work_seller', bg: 'seller' });
+    }
+
+    options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = opt.text;
+      btn.onclick = () => renderScene(opt.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+// --- Заглушки ---
+Scenes['stub_walk'] = {
+  title: 'Прогулка',
+  text: 'Ты решаешь, что работа подождёт. Город прекрасен в своей сырости... [Заглушка — продолжение следует]',
+  choices: [{ text: 'Вернуться к началу', next: 'intro_map' }]
+};
+Scenes['stub_work_worker'] = {
+  title: 'Склад',
+  text: 'Ты идёшь на склад. Спина ноет от одной мысли о предстоящей работе. [Заглушка — продолжение следует]',
+  choices: [{ text: 'Вернуться к началу', next: 'intro_map' }]
+};
+Scenes['stub_work_seller'] = {
+  title: 'Улицы',
+  text: 'Ты берёшь стопку газет. Прохожие игнорируют тебя, как всегда. [Заглушка — продолжение следует]',
+  choices: [{ text: 'Вернуться к началу', next: 'intro_map' }]
+};
+Scenes['stub_work_librarian'] = {
+  title: 'Библиотека',
+  text: 'Старик встречает тебя привычным ворчанием. Пыль, книги, плесень. [Заглушка — продолжение следует]',
+  choices: [{ text: 'Вернуться к началу', next: 'intro_map' }]
 };
 
 // --- Инициализация ---
 function initGame() {
-  // Проверяем, есть ли сохранения
   let hasSaves = false;
   for (let i = 0; i < 3; i++) {
     if (localStorage.getItem('teomor_save_' + i)) hasSaves = true;
   }
-
   if (hasSaves) {
-    document.getElementById('scene-text').innerHTML = '<p>У вас есть сохранения. Хотите загрузить игру или начать заново?</p>';
+    document.getElementById('scene-text').innerHTML = '<p>У вас есть сохранения. Загрузить или начать заново?</p>';
     document.getElementById('choices-container').innerHTML = `
       <button class="choice-btn" onclick="loadGame(0)">📂 Загрузить последнее сохранение</button>
       <button class="choice-btn" onclick="clearSavesAndStart()">🆕 Начать заново</button>
     `;
   } else {
-    renderScene('start');
+    renderScene('intro_map');
   }
 }
 
 function clearSavesAndStart() {
   for (let i = 0; i < 3; i++) localStorage.removeItem('teomor_save_' + i);
-  renderScene('start');
+  renderScene('intro_map');
 }
 
 window.onload = initGame;
 </script>
-
 </body>
 </html>
