@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teomor — Текстовая RPG</title>
+<style>
+/* ========================================
+   СТИЛИЗАЦИЯ: СТАРЫЙ ПЕРГАМЕНТ
+   ======================================== */
+@font-face {
+  font-family: 'InkFont';
+  src: local('Georgia'), local('Times New Roman');
+  /* Заглушка. Для настоящего рукописного шрифта положи .woff2 в /assets/fonts/ и раскомментируй строку ниже */
+  /* src: url('assets/fonts/ink-font.woff2') format('woff2'); */
+}
+
+:root {
+  --parchment: #f4e4c1;
+  --parchment-dark: #e8d5a3;
+  --ink: #2c1810;
+  --ink-light: #5a3a28;
+  --red-wax: #8b1a1a;
+  --gold: #b8860b;
+  --border-color: #3a2a1a;
+  --slot-bg: #e8d5a3;
+  --slot-border: #3a2a1a;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #1a1a1a url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%231a1a1a"/><rect x="10" y="10" width="80" height="80" fill="%23222222" rx="5"/></svg>');
+  font-family: 'InkFont', 'Georgia', 'Times New Roman', serif;
+  color: var(--ink);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+#game-container {
+  width: 100%;
+  max-width: 1000px;
+  min-height: 700px;
+  background: var(--parchment);
+  border: 12px solid #3a2a1a;
+  border-radius: 4px;
+  box-shadow: 0 0 40px rgba(0,0,0,0.8), inset 0 0 100px rgba(139,90,43,0.3);
+  padding: 30px;
+  position: relative;
+  display: flex;
+  gap: 20px;
+}
+
+/* Декоративные пятна на пергаменте */
+#game-container::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><circle cx="30" cy="40" r="15" fill="%23d4b896" opacity="0.4"/><circle cx="150" cy="120" r="25" fill="%23c4a882" opacity="0.3"/><circle cx="80" cy="170" r="10" fill="%23d4b896" opacity="0.35"/></svg>');
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Основная панель — текст сцены */
+#scene-panel {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+  padding: 20px;
+  background: rgba(244,228,193,0.7);
+  border: 2px solid var(--border-color);
+  border-radius: 3px;
+  overflow-y: auto;
+  max-height: 650px;
+}
+
+#scene-title {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: var(--ink);
+  text-align: center;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 10px;
+}
+
+#scene-text {
+  font-size: 18px;
+  line-height: 1.8;
+  margin-bottom: 20px;
+  white-space: pre-wrap;
+}
+
+#scene-text .glossary-link {
+  color: var(--red-wax);
+  border-bottom: 1px dotted var(--red-wax);
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+#scene-text .glossary-link:hover {
+  color: #a00;
+}
+
+#choices-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.choice-btn {
+  display: block;
+  width: 100%;
+  padding: 12px 18px;
+  background: var(--parchment-dark);
+  border: 2px solid var(--border-color);
+  font-family: inherit;
+  font-size: 16px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.3s;
+  position: relative;
+  color: var(--ink);
+}
+
+.choice-btn::before {
+  content: '➤';
+  margin-right: 8px;
+  color: var(--red-wax);
+}
+
+.choice-btn:hover {
+  background: #d4b896;
+  border-color: var(--red-wax);
+}
+
+.choice-btn.dice-roll {
+  border-color: var(--gold);
+}
+
+.choice-btn.dice-roll::after {
+  content: ' 🎲';
+}
+
+/* Боковая панель */
+#side-panel {
+  width: 280px;
+  min-width: 280px;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.side-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--parchment-dark);
+  border: 2px solid var(--border-color);
+  font-family: inherit;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: var(--ink);
+  text-align: center;
+}
+
+.side-btn:hover {
+  background: #d4b896;
+  border-color: var(--red-wax);
+}
+
+#quick-stats {
+  background: rgba(244,228,193,0.7);
+  border: 2px solid var(--border-color);
+  padding: 12px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+#quick-stats strong {
+  color: var(--red-wax);
+}
+
+/* Модальное окно — Дневник */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 100;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal-journal {
+  width: 90%;
+  max-width: 800px;
+  max-height: 85vh;
+  background: var(--parchment);
+  border: 12px solid #3a2a1a;
+  border-radius: 4px;
+  box-shadow: 0 0 60px rgba(0,0,0,0.9);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.journal-tabs {
+  display: flex;
+  border-bottom: 2px solid var(--border-color);
+  background: var(--parchment-dark);
+}
+
+.journal-tab {
+  flex: 1;
+  padding: 12px;
+  background: var(--parchment-dark);
+  border: none;
+  border-right: 1px solid var(--border-color);
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--ink);
+  transition: all 0.3s;
+}
+
+.journal-tab:last-child {
+  border-right: none;
+}
+
+.journal-tab.active {
+  background: var(--parchment);
+  border-bottom: 2px solid var(--parchment);
+  font-weight: bold;
+  color: var(--red-wax);
+}
+
+.journal-tab:hover {
+  background: #d4b896;
+}
+
+.journal-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  max-height: 60vh;
+}
+
+.journal-pane {
+  display: none;
+}
+
+.journal-pane.active {
+  display: block;
+}
+
+/* Вкладка Персонаж */
+#character-portrait-container {
+  width: 150px;
+  height: 150px;
+  border: 3px solid var(--border-color);
+  margin: 0 auto 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--parchment-dark);
+  cursor: pointer;
+  position: relative;
+}
+
+#character-portrait-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#portrait-placeholder {
+  font-size: 48px;
+  color: var(--ink-light);
+}
+
+/* Вкладка Инвентарь */
+#inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 55px);
+  grid-template-rows: repeat(3, 55px);
+  gap: 4px;
+  margin-bottom: 15px;
+  justify-content: center;
+}
+
+.inventory-slot {
+  width: 55px;
+  height: 55px;
+  background: var(--slot-bg);
+  border: 2px solid var(--slot-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  word-break: break-word;
+  padding: 2px;
+}
+
+.inventory-slot.occupied {
+  background: #d4b896;
+  border-color: var(--red-wax);
+}
+
+.inventory-slot:hover {
+  background: #c4a882;
+}
+
+#quest-items-list {
+  border: 2px dashed var(--border-color);
+  padding: 10px;
+  min-height: 40px;
+  margin-top: 10px;
+}
+
+#quest-items-list .quest-item {
+  padding: 5px;
+  background: var(--parchment-dark);
+  margin: 3px 0;
+  font-size: 13px;
+}
+
+/* Вкладка Сохранения */
+.save-slot {
+  padding: 12px;
+  border: 2px solid var(--border-color);
+  margin: 8px 0;
+  background: var(--parchment-dark);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s;
+}
+
+.save-slot:hover {
+  border-color: var(--red-wax);
+  background: #d4b896;
+}
+
+.save-slot .save-info {
+  font-size: 13px;
+  color: var(--ink-light);
+}
+
+/* Окно броска куба */
+#dice-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 200;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+#dice-overlay.active {
+  display: flex;
+}
+
+#dice-result {
+  font-size: 72px;
+  color: var(--gold);
+  font-family: 'InkFont', serif;
+  margin-top: 20px;
+}
+
+#dice-canvas {
+  border: 3px solid var(--border-color);
+  background: var(--parchment);
+  border-radius: 5px;
+}
+
+/* Кнопка закрытия */
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--ink);
+  z-index: 101;
+}
+
+.close-btn:hover {
+  color: var(--red-wax);
+}
+</style>
+</head>
+<body>
+
+<div id="game-container">
+  <!-- Основная панель сцены -->
+  <div id="scene-panel">
+    <div id="scene-title">Teomor</div>
+    <div id="scene-text">Загрузка...</div>
+    <div id="choices-container"></div>
+  </div>
+
+  <!-- Боковая панель -->
+  <div id="side-panel">
+    <div id="quick-stats">
+      <strong>Имя:</strong> <span id="stat-name">—</span><br>
+      <strong>DEX:</strong> <span id="stat-dex">0</span> |
+      <strong>WIS:</strong> <span id="stat-wis">0</span> |
+      <strong>CHA:</strong> <span id="stat-cha">0</span>
+    </div>
+    <button class="side-btn" onclick="openJournal()">📖 Дневник</button>
+    <button class="side-btn" onclick="saveGame(0)">💾 Сохранить</button>
+  </div>
+</div>
+
+<!-- Модальное окно Дневника -->
+<div class="modal-overlay" id="journal-modal">
+  <div class="modal-journal">
+    <span class="close-btn" onclick="closeJournal()">✕</span>
+    <div class="journal-tabs">
+      <button class="journal-tab active" onclick="switchTab('character')">Персонаж</button>
+      <button class="journal-tab" onclick="switchTab('inventory')">Инвентарь</button>
+      <button class="journal-tab" onclick="switchTab('glossary')">Глоссарий</button>
+      <button class="journal-tab" onclick="switchTab('quests')">Квесты</button>
+      <button class="journal-tab" onclick="switchTab('notes')">Заметки</button>
+      <button class="journal-tab" onclick="switchTab('saves')">Сохранения</button>
+    </div>
+    <div class="journal-content" id="journal-content">
+      <!-- Вкладка Персонаж -->
+      <div class="journal-pane active" id="pane-character">
+        <div id="character-portrait-container" onclick="document.getElementById('portrait-upload').click()">
+          <span id="portrait-placeholder">🖼</span>
+          <img id="portrait-img" style="display:none" alt="Портрет">
+        </div>
+        <input type="file" id="portrait-upload" accept="image/*" style="display:none" onchange="uploadPortrait(event)">
+        <p style="text-align:center"><em>Нажмите на портрет, чтобы загрузить</em></p>
+        <p><strong>Имя:</strong> <span id="pane-name">—</span></p>
+        <p><strong>Предыстория:</strong> <span id="pane-background">—</span></p>
+        <p><strong>Ловкость (DEX):</strong> <span id="pane-dex">0</span></p>
+        <p><strong>Чутьё (WIS):</strong> <span id="pane-wis">0</span></p>
+        <p><strong>Красноречие (CHA):</strong> <span id="pane-cha">0</span></p>
+      </div>
+
+      <!-- Вкладка Инвентарь -->
+      <div class="journal-pane" id="pane-inventory">
+        <h3>🎒 Вещмешок</h3>
+        <div id="inventory-grid"></div>
+        <p style="font-size:12px;text-align:center"><em>Ячейки: 4×3. Перетаскивание будет добавлено позже.</em></p>
+        <h3>📜 Квестовые предметы</h3>
+        <div id="quest-items-list"></div>
+      </div>
+
+      <!-- Вкладка Глоссарий -->
+      <div class="journal-pane" id="pane-glossary">
+        <h3>📚 Глоссарий</h3>
+        <div id="glossary-list"><em>Термины появятся по мере исследования мира.</em></div>
+      </div>
+
+      <!-- Вкладка Квесты -->
+      <div class="journal-pane" id="pane-quests">
+        <h3>📋 Квесты</h3>
+        <div id="quests-list"><em>Задания появятся по мере продвижения.</em></div>
+      </div>
+
+      <!-- Вкладка Заметки -->
+      <div class="journal-pane" id="pane-notes">
+        <h3>📝 Заметки</h3>
+        <div id="notes-list"><em>Заметки появятся автоматически.</em></div>
+      </div>
+
+      <!-- Вкладка Сохранения -->
+      <div class="journal-pane" id="pane-saves">
+        <h3>💾 Сохранения</h3>
+        <div id="saves-list">
+          <div class="save-slot" onclick="saveGame(0)"><span>📌 Закладка 1</span><span class="save-info" id="save-info-0">Пусто</span></div>
+          <div class="save-slot" onclick="saveGame(1)"><span>📌 Закладка 2</span><span class="save-info" id="save-info-1">Пусто</span></div>
+          <div class="save-slot" onclick="saveGame(2)"><span>📌 Закладка 3</span><span class="save-info" id="save-info-2">Пусто</span></div>
+        </div>
+        <p style="font-size:12px;margin-top:10px"><em>Нажмите на закладку, чтобы сохранить игру.</em></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Окно броска куба -->
+<div class="modal-overlay" id="dice-overlay">
+  <canvas id="dice-canvas" width="200" height="200"></canvas>
+  <div id="dice-result"></div>
+  <p style="color:var(--parchment);margin-top:10px;font-family:'InkFont',serif">Нажмите в любом месте, чтобы закрыть</p>
+</div>
+
+<script>
+// ========================================
+// ДВИЖОК ИГРЫ TEOMOR
+// ========================================
+
+// --- Game State ---
+const GameState = {
+  player: {
+    name: 'Кассиан Вейл',
+    portrait: null, // base64
+    background: null, // 'order_acolyte' | 'explorer' | 'exile'
+    stats: { DEX: 0, WIS: 0, CHA: 0 },
+    inventory: [], // [{id, name, icon, sizeW, sizeH, consumable, bonus, bonusStat}]
+    questItems: [], // [{id, name}]
+  },
+  flags: {}, // сюжетные флаги
+  glossary: {}, // {termId: {name, description}}
+  quests: [], // [{id, name, description, status}]
+  notes: [], // [{text, sceneId}]
+  currentScene: 'start',
+  lastRoll: null,
+};
+
+// --- Scene Database ---
+// Сцены хранятся в объекте. Позже будут вынесены в /content/scenes/*.json
+const Scenes = {};
+
+// --- Рендеринг сцены ---
+function renderScene(sceneId) {
+  const scene = Scenes[sceneId];
+  if (!scene) {
+    document.getElementById('scene-text').textContent = `[Ошибка: сцена "${sceneId}" не найдена]`;
+    return;
+  }
+
+  GameState.currentScene = sceneId;
+  document.getElementById('scene-title').textContent = scene.title || 'Teomor';
+
+  // Обработка текста: подстановка имени, условный текст по предыстории
+  let text = scene.text || '';
+  text = text.replace(/\{name\}/g, GameState.player.name);
+
+  // Условный текст по предыстории
+  if (scene.conditional_text && GameState.player.background) {
+    const condKey = 'background_' + GameState.player.background;
+    if (scene.conditional_text[condKey]) {
+      text += '\n\n' + scene.conditional_text[condKey];
+    }
+  }
+
+  // Обработка глоссарий-ссылок: <glossary id="termId">текст</glossary>
+  text = text.replace(/<glossary\s+id="([^"]+)"\s*>(.*?)<\/glossary>/g, (match, id, innerText) => {
+    if (GameState.glossary[id]) {
+      return `<span class="glossary-link" onclick="openGlossaryTerm('${id}')">${innerText}</span>`;
+    }
+    return innerText;
+  });
+
+  document.getElementById('scene-text').innerHTML = text;
+
+  // Выборы
+  const choicesContainer = document.getElementById('choices-container');
+  choicesContainer.innerHTML = '';
+
+  if (scene.choices && scene.choices.length > 0) {
+    scene.choices.forEach(choice => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      if (choice.check) btn.classList.add('dice-roll');
+      btn.textContent = choice.text;
+      btn.onclick = () => handleChoice(choice);
+      choicesContainer.appendChild(btn);
+    });
+  } else if (scene.next) {
+    // Автоматический переход
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = 'Продолжить...';
+    btn.onclick = () => renderScene(scene.next);
+    choicesContainer.appendChild(btn);
+  }
+
+  // Обновление быстрых статов
+  updateQuickStats();
+  updateAllPanels();
+}
+
+// --- Обработка выбора ---
+function handleChoice(choice) {
+  // Если есть проверка характеристики
+  if (choice.check) {
+    rollDice(choice);
+    return;
+  }
+
+  // Если это даёт предмет
+  if (choice.giveItem) {
+    addToInventory(choice.giveItem);
+  }
+
+  // Если это устанавливает флаг
+  if (choice.setFlag) {
+    GameState.flags[choice.setFlag] = true;
+  }
+
+  // Если это добавляет термин в глоссарий
+  if (choice.addGlossary) {
+    const g = choice.addGlossary;
+    GameState.glossary[g.id] = { name: g.name, description: g.description };
+  }
+
+  // Переход
+  if (choice.next) {
+    renderScene(choice.next);
+  } else if (choice.success) {
+    renderScene(choice.success);
+  }
+}
+
+// --- Бросок куба ---
+function rollDice(choice) {
+  const stat = choice.check.stat;
+  const dc = choice.check.dc;
+  const modifier = GameState.player.stats[stat] || 0;
+
+  // Проверяем, есть ли расходники
+  let bonusItem = null;
+  const consumables = GameState.player.inventory.filter(item => item.consumable && item.bonusStat === stat);
+  if (consumables.length > 0) {
+    // Показываем диалог использования (упрощённо: используем первый подходящий)
+    const useItem = confirm(`Использовать расходник "${consumables[0].name}" для бонуса +${consumables[0].bonus} к броску?`);
+    if (useItem) {
+      bonusItem = consumables[0];
+    }
+  }
+
+  const bonus = bonusItem ? bonusItem.bonus : 0;
+  const roll = Math.floor(Math.random() * 20) + 1;
+  const total = roll + modifier + bonus;
+
+  // Трата расходника
+  if (bonusItem) {
+    const idx = GameState.player.inventory.indexOf(bonusItem);
+    if (idx > -1) GameState.player.inventory.splice(idx, 1);
+  }
+
+  // Анимация куба
+  showDiceAnimation(roll, () => {
+    GameState.lastRoll = { roll, modifier, bonus, total, dc, success: total >= dc };
+
+    if (total >= dc) {
+      if (choice.success) {
+        if (choice.successGiveItem) addToInventory(choice.successGiveItem);
+        if (choice.successSetFlag) GameState.flags[choice.successSetFlag] = true;
+        renderScene(choice.success);
+      }
+    } else {
+      if (choice.failure) {
+        if (choice.failureSetFlag) GameState.flags[choice.failureSetFlag] = true;
+        renderScene(choice.failure);
+      } else {
+        alert(`Провал! Выпало ${roll} + ${modifier}${bonus ? ' + ' + bonus : ''} = ${total}. Нужно было ${dc}.`);
+      }
+    }
+  });
+}
+
+// --- Анимация куба ---
+function showDiceAnimation(result, callback) {
+  const overlay = document.getElementById('dice-overlay');
+  const canvas = document.getElementById('dice-canvas');
+  const ctx = canvas.getContext('2d');
+  const resultDiv = document.getElementById('dice-result');
+
+  overlay.classList.add('active');
+  resultDiv.textContent = '';
+
+  let frame = 0;
+  const maxFrames = 12;
+  const interval = setInterval(() => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Фон пергамента
+    ctx.fillStyle = '#f4e4c1';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Рамка
+    ctx.strokeStyle = '#3a2a1a';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
+
+    // Рисуем куб (упрощённый d20 — шестиугольник)
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const size = 50 + Math.random() * 20;
+
+    ctx.fillStyle = '#e8d5a3';
+    ctx.strokeStyle = '#2c1810';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let i = 0; i < 6; i++) {
+      const angle = (Math.PI * 2 / 6) * i + frame * 0.3;
+      const x = cx + Math.cos(angle) * size;
+      const y = cy + Math.sin(angle) * size;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Случайное число внутри
+    if (frame < maxFrames - 1) {
+      ctx.fillStyle = '#2c1810';
+      ctx.font = 'bold 40px Georgia';
+      ctx.textAlign = 'center';
+      ctx.fillText(Math.floor(Math.random() * 20) + 1, cx, cy + 14);
+    }
+
+    frame++;
+    if (frame >= maxFrames) {
+      clearInterval(interval);
+      // Финальный кадр
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#f4e4c1';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = '#3a2a1a';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
+      ctx.fillStyle = '#e8d5a3';
+      ctx.strokeStyle = '#2c1810';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const angle = (Math.PI * 2 / 6) * i;
+        const x = cx + Math.cos(angle) * 55;
+        const y = cy + Math.sin(angle) * 55;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#2c1810';
+      ctx.font = 'bold 48px Georgia';
+      ctx.textAlign = 'center';
+      ctx.fillText(result, cx, cy + 16);
+
+      resultDiv.textContent = result;
+
+      overlay.onclick = () => {
+        overlay.classList.remove('active');
+        overlay.onclick = null;
+        if (callback) callback();
+      };
+    }
+  }, 100);
+}
+
+// --- Инвентарь ---
+function addToInventory(item) {
+  if (!item) return;
+  const currentItems = GameState.player.inventory.length;
+  if (currentItems >= 12) {
+    alert('Инвентарь полон! Освободите ячейку.');
+    return false;
+  }
+  GameState.player.inventory.push(item);
+  updateInventoryUI();
+  return true;
+}
+
+function addQuestItem(item) {
+  if (!item) return;
+  GameState.player.questItems.push(item);
+  updateInventoryUI();
+}
+
+function updateInventoryUI() {
+  const grid = document.getElementById('inventory-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  for (let i = 0; i < 12; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'inventory-slot';
+    if (i < GameState.player.inventory.length) {
+      slot.classList.add('occupied');
+      slot.textContent = GameState.player.inventory[i].name;
+      slot.title = GameState.player.inventory[i].name + (GameState.player.inventory[i].consumable ? ' (расходник)' : '');
+    }
+    grid.appendChild(slot);
+  }
+
+  const questList = document.getElementById('quest-items-list');
+  if (questList) {
+    questList.innerHTML = GameState.player.questItems.map(item =>
+      `<div class="quest-item">📜 ${item.name}</div>`
+    ).join('') || '<em>Пусто</em>';
+  }
+}
+
+// --- Дневник ---
+function openJournal() {
+  document.getElementById('journal-modal').classList.add('active');
+  updateAllPanels();
+}
+
+function closeJournal() {
+  document.getElementById('journal-modal').classList.remove('active');
+}
+
+function switchTab(tabName) {
+  document.querySelectorAll('.journal-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.journal-pane').forEach(p => p.classList.remove('active'));
+
+  const tabMap = {
+    'character': 0,
+    'inventory': 1,
+    'glossary': 2,
+    'quests': 3,
+    'notes': 4,
+    'saves': 5
+  };
+  const idx = tabMap[tabName] || 0;
+  document.querySelectorAll('.journal-tab')[idx].classList.add('active');
+  document.getElementById('pane-' + tabName).classList.add('active');
+
+  if (tabName === 'inventory') updateInventoryUI();
+  if (tabName === 'glossary') updateGlossaryUI();
+  if (tabName === 'quests') updateQuestsUI();
+  if (tabName === 'notes') updateNotesUI();
+  if (tabName === 'saves') updateSavesUI();
+}
+
+function updateAllPanels() {
+  const p = GameState.player;
+  document.getElementById('pane-name').textContent = p.name;
+  document.getElementById('pane-background').textContent = getBackgroundName(p.background);
+  document.getElementById('pane-dex').textContent = p.stats.DEX;
+  document.getElementById('pane-wis').textContent = p.stats.WIS;
+  document.getElementById('pane-cha').textContent = p.stats.CHA;
+
+  if (p.portrait) {
+    document.getElementById('portrait-img').src = p.portrait;
+    document.getElementById('portrait-img').style.display = 'block';
+    document.getElementById('portrait-placeholder').style.display = 'none';
+  }
+  updateInventoryUI();
+  updateGlossaryUI();
+  updateQuestsUI();
+  updateNotesUI();
+  updateSavesUI();
+  updateQuickStats();
+}
+
+function updateQuickStats() {
+  document.getElementById('stat-name').textContent = GameState.player.name;
+  document.getElementById('stat-dex').textContent = GameState.player.stats.DEX;
+  document.getElementById('stat-wis').textContent = GameState.player.stats.WIS;
+  document.getElementById('stat-cha').textContent = GameState.player.stats.CHA;
+}
+
+function updateGlossaryUI() {
+  const list = document.getElementById('glossary-list');
+  if (!list) return;
+  const entries = Object.values(GameState.glossary);
+  if (entries.length === 0) {
+    list.innerHTML = '<em>Термины появятся по мере исследования мира.</em>';
+    return;
+  }
+  list.innerHTML = entries.map(e =>
+    `<div style="margin-bottom:8px"><strong>${e.name}</strong>: ${e.description}</div>`
+  ).join('');
+}
+
+function updateQuestsUI() {
+  const list = document.getElementById('quests-list');
+  if (!list) return;
+  if (GameState.quests.length === 0) {
+    list.innerHTML = '<em>Задания появятся по мере продвижения.</em>';
+    return;
+  }
+  list.innerHTML = GameState.quests.map(q =>
+    `<div style="margin-bottom:8px"><strong>${q.name}</strong> [${q.status}]<br>${q.description}</div>`
+  ).join('');
+}
+
+function updateNotesUI() {
+  const list = document.getElementById('notes-list');
+  if (!list) return;
+  if (GameState.notes.length === 0) {
+    list.innerHTML = '<em>Заметки появятся автоматически.</em>';
+    return;
+  }
+  list.innerHTML = GameState.notes.map(n =>
+    `<div style="margin-bottom:8px;font-style:italic">${n.text}</div>`
+  ).join('');
+}
+
+function updateSavesUI() {
+  for (let i = 0; i < 3; i++) {
+    const key = 'teomor_save_' + i;
+    const data = localStorage.getItem(key);
+    const info = document.getElementById('save-info-' + i);
+    if (info) {
+      if (data) {
+        try {
+          const parsed = JSON.parse(data);
+          info.textContent = `${parsed.player?.name || '—'} | ${parsed.currentScene || '—'}`;
+        } catch(e) {
+          info.textContent = 'Повреждено';
+        }
+      } else {
+        info.textContent = 'Пусто';
+      }
+    }
+  }
+}
+
+function openGlossaryTerm(termId) {
+  openJournal();
+  switchTab('glossary');
+  // Прокрутка к термину (упрощённо)
+}
+
+function getBackgroundName(bg) {
+  const map = {
+    'order_acolyte': 'Бывший послушник Ордена Молчаливой Длани',
+    'explorer': 'Исследователь из Вольных Земель',
+    'exile': 'Бывший каторжник Серебряных Копей'
+  };
+  return map[bg] || 'Неизвестно';
+}
+
+// --- Портрет ---
+function uploadPortrait(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    GameState.player.portrait = e.target.result;
+    document.getElementById('portrait-img').src = e.target.result;
+    document.getElementById('portrait-img').style.display = 'block';
+    document.getElementById('portrait-placeholder').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+// --- Сохранения ---
+function saveGame(slot) {
+  const key = 'teomor_save_' + slot;
+  localStorage.setItem(key, JSON.stringify(GameState));
+  updateSavesUI();
+  alert(`Игра сохранена в закладку ${slot + 1}.`);
+}
+
+function loadGame(slot) {
+  const key = 'teomor_save_' + slot;
+  const data = localStorage.getItem(key);
+  if (!data) {
+    alert('Эта закладка пуста.');
+    return;
+  }
+  try {
+    const parsed = JSON.parse(data);
+    Object.assign(GameState, parsed);
+    closeJournal();
+    renderScene(GameState.currentScene);
+    alert('Игра загружена.');
+  } catch(e) {
+    alert('Ошибка загрузки: сохранение повреждено.');
+  }
+}
+
+// ========================================
+// КОНТЕНТ: СЦЕНЫ
+// ========================================
+
+// --- Сцена: Стартовый экран ---
+Scenes['start'] = {
+  title: 'Teomor — Иллюзорное Героическое Фэнтези',
+  text: 'Добро пожаловать в Teomor.\n\nМир, где боги мертвы, а те, кто носит их имена — лишь атеистические военные ордена, хранящие страшные тайны.\n\nВы — Кассиан Вейл, человек с прошлым, от которого не убежать. В ваших руках — <glossary id="key_ntfah">Ключ гробницы Нтфаха</glossary>, артефакт мёртвого бога, способного менять человеческую натуру.\n\nПрежде чем начать путь, выберите вашу предысторию.',
+  choices: [
+    {
+      text: 'Бывший послушник Ордена Молчаливой Длани (CHA +2, DEX +1)',
+      next: 'choose_name',
+      setFlag: 'bg_order_acolyte',
+      giveItem: { id: 'false_confession', name: 'Фальшивая исповедь', icon: '📜', sizeW: 1, sizeH: 1, consumable: true, bonus: 3, bonusStat: 'CHA' }
+    },
+    {
+      text: 'Исследователь из Вольных Земель (WIS +2, DEX +1)',
+      next: 'choose_name',
+      setFlag: 'bg_explorer',
+      giveItem: { id: 'smelling_salt', name: 'Нюхательная соль', icon: '🧂', sizeW: 1, sizeH: 1, consumable: true, bonus: 3, bonusStat: 'WIS' }
+    },
+    {
+      text: 'Бывший каторжник Серебряных Копей (DEX +2, WIS +1)',
+      next: 'choose_name',
+      setFlag: 'bg_exile',
+      giveItem: { id: 'cat_hook', name: 'Кошка', icon: '🪝', sizeW: 1, sizeH: 1, consumable: true, bonus: 3, bonusStat: 'DEX' }
+    }
+  ]
+};
+
+// --- Сцена: Выбор имени ---
+Scenes['choose_name'] = {
+  title: 'Ваше имя',
+  text: 'Назовите себя. Или оставьте имя, данное при рождении.',
+  choices: [
+    { text: 'Кассиан Вейл (оставить)', next: 'prologue' },
+    { text: 'Ввести своё имя', next: 'custom_name' }
+  ]
+};
+
+Scenes['custom_name'] = {
+  title: 'Введите имя',
+  text: 'Введите ваше имя в появившемся окне.',
+  choices: [
+    {
+      text: 'Ввести имя',
+      next: 'prologue',
+      action: function() {
+        const name = prompt('Введите имя персонажа:', 'Кассиан Вейл');
+        if (name && name.trim()) GameState.player.name = name.trim();
+      }
+    }
+  ]
+};
+
+// --- Сцена: Пролог ---
+Scenes['prologue'] = {
+  title: 'Пролог: Побег',
+  text: 'Библиотека горела. Дым ел глаза, а в коридоре слышались шаги дознавателей. В моей руке был свиток с упоминанием Нтфаха — мёртвого бога, чьё имя Орден выжигал из памяти.\n\nУ меня было мгновение, чтобы решить, как бежать.',
+  choices: [],
+  next: null
+};
+
+// --- Определение стартовой сцены ---
+// (вызывается после загрузки)
+function initGame() {
+  // Проверяем, не загружена ли игра
+  const saved = localStorage.getItem('teomor_save_0');
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (parsed.currentScene && parsed.currentScene !== 'start') {
+        document.getElementById('scene-text').innerHTML = '<p>У вас есть сохранение. Хотите загрузить его или начать заново?</p>';
+        document.getElementById('choices-container').innerHTML = `
+          <button class="choice-btn" onclick="loadGame(0)">Загрузить последнее сохранение</button>
+          <button class="choice-btn" onclick="clearSavesAndStart()">Начать заново</button>
+        `;
+        return;
+      }
+    } catch(e) {}
+  }
+  renderScene('start');
+}
+
+function clearSavesAndStart() {
+  for (let i = 0; i < 3; i++) localStorage.removeItem('teomor_save_' + i);
+  renderScene('start');
+}
+
+// --- Обработчик выбора предыстории ---
+const originalHandleChoice = handleChoice;
+handleChoice = function(choice) {
+  if (choice.setFlag && choice.setFlag.startsWith('bg_')) {
+    const bgMap = {
+      'bg_order_acolyte': { bg: 'order_acolyte', stats: { DEX: 1, WIS: 0, CHA: 2 } },
+      'bg_explorer': { bg: 'explorer', stats: { DEX: 1, WIS: 2, CHA: 0 } },
+      'bg_exile': { bg: 'exile', stats: { DEX: 2, WIS: 1, CHA: 0 } }
+    };
+    const bgData = bgMap[choice.setFlag];
+    if (bgData) {
+      GameState.player.background = bgData.bg;
+      GameState.player.stats = bgData.stats;
+      GameState.flags[choice.setFlag] = true;
+    }
+  }
+  originalHandleChoice(choice);
+};
+
+// --- Запуск ---
+window.onload = initGame;
+
+// Сохранение при закрытии (автосохранение в слот 0)
+window.onbeforeunload = function() {
+  saveGame(0);
+};
+</script>
+
+</body>
+</html>
