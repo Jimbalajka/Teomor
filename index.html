@@ -372,6 +372,66 @@ body {
   font-family: inherit; font-size: 16px; cursor: pointer; color: var(--ink); text-align: center;
 }
 .close-journal-btn:hover { background: #d4b896; border-color: var(--red-wax); }
+
+/* Glossary sidebar layout */
+#glossary-list {
+  display: flex;
+  gap: 0;
+  min-height: 300px;
+}
+.glossary-sidebar {
+  width: 180px;
+  min-width: 180px;
+  border-right: 2px solid var(--border-color);
+  overflow-y: auto;
+  max-height: 50vh;
+}
+.glossary-sidebar-item {
+  padding: 8px 10px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(58,42,26,0.3);
+  font-size: 14px;
+  transition: all 0.3s;
+}
+.glossary-sidebar-item:hover { background: #d4b896; }
+.glossary-sidebar-item.active {
+  background: var(--parchment-dark);
+  font-weight: bold;
+  color: var(--red-wax);
+  border-left: 3px solid var(--red-wax);
+}
+.glossary-detail {
+  flex: 1;
+  padding: 15px;
+  font-size: 16px;
+  line-height: 1.7;
+}
+.glossary-detail h4 {
+  color: var(--red-wax);
+  margin-bottom: 10px;
+  font-size: 20px;
+}
+
+/* Hidden path choices */
+.choice-btn.hidden-path {
+  border-color: #6a4a8a;
+  border-style: dashed;
+  opacity: 0.9;
+}
+.choice-btn.hidden-path::before {
+  content: '👁';
+  margin-right: 8px;
+  color: #6a4a8a;
+}
+
+/* Clickable title easter egg */
+#scene-title.clickable {
+  cursor: pointer;
+  transition: color 0.3s;
+}
+#scene-title.clickable:hover {
+  color: var(--red-wax);
+}
 </style>
 </head>
 <body>
@@ -541,12 +601,9 @@ function renderScene(sceneId) {
     return;
   }
 
-  if (scene.action && typeof scene.action === 'function') {
-    scene.action();
-  }
-
   GameState.currentScene = sceneId;
   document.getElementById('scene-title').textContent = scene.title || 'Teomor';
+  document.getElementById('scene-title').className = '';
 
   // Картинка сцены
   const img = document.getElementById('scene-image');
@@ -590,7 +647,9 @@ function renderScene(sceneId) {
   const choicesContainer = document.getElementById('choices-container');
   choicesContainer.innerHTML = '';
 
-  if (scene.choices && scene.choices.length > 0) {
+  if (scene.action && typeof scene.action === 'function') {
+    scene.action();
+  } else if (scene.choices && scene.choices.length > 0) {
     scene.choices.forEach(choice => {
       const btn = document.createElement('button');
       btn.className = 'choice-btn';
@@ -811,11 +870,23 @@ function updateQuickStats() {
   document.getElementById('stat-cha').textContent = formatMod(getModifier(p.stats.CHA));
   document.getElementById('stat-int').textContent = formatMod(getModifier(p.stats.INT));
 }
-function updateGlossaryUI() {
+let selectedGlossaryTerm = null;
+function updateGlossaryUI(selectTermId) {
   const list = document.getElementById('glossary-list');
   if (!list) return;
-  const entries = Object.values(GameState.glossary);
-  list.innerHTML = entries.map(e => `<div style="margin-bottom:8px"><strong>${e.name}</strong>: ${e.description}</div>`).join('');
+  const entries = Object.entries(GameState.glossary);
+  if (entries.length === 0) { list.innerHTML = '<em>Пусто</em>'; return; }
+  if (selectTermId) selectedGlossaryTerm = selectTermId;
+  if (!selectedGlossaryTerm || !GameState.glossary[selectedGlossaryTerm]) selectedGlossaryTerm = entries[0][0];
+  const sidebar = entries.map(([id, e]) =>
+    `<div class="glossary-sidebar-item${id === selectedGlossaryTerm ? ' active' : ''}" onclick="showGlossaryEntry('${id}')">${e.name}</div>`
+  ).join('');
+  const term = GameState.glossary[selectedGlossaryTerm];
+  list.innerHTML = `<div class="glossary-sidebar">${sidebar}</div><div class="glossary-detail"><h4>${term.name}</h4><p>${term.description}</p></div>`;
+}
+function showGlossaryEntry(termId) {
+  selectedGlossaryTerm = termId;
+  updateGlossaryUI();
 }
 function updateQuestsUI() {
   const list = document.getElementById('quests-list');
@@ -854,7 +925,7 @@ function updateSavesUI() {
     container.appendChild(div);
   }
 }
-function openGlossaryTerm(termId) { openJournal(); switchTab('glossary'); }
+function openGlossaryTerm(termId) { openJournal(); selectedGlossaryTerm = termId; switchTab('glossary'); }
 function getBackgroundName(bg) {
   const map = {
     'worker': 'Разнорабочий сомнительного склада',
@@ -903,6 +974,7 @@ function loadGame(slot) {
 // --- 1. Карта и интро ---
 Scenes['intro_map'] = {
   title: 'Teomor — Иллюзорное Героическое Фэнтези',
+  image: '%D0%9A%D0%B0%D1%80%D1%82%D0%B0%20%D0%93%D0%BE%D1%80%D0%BE%D0%B4%D0%BE%D0%B2%20TEOMOR%20(3).jpg',
   text: '10 Эра, 35 год.\n\nТеомор — прекрасное место, где полно возможностей. Каждый может подняться из низов в Герои, словно Великий <glossary id="faidych">Фаидыч</glossary>, свершая один за одним подвиги и получая всенародную любовь и славу. Или пойти изучать таинства магии, став великим волшебником, чья магия способна менять ландшафты и людей. Как и стать успешным торговцем, открыв процветающий бизнес, разливая путникам кружечки <glossary id="suhodzhuy_el">сухожуйного эля</glossary> или <glossary id="gornoe_vino">горного вина</glossary> в тёплом кабаке, или продавая старинные безделушки из древних руин, возя их из одного города в другой караванами...\n\nЕсли, конечно, ты родился в <glossary id="imperia_sa">Империи СА</glossary>. И если тебе повезло. И тебя не убили Конгрегаты за мнимую связь со <glossary id="sferidy">Сферидами</glossary>. Или если тебя не превратил в кусочек сыра с ушками очередной безумный маг с неподстриженными ногтями и бородавкой размером с мяч, которая перекрывает ему член... Или если вас случайно не убьёт очередная тварь, которая то ли сбежала из сферы, то ли из руин.\n\nДа, всё-таки мир этот до прискорбия и отчаяния ужасно раздражающий. Ты либо до безумия сильный, либо до тоски обречённый. Как раз ты из последних.',
   choices: [
     { text: 'Далее', next: 'intro_city' }
@@ -912,7 +984,7 @@ Scenes['intro_map'] = {
 // --- 2. Город Вастерса ---
 Scenes['intro_city'] = {
   title: 'Вастерса',
-  image: 'assets/ui/vastersa.jpg',
+  image: '41058e58ede43e8fdf03617e82892b16.jpg',
   text: 'Всю свою жизнь ты прожил в <glossary id="vastersa">Вастерса</glossary> — прекрасном многоярусном городе посреди озера, через который проходит множество искусственных каналов. Часто можно увидеть, как небольшие кораблики с пряностями и алкоголем из <glossary id="troynoy_sultanat">Тройного Султаната Туо</glossary> или столичные, везущие древесину и зерно, проходят по разным Ярусам.\n\nНо тебе больше знаком другой пейзаж — постоянно сырых улиц и заплесневелых переходов, в которых часто умирают от обычных болезней. Где каждый <glossary id="des">дес</glossary> больше походит на слизнеходок, чем на десов. Где сухие дрова ценнее, чем мать. Где грибы, растущие на каждом шагу, как продлевают жизнь, помогая не подохнуть с голоду, так и постепенно убивают, разрушая организм своими спорами, обрекая на мучительную смерть через прорастание <glossary id="vsegrib">всегриба</glossary>.\n\nНе самая худшая судьба, но... ты и тут стал исключением. С рождения ты проиграл: мало того, что ты не обладаешь никакими способностями и тебе по жизни никогда не везло, так ещё ты — <glossary id="nikchemysh">никчемыш</glossary>. Тот, кто с рождения обладает нулевым магическим потенциалом. Ты не можешь пользоваться ни кристаллами, ни свитками, ни магическими предметами. Даже зелья на тебя действуют намного слабее обычного.\n\nТо, что ты остался жив — это либо единственное везение в твоей жизни, либо крупное невезение.',
   choices: [
     { text: 'Далее', next: 'intro_mirror' }
@@ -934,6 +1006,24 @@ Scenes['intro_mirror'] = {
 function renderMirrorScene() {
   const container = document.getElementById('choices-container');
   container.innerHTML = '';
+
+  // Easter egg: clicking "Зеркало" title gives +1 WIS modifier
+  const title = document.getElementById('scene-title');
+  if (!GameState.flags.mirror_wisdom) {
+    title.classList.add('clickable');
+    title.onclick = function() {
+      if (!GameState.flags.mirror_wisdom) {
+        GameState.flags.mirror_wisdom = true;
+        GameState.player.stats.WIS += 2;
+        title.classList.remove('clickable');
+        title.onclick = null;
+        title.style.color = 'var(--gold)';
+        setTimeout(() => { title.style.color = ''; }, 1500);
+        updateQuickStats();
+        updateAllPanels();
+      }
+    };
+  }
 
   // Имя
   const nameLabel = document.createElement('p');
@@ -1080,13 +1170,35 @@ function createToggle(id, leftText, rightText, initialState, onChange) {
 // --- 4. Утро, спуск ---
 Scenes['intro_morning'] = {
   title: 'Утро',
-  image: 'assets/ui/start.jpg',
+  image: '10379ad94c18e2272faa805a38440b1e.jpg',
   text: 'Умывая своё {beauty} лицо и одеваясь, ты вылезаешь из чердака на крышу через занавешенную дыру, не забывая свой дневник, и аккуратно спускаешься по лестнице на улицу.\n\nСегодня очередной рабочий день. Хотя, может, ну его — и просто пойти погулять по городу?',
-  choices: [
-    { text: 'Пойти на работу', next: 'choice_work' },
-    { text: 'Пойти гулять по городу', next: 'stub_walk' }
-  ],
-  addQuest: { id: 'quest_work', name: 'Опять Работа', description: 'Пойти на работу. Или не пойти.', status: 'Активен' }
+  action: function() {
+    if (!GameState.flags.quest_work_added) {
+      GameState.quests.push({ id: 'quest_work', name: 'Опять Работа', description: 'Пойти на работу. Или не пойти.', status: 'Активен' });
+      GameState.flags.quest_work_added = true;
+    }
+    const container = document.getElementById('choices-container');
+    const btn1 = document.createElement('button');
+    btn1.className = 'choice-btn';
+    btn1.textContent = 'Пойти на работу';
+    btn1.onclick = () => renderScene('choice_work');
+    container.appendChild(btn1);
+
+    const btn2 = document.createElement('button');
+    btn2.className = 'choice-btn';
+    btn2.textContent = 'Пойти гулять по городу';
+    btn2.onclick = () => renderScene('stub_walk');
+    container.appendChild(btn2);
+
+    // Hidden path: requires WIS modifier >= 2
+    if (getModifier(GameState.player.stats.WIS) >= 2) {
+      const btn3 = document.createElement('button');
+      btn3.className = 'choice-btn hidden-path';
+      btn3.textContent = 'Стоп, новая лавка?';
+      btn3.onclick = () => renderScene('stub_new_shop');
+      container.appendChild(btn3);
+    }
+  }
 };
 
 // --- 5. Выбор работы ---
@@ -1124,6 +1236,12 @@ Scenes['choice_work'] = {
 };
 
 // --- Заглушки ---
+Scenes['stub_new_shop'] = {
+  title: 'Новая лавка',
+  text: 'Твоя наблюдательность не подвела. На углу, где раньше были заколоченные двери, появилась странная лавка. Вывеска покосилась, но на ней ещё можно разобрать: «Всякое-разное для всяких-разных».\n\n[Заглушка — продолжение следует]',
+  choices: [{ text: 'Вернуться к началу', next: 'intro_map' }]
+};
+
 Scenes['stub_walk'] = {
   title: 'Прогулка',
   text: 'Ты решаешь, что работа подождёт. Город прекрасен в своей сырости... [Заглушка — продолжение следует]',
@@ -1163,7 +1281,18 @@ function initGame() {
 }
 
 function clearSavesAndStart() {
-  for (let i = 0; i < 3; i++) localStorage.removeItem('teomor_save_' + i);
+  GameState.player = {
+    name: '', portrait: null, background: null, gender: 'male',
+    traits: { beautiful: true, tall: true, fat: false, cool: true },
+    stats: { STR: 10, DEX: 10, WIS: 10, CHA: 10, INT: 10 },
+    inventory: [], questItems: []
+  };
+  GameState.flags = {};
+  GameState.quests = [];
+  GameState.notes = [];
+  GameState.currentScene = 'intro_map';
+  GameState.lastRoll = null;
+  initGlossary();
   renderScene('intro_map');
 }
 
