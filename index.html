@@ -451,9 +451,14 @@ body {
       <strong>ЛОВ:</strong> <span id="stat-dex">0</span> |
       <strong>МУД:</strong> <span id="stat-wis">0</span><br>
       <strong>ХАР:</strong> <span id="stat-cha">0</span> |
-      <strong>ИНТ:</strong> <span id="stat-int">0</span>
+      <strong>ИНТ:</strong> <span id="stat-int">0</span><br>
+      <strong>💰</strong> <span id="stat-money">10 н.б.</span>
     </div>
     <button class="side-btn" onclick="openJournal()">📖 Дневник</button>
+    <div style="display:flex;gap:5px;margin-top:5px;">
+      <button class="side-btn" onclick="devNavBack()" style="flex:1;font-size:13px;" title="Ctrl+Z">◀ Назад</button>
+      <button class="side-btn" onclick="devNavForward()" style="flex:1;font-size:13px;" title="Ctrl+Y">Вперёд ▶</button>
+    </div>
   </div>
 </div>
 
@@ -539,6 +544,49 @@ function formatMod(mod) {
   return mod >= 0 ? '+' + mod : '' + mod;
 }
 
+// --- Деньги ---
+function formatMoney() {
+  const m = GameState.player.money;
+  const parts = [];
+  if (m.vb > 0) parts.push(m.vb + ' в.б.');
+  parts.push((m.nb || 0) + ' н.б.');
+  return parts.join(' ');
+}
+function addMoney(nb) {
+  GameState.player.money.nb += nb;
+  while (GameState.player.money.nb >= 100) {
+    GameState.player.money.nb -= 100;
+    GameState.player.money.vb += 1;
+  }
+  while (GameState.player.money.nb < 0 && GameState.player.money.vb > 0) {
+    GameState.player.money.nb += 100;
+    GameState.player.money.vb -= 1;
+  }
+  updateQuickStats();
+}
+
+// --- Dev навигация (Ctrl+Z / Ctrl+Y) ---
+function devNavBack() {
+  if (GameState.historyIndex > 0) {
+    GameState.historyIndex--;
+    _devNav = true;
+    renderScene(GameState.sceneHistory[GameState.historyIndex]);
+    _devNav = false;
+  }
+}
+function devNavForward() {
+  if (GameState.historyIndex < GameState.sceneHistory.length - 1) {
+    GameState.historyIndex++;
+    _devNav = true;
+    renderScene(GameState.sceneHistory[GameState.historyIndex]);
+    _devNav = false;
+  }
+}
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 'z') { e.preventDefault(); devNavBack(); }
+  if (e.ctrlKey && e.key === 'y') { e.preventDefault(); devNavForward(); }
+});
+
 // --- Game State ---
 const GameState = {
   player: {
@@ -555,6 +603,7 @@ const GameState = {
     stats: { STR: 10, DEX: 10, WIS: 10, CHA: 10, INT: 10 },
     inventory: [],
     questItems: [],
+    money: { nb: 10, vb: 0 },
   },
   flags: {},
   glossary: {},
@@ -563,6 +612,8 @@ const GameState = {
   currentScene: 'intro_map',
   lastRoll: null,
   diceCallback: null,
+  sceneHistory: [],
+  historyIndex: -1,
 };
 
 // --- База глоссария (все 15 терминов) ---
@@ -581,7 +632,8 @@ const GLOSSARY_BASE = {
   'vastersa': { name: 'Вастерса', description: 'Прекрасный многоярусный город посреди озера, через который проходит множество искусственных каналов. Контраст между богатыми и бедными кварталами огромен.' },
   'troynoy_sultanat': { name: 'Тройной Султанат Туо', description: '[Описание появится позже]' },
   'vsegrib': { name: 'Всегриб', description: 'Тип грибов, растущих преимущественно в Вастерса. Могут прорасти где угодно: в камне, на земле, на лице. Требуют постоянного приёма лекарств. Вкус зависит от места: Каменные всегрибы ценятся поварами, Дес-всегрибы запрещены (приравниваются к каннибализму).' },
-  'nikchemysh': { name: 'Никчемыш', description: 'Проклятый от рождения дес, который не обладает и никогда не сможет обладать магией. Не может пользоваться кристаллами, свитками, магическими предметами. Зелья действуют намного слабее.' }
+  'nikchemysh': { name: 'Никчемыш', description: 'Проклятый от рождения дес, который не обладает и никогда не сможет обладать магией. Не может пользоваться кристаллами, свитками, магическими предметами. Зелья действуют намного слабее.' },
+  'pokoy_trava': { name: 'Покой-трава', description: 'Популярный наркотик среди бедняков Вастерса. Курится в гамаках и на улицах Грибного района.' }
 };
 
 // --- Инициализация глоссария при старте ---
@@ -594,11 +646,20 @@ initGlossary();
 const Scenes = {};
 
 // --- Рендеринг ---
+let _devNav = false;
 function renderScene(sceneId) {
   const scene = Scenes[sceneId];
   if (!scene) {
     document.getElementById('scene-text').innerHTML = `[Ошибка: сцена "${sceneId}" не найдена]`;
     return;
+  }
+
+  if (!_devNav) {
+    if (GameState.historyIndex < GameState.sceneHistory.length - 1) {
+      GameState.sceneHistory = GameState.sceneHistory.slice(0, GameState.historyIndex + 1);
+    }
+    GameState.sceneHistory.push(sceneId);
+    GameState.historyIndex = GameState.sceneHistory.length - 1;
   }
 
   GameState.currentScene = sceneId;
@@ -869,6 +930,7 @@ function updateQuickStats() {
   document.getElementById('stat-wis').textContent = formatMod(getModifier(p.stats.WIS));
   document.getElementById('stat-cha').textContent = formatMod(getModifier(p.stats.CHA));
   document.getElementById('stat-int').textContent = formatMod(getModifier(p.stats.INT));
+  document.getElementById('stat-money').textContent = formatMoney();
 }
 let selectedGlossaryTerm = null;
 function updateGlossaryUI(selectTermId) {
@@ -957,11 +1019,14 @@ function loadGame(slot) {
   try {
     const parsed = JSON.parse(data);
     GameState.player = parsed.player;
+    if (!GameState.player.money) GameState.player.money = { nb: 10, vb: 0 };
     GameState.flags = parsed.flags || {};
     GameState.glossary = parsed.glossary || {};
     GameState.quests = parsed.quests || [];
     GameState.notes = parsed.notes || [];
     GameState.currentScene = parsed.currentScene;
+    GameState.sceneHistory = [];
+    GameState.historyIndex = -1;
     closeJournal();
     renderScene(GameState.currentScene);
   } catch(e) { alert('Ошибка загрузки.'); }
@@ -1019,11 +1084,48 @@ function renderMirrorScene() {
         title.onclick = null;
         title.style.color = 'var(--gold)';
         setTimeout(() => { title.style.color = ''; }, 1500);
+        const msg = document.createElement('p');
+        msg.style.cssText = 'color:var(--gold);font-style:italic;margin-top:10px;padding:10px;border:1px dashed var(--gold);';
+        msg.textContent = 'Ты протираешь зеркало ещё раз и внимательно прихорашиваешь себя. Это придаёт тебе сил. (+1 Мудрость)';
+        document.getElementById('scene-text').appendChild(msg);
         updateQuickStats();
         updateAllPanels();
       }
     };
   }
+
+  // Портрет (сверху)
+  const portraitWrap = document.createElement('div');
+  portraitWrap.style.cssText = 'text-align:center;margin-bottom:15px;';
+  const portraitBox = document.createElement('div');
+  portraitBox.style.cssText = 'width:120px;height:120px;border:3px solid var(--border-color);margin:0 auto 8px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--parchment-dark);cursor:pointer;';
+  if (GameState.player.portrait) {
+    portraitBox.innerHTML = '<img src="' + GameState.player.portrait + '" style="width:100%;height:100%;object-fit:cover;">';
+  } else {
+    portraitBox.innerHTML = '<span style="font-size:36px;color:var(--ink-light)">🖼</span>';
+  }
+  portraitBox.onclick = () => {
+    const input = document.getElementById('portrait-upload');
+    input.onchange = function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        GameState.player.portrait = ev.target.result;
+        portraitBox.innerHTML = '<img src="' + ev.target.result + '" style="width:100%;height:100%;object-fit:cover;">';
+        document.getElementById('portrait-img').src = ev.target.result;
+        document.getElementById('portrait-img').style.display = 'block';
+        document.getElementById('portrait-placeholder').style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    };
+    input.click();
+  };
+  portraitWrap.appendChild(portraitBox);
+  const portraitHint = document.createElement('p');
+  portraitHint.innerHTML = '<em style="font-size:13px;color:var(--ink-light)">Нажмите для загрузки портрета</em>';
+  portraitWrap.appendChild(portraitHint);
+  container.appendChild(portraitWrap);
 
   // Имя
   const nameLabel = document.createElement('p');
@@ -1047,22 +1149,15 @@ function renderMirrorScene() {
     GameState.player.gender = val ? 'male' : 'female';
   }));
 
-  // Красивый/Некрасивый
   container.appendChild(createToggle('beauty', 'Красивый', 'Некрасивый', GameState.player.traits.beautiful, (val) => {
     GameState.player.traits.beautiful = val;
   }));
-
-  // Высокий/Низкий
   container.appendChild(createToggle('height', 'Высокий', 'Низкий', GameState.player.traits.tall, (val) => {
     GameState.player.traits.tall = val;
   }));
-
-  // Толстый/Худой
   container.appendChild(createToggle('build', 'Толстый', 'Худой', GameState.player.traits.fat, (val) => {
     GameState.player.traits.fat = val;
   }));
-
-  // Крутой/Некрутой
   container.appendChild(createToggle('coolness', 'Крутой', 'Некрутой', GameState.player.traits.cool, (val) => {
     GameState.player.traits.cool = val;
   }));
@@ -1076,9 +1171,9 @@ function renderMirrorScene() {
   const bgGroup = document.createElement('div');
   bgGroup.className = 'radio-group';
   const backgrounds = [
-    { id: 'worker', label: 'Разнорабочий сомнительного склада (+1 Сила)', stat: 'STR' },
-    { id: 'seller', label: 'Продавец местной неизвестной газетёнки (+1 Харизма)', stat: 'CHA' },
-    { id: 'librarian', label: 'Помощник занудного библиотекаря (+1 Интеллект)', stat: 'INT' }
+    { id: 'worker', label: 'Разнорабочий сомнительного склада (+1 Сила, +1 Ловкость)', stats: { STR: 12, DEX: 12 } },
+    { id: 'seller', label: 'Продавец местной неизвестной газетёнки (+1 Харизма, +1 Ловкость)', stats: { CHA: 12, DEX: 12 } },
+    { id: 'librarian', label: 'Помощник занудного библиотекаря (+1 Интеллект, +1 Мудрость)', stats: { INT: 12, WIS: 12 } }
   ];
   backgrounds.forEach((bg, idx) => {
     const lbl = document.createElement('label');
@@ -1090,30 +1185,17 @@ function renderMirrorScene() {
     radio.id = 'bg-' + bg.id;
     if (GameState.player.background === bg.id) radio.checked = true;
     if (!GameState.player.background && idx === 0) radio.checked = true;
-    radio.onchange = () => selectBackground(bg.id, bg.stat);
+    radio.onchange = () => selectBackground(bg.id, bg.stats);
     lbl.appendChild(radio);
     lbl.appendChild(document.createTextNode(bg.label));
     bgGroup.appendChild(lbl);
   });
   container.appendChild(bgGroup);
 
-  // Если предыстория не выбрана — выбираем первую
   if (!GameState.player.background) {
-    selectBackground('worker', 'STR');
+    selectBackground('worker', { STR: 12, DEX: 12 });
     document.getElementById('bg-worker').checked = true;
   }
-
-  // Портрет
-  const portraitLabel = document.createElement('p');
-  portraitLabel.innerHTML = '<strong>Портрет:</strong>';
-  portraitLabel.style.marginTop = '10px';
-  container.appendChild(portraitLabel);
-
-  const uploadBtn = document.createElement('button');
-  uploadBtn.className = 'side-btn';
-  uploadBtn.textContent = '📷 Загрузить портрет';
-  uploadBtn.onclick = () => document.getElementById('portrait-upload').click();
-  container.appendChild(uploadBtn);
 
   // Кнопка Продолжить
   const continueBtn = document.createElement('button');
@@ -1129,10 +1211,12 @@ function renderMirrorScene() {
   container.appendChild(continueBtn);
 }
 
-function selectBackground(bgId, stat) {
+function selectBackground(bgId, statsOverride) {
   GameState.player.background = bgId;
   GameState.player.stats = { STR: 10, DEX: 10, WIS: 10, CHA: 10, INT: 10 };
-  GameState.player.stats[stat] = 12;
+  if (statsOverride) Object.assign(GameState.player.stats, statsOverride);
+  if (GameState.flags.mirror_wisdom) GameState.player.stats.WIS += 2;
+  updateQuickStats();
 }
 
 function createToggle(id, leftText, rightText, initialState, onChange) {
@@ -1178,10 +1262,18 @@ Scenes['intro_morning'] = {
       GameState.flags.quest_work_added = true;
     }
     const container = document.getElementById('choices-container');
+
+    const workMap = {
+      worker:    { text: 'И снова надрывать спину на складе', next: 'work_warehouse_walk' },
+      seller:    { text: 'И снова испытывать унижение от игнорирования', next: 'work_newspaper_walk' },
+      librarian: { text: 'И снова слушать ворчанье плесневелого старика', next: 'work_library_walk' }
+    };
+    const work = workMap[GameState.player.background] || workMap.worker;
+
     const btn1 = document.createElement('button');
     btn1.className = 'choice-btn';
-    btn1.textContent = 'Пойти на работу';
-    btn1.onclick = () => renderScene('choice_work');
+    btn1.textContent = work.text;
+    btn1.onclick = () => renderScene(work.next);
     container.appendChild(btn1);
 
     const btn2 = document.createElement('button');
@@ -1190,7 +1282,6 @@ Scenes['intro_morning'] = {
     btn2.onclick = () => renderScene('stub_walk');
     container.appendChild(btn2);
 
-    // Hidden path: requires WIS modifier >= 2
     if (getModifier(GameState.player.stats.WIS) >= 2) {
       const btn3 = document.createElement('button');
       btn3.className = 'choice-btn hidden-path';
@@ -1201,41 +1292,167 @@ Scenes['intro_morning'] = {
   }
 };
 
-// --- 5. Выбор работы ---
-Scenes['choice_work'] = {
-  title: 'Работа',
-  text: 'Куда направишься?',
-  choices: [],
-  action: function() {
-    const container = document.getElementById('choices-container');
-    container.innerHTML = '';
+// ========================================
+// РАБОТА — СКЛАД (worker)
+// ========================================
 
-    const options = [];
-    if (GameState.player.background === 'worker') {
-      options.push({ text: 'И снова надрывать спину на складе', next: 'stub_work_worker', bg: 'worker' });
-      options.push({ text: 'И снова испытывать унижение от игнорирования (газета)', next: 'stub_work_seller', bg: 'seller' });
-      options.push({ text: 'И снова слушать ворчанье плесневелого старика (библиотека)', next: 'stub_work_librarian', bg: 'librarian' });
-    } else if (GameState.player.background === 'seller') {
-      options.push({ text: 'И снова испытывать унижение от игнорирования', next: 'stub_work_seller', bg: 'seller' });
-      options.push({ text: 'И снова надрывать спину на складе', next: 'stub_work_worker', bg: 'worker' });
-      options.push({ text: 'И снова слушать ворчанье плесневелого старика (библиотека)', next: 'stub_work_librarian', bg: 'librarian' });
-    } else {
-      options.push({ text: 'И снова слушать ворчанье плесневелого старика', next: 'stub_work_librarian', bg: 'librarian' });
-      options.push({ text: 'И снова надрывать спину на складе', next: 'stub_work_worker', bg: 'worker' });
-      options.push({ text: 'И снова испытывать унижение от игнорирования (газета)', next: 'stub_work_seller', bg: 'seller' });
+Scenes['work_warehouse_walk'] = {
+  title: 'Путь на склад',
+  text: 'Ты медленно волочишь свои ноги по прохладным переулкам Грибного района, периодически встречая живущих здесь десов. Вид их истощённый и болезненный: некоторые тяжело сидят на сырой земле с заросшим грибами телом, медленно умирая; некоторые валяются на гамаках, покуривая <glossary id="pokoy_trava">покой-траву</glossary>; а некоторые так же вяло и слабо идут по своим делам.\n\nСпустя несколько десятков минут ты доходишь до верфей, что расположены за пределами многоярусного города. Для некоторых этот вид статного города, по которому ходят корабли, окружённый холодным сапфировым озером, в котором корабли кишат как десы в центре города, может показаться красивым. Но для тебя это вечное напоминание того, что ты заперт в этом проклятом городе, что твоя судьба — в конце умереть от зарастания всегриба.\n\nЭти мысли сразу улетучиваются, как только ты заходишь на склад. Вопящий голос твоего прораба будто бы кувалдой выбивает из тебя любое размышление. Не успев переступить порог, Рубин Тон Тон сразу обрушивает лавину из матов и обвинений на тебя, от чего ты сразу несёшься таскать ящики.',
+  choices: [
+    {
+      text: 'Постараться не сорвать спину',
+      check: { stat: 'STR', dc: 5 },
+      success: 'work_warehouse_payday',
+      failure: 'work_warehouse_injury'
     }
+  ]
+};
 
-    options.forEach(opt => {
+Scenes['work_warehouse_payday'] = {
+  title: 'Склад — Конец смены',
+  text: 'Ты продолжаешь работать, правильно распределяя нагрузку по телу, и к концу дня выполняешь норму.\n\nКак обычно, по завершению рабочего дня выстраивается очередь к Тон Тону, и он, высокомерно сидя на высоком стуле, выплачивает плату за проделанную работу. Когда дело доходит до тебя, ты протягиваешь свою ладонь, в которую он кладёт 2 низших. Ты удивлённо смотришь на его ехидное лицо — ведь это в два раза меньше стандартной ставки.',
+  action: function() {
+    if (!GameState.flags.warehouse_paid) { GameState.flags.warehouse_paid = true; addMoney(2); }
+    const container = document.getElementById('choices-container');
+    [{text:'Спасибо. До завтрашнего дня, Начальник Тон Тон', next:'work_warehouse_accept'},
+     {text:'Тут не хватает', next:'work_warehouse_confront'},
+     {text:'Продолжить удивлённо смотреть на него', next:'work_warehouse_stare'}
+    ].forEach(c => {
       const btn = document.createElement('button');
       btn.className = 'choice-btn';
-      btn.textContent = opt.text;
-      btn.onclick = () => renderScene(opt.next);
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
       container.appendChild(btn);
     });
   }
 };
 
-// --- Заглушки ---
+Scenes['work_warehouse_accept'] = {
+  title: 'Склад — Смирение',
+  text: 'А что тебе ещё оставалось, кроме как стерпеть? Подними шум — и он бы уволил тебя.',
+  next: 'work_go_home'
+};
+
+Scenes['work_warehouse_confront'] = {
+  title: 'Склад — Конфронтация',
+  text: 'Ты видишь, как лицо твоего прораба резко меняет свою гримасу на яростную.\n\nТЫ НЕБЛАГОДАРНАЯ СВОЛОЧЬ, НЕ ХВАТАЕТ?! МОЖЕТ ЭТО ТРУДОЛЮБИЯ БЛЯТЬ В ТЕБЕ НЕ ХВАТАЕТ, ЁБАНЫЙ ГРИБОЕД. ТЫ ВИДИМО СОВСЕМ СУКА ОБНАГЛЕЛ. ЕБАТЬ ЗВЕРЕЙ МЕЧОМ СУДЬБЫ, ВЫ ПОСМОТРИТЕ НА НЕГО...\n\nОн делает небольшую паузу, чтобы перевести дыхание.',
+  choices: [
+    { text: 'Извините, господин Тон Тон. Пожалуйста, я был не прав', next: 'work_warehouse_apologize' },
+    { text: 'Но стандартная ставка 4 низших', next: 'work_warehouse_argue' },
+    { text: 'Продолжить молчать и выслушать все его претензии', next: 'work_warehouse_endure' }
+  ]
+};
+
+Scenes['work_warehouse_apologize'] = {
+  title: 'Склад — Извинения',
+  text: 'ДРУГОЕ ДЕЛО, СУКА ГРИБНАЯ! А ТЕПЕРЬ ПШЁЛ ВОН ОТСЕДОВА, БЛЯТЬ!',
+  next: 'work_go_home'
+};
+
+Scenes['work_warehouse_argue'] = {
+  title: 'Склад — Спор',
+  text: 'ТЫ СУКА ЕЩЁ СПОРИТЬ СО МНОЙ БУДЕШЬ, ЁБАНЫЙ ГРИБНИК ТЫ БЛЯТЬ! Я СУКА ТУТ ВАМ ДЕНЬГИ ОТДАЮ, А ВЫ МНЕ ТУТ СУКА ВИДИТЕ ЛИ БЛЯТЬ ПРЕТЕНЗИИ СВОИ ЁБАНЫЕ ВЫСКАЗЫВАЕТЕ! КАТИСЬ В СВОЮ ЗЕМЛЯНКУ, ХУЕСОС!',
+  choices: [
+    { text: 'Молча развернуться и уйти', next: 'work_go_home' },
+    { text: 'Но вы должны мне на 2 больше', next: 'work_warehouse_fired' }
+  ]
+};
+
+Scenes['work_warehouse_fired'] = {
+  title: 'Склад — Увольнение',
+  text: 'БЛЯТЬ! СУКА! ВСЁ! ЗВЕРИ ТЕБЯ ЕБАЛИ, ТЫ УВОЛЕН! ПШЁЛ ВОН! ВОН ОТСЕДОВА!\n\nТон Тон встаёт со стула и начинает тебя толкать, выпроваживая со склада.',
+  action: function() {
+    GameState.flags.fired_from_warehouse = true;
+    const container = document.getElementById('choices-container');
+    [{text:'Злобно ударить его', next:'stub_warehouse_fight'},
+     {text:'НУ И ПОШЁЛ НАХУЙ!', next:'stub_warehouse_curse'},
+     {text:'Развернуться и уйти', next:'work_go_home'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['work_warehouse_stare'] = {
+  title: 'Склад',
+  text: '[Заглушка — продолжение следует]',
+  next: 'work_go_home'
+};
+
+Scenes['work_warehouse_endure'] = {
+  title: 'Склад — Терпение',
+  text: '[Заглушка — продолжение следует]',
+  next: 'work_go_home'
+};
+
+Scenes['work_warehouse_injury'] = {
+  title: 'Склад — Травма',
+  text: 'В спешке ты неправильно поднял груз и сорвал себе спину.\n\n[Заглушка — продолжение следует]',
+  choices: [{ text: 'Далее', next: 'work_go_home' }]
+};
+
+Scenes['stub_warehouse_fight'] = {
+  title: 'Склад — Драка',
+  text: '[Заглушка — продолжение следует]',
+  choices: [{ text: 'Далее', next: 'work_go_home' }]
+};
+
+Scenes['stub_warehouse_curse'] = {
+  title: 'Склад — Ярость',
+  text: '[Заглушка — продолжение следует]',
+  choices: [{ text: 'Далее', next: 'work_go_home' }]
+};
+
+// Общая сцена: идём домой, покупаем еду
+Scenes['work_go_home'] = {
+  title: 'Дорога домой',
+  text: 'Ты устало волочишь свои ноги обратно домой, перед этим покупая себе еду.',
+  action: function() {
+    if (!GameState.flags.day1_food) { GameState.flags.day1_food = true; addMoney(-3); }
+    const container = document.getElementById('choices-container');
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = 'Далее';
+    btn.onclick = () => renderScene('stub_home');
+    container.appendChild(btn);
+  }
+};
+
+Scenes['stub_home'] = {
+  title: 'Дом',
+  text: '[Заглушка — продолжение следует]',
+  choices: [{ text: 'Вернуться к началу', next: 'intro_map' }]
+};
+
+// ========================================
+// РАБОТА — ГАЗЕТА (seller)
+// ========================================
+
+Scenes['work_newspaper_walk'] = {
+  title: 'Путь на точку',
+  text: 'Ты медленно волочишь свои ноги по прохладным переулкам Грибного района, периодически встречая живущих здесь десов. Вид их истощённый и болезненный: некоторые тяжело сидят на сырой земле с заросшим грибами телом, медленно умирая; некоторые валяются на гамаках, покуривая <glossary id="pokoy_trava">покой-траву</glossary>; а некоторые так же вяло и слабо идут по своим делам.\n\nСпустя несколько десятков минут ты доходишь до 1 яруса, к небольшой площади у стен города. Людей тут мало, и живут преимущественно бедняки — конечно, не такие как ты. Даже для них ты бельмо на глазу: каждый раз проходя мимо местных, ты ловишь на себе косые взгляды и замечаешь, как от тебя шарахаются.\n\nЗаходя в местную газету, в полном игнорировании со стороны рабочих, ты молча берёшь выпуски, которые тебе надо раздать, и идёшь на свою точку. И вот опять — целый день стоять и чувствовать это отвратительное чувство полного безразличия и наплевательства со стороны окружающих.\n\n[Заглушка — продолжение следует]',
+  choices: [{ text: 'Далее', next: 'work_go_home' }]
+};
+
+// ========================================
+// РАБОТА — БИБЛИОТЕКА (librarian)
+// ========================================
+
+Scenes['work_library_walk'] = {
+  title: 'Путь в библиотеку',
+  text: 'Ты медленно волочишь свои ноги по прохладным переулкам Грибного района, периодически встречая живущих здесь десов. Вид их истощённый и болезненный: некоторые тяжело сидят на сырой земле с заросшим грибами телом, медленно умирая; некоторые валяются на гамаках, покуривая <glossary id="pokoy_trava">покой-траву</glossary>; а некоторые так же вяло и слабо идут по своим делам.\n\n[Заглушка — продолжение следует]',
+  choices: [{ text: 'Далее', next: 'work_go_home' }]
+};
+
+// ========================================
+// ПРОГУЛКА / СКРЫТЫЕ ПУТИ
+// ========================================
+
 Scenes['stub_new_shop'] = {
   title: 'Новая лавка',
   text: 'Твоя наблюдательность не подвела. На углу, где раньше были заколоченные двери, появилась странная лавка. Вывеска покосилась, но на ней ещё можно разобрать: «Всякое-разное для всяких-разных».\n\n[Заглушка — продолжение следует]',
@@ -1245,21 +1462,6 @@ Scenes['stub_new_shop'] = {
 Scenes['stub_walk'] = {
   title: 'Прогулка',
   text: 'Ты решаешь, что работа подождёт. Город прекрасен в своей сырости... [Заглушка — продолжение следует]',
-  choices: [{ text: 'Вернуться к началу', next: 'intro_map' }]
-};
-Scenes['stub_work_worker'] = {
-  title: 'Склад',
-  text: 'Ты идёшь на склад. Спина ноет от одной мысли о предстоящей работе. [Заглушка — продолжение следует]',
-  choices: [{ text: 'Вернуться к началу', next: 'intro_map' }]
-};
-Scenes['stub_work_seller'] = {
-  title: 'Улицы',
-  text: 'Ты берёшь стопку газет. Прохожие игнорируют тебя, как всегда. [Заглушка — продолжение следует]',
-  choices: [{ text: 'Вернуться к началу', next: 'intro_map' }]
-};
-Scenes['stub_work_librarian'] = {
-  title: 'Библиотека',
-  text: 'Старик встречает тебя привычным ворчанием. Пыль, книги, плесень. [Заглушка — продолжение следует]',
   choices: [{ text: 'Вернуться к началу', next: 'intro_map' }]
 };
 
@@ -1285,13 +1487,16 @@ function clearSavesAndStart() {
     name: '', portrait: null, background: null, gender: 'male',
     traits: { beautiful: true, tall: true, fat: false, cool: true },
     stats: { STR: 10, DEX: 10, WIS: 10, CHA: 10, INT: 10 },
-    inventory: [], questItems: []
+    inventory: [], questItems: [],
+    money: { nb: 10, vb: 0 }
   };
   GameState.flags = {};
   GameState.quests = [];
   GameState.notes = [];
   GameState.currentScene = 'intro_map';
   GameState.lastRoll = null;
+  GameState.sceneHistory = [];
+  GameState.historyIndex = -1;
   initGlossary();
   renderScene('intro_map');
 }
