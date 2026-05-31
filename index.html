@@ -42,7 +42,7 @@ body {
 
 #game-container {
   width: 100%;
-  max-width: 1000px;
+  max-width: 1400px;
   min-height: 700px;
   background: var(--parchment);
   border: 12px solid #3a2a1a;
@@ -62,6 +62,15 @@ body {
   pointer-events: none;
   z-index: 0;
 }
+#game-container::after {
+  content: '';
+  position: absolute;
+  top: -20px; left: -20px; right: -20px; bottom: -20px;
+  background: url('image.png') center/contain no-repeat;
+  opacity: 0.06;
+  pointer-events: none;
+  z-index: 0;
+}
 
 /* Панель сцены */
 #scene-panel {
@@ -74,7 +83,7 @@ body {
   border: 2px solid var(--border-color);
   border-radius: 3px;
   overflow-y: auto;
-  max-height: 650px;
+  max-height: 750px;
 }
 
 #scene-image {
@@ -432,6 +441,45 @@ body {
 #scene-title.clickable:hover {
   color: var(--red-wax);
 }
+
+/* Darker mirror title */
+#scene-title.mirror-title {
+  color: #1a0e08;
+  text-shadow: 0 0 3px rgba(0,0,0,0.3);
+}
+
+/* Madness display (dev mode) */
+#madness-display {
+  margin-top: 5px;
+  padding: 4px 8px;
+  background: rgba(80,0,80,0.1);
+  border: 1px dashed #6a1a6a;
+  font-size: 13px;
+  color: #6a1a6a;
+  text-align: center;
+}
+
+/* Madness-gated choice */
+.choice-btn.madness-locked {
+  border-color: #6a1a6a;
+  border-style: dashed;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.choice-btn.madness-locked::before {
+  content: '🔮';
+  margin-right: 8px;
+  color: #6a1a6a;
+}
+
+/* Dev-authored text marker (for text I wrote) */
+.author-text { color: #2a6a2a; }
+/* Dev madness-related marker (for ОБ changes I added) */
+.author-madness { color: #6a1a6a; }
+
+/* Passive check info (hidden from player, shown in text naturally) */
+.passive-check-success { font-style: italic; }
+.passive-check-fail { font-style: italic; }
 </style>
 </head>
 <body>
@@ -454,6 +502,7 @@ body {
       <strong>ИНТ:</strong> <span id="stat-int">0</span><br>
       <strong>💰</strong> <span id="stat-money">10 н.б.</span>
     </div>
+    <div id="madness-display">🔮 ОБ: <span id="stat-madness">0</span></div>
     <button class="side-btn" onclick="openJournal()">📖 Дневник</button>
     <div style="display:flex;gap:5px;margin-top:5px;">
       <button class="side-btn" onclick="devNavBack()" style="flex:1;font-size:13px;" title="Ctrl+Z">◀ Назад</button>
@@ -552,6 +601,12 @@ function formatMoney() {
   parts.push((m.nb || 0) + ' н.б.');
   return parts.join(' ');
 }
+// --- Безумие (ОБ) ---
+function addMadness(n) {
+  GameState.player.madness += n;
+  updateQuickStats();
+}
+
 function addMoney(nb) {
   GameState.player.money.nb += nb;
   while (GameState.player.money.nb >= 100) {
@@ -604,6 +659,7 @@ const GameState = {
     inventory: [],
     questItems: [],
     money: { nb: 10, vb: 0 },
+    madness: 0,
   },
   flags: {},
   glossary: {},
@@ -931,6 +987,7 @@ function updateQuickStats() {
   document.getElementById('stat-cha').textContent = formatMod(getModifier(p.stats.CHA));
   document.getElementById('stat-int').textContent = formatMod(getModifier(p.stats.INT));
   document.getElementById('stat-money').textContent = formatMoney();
+  document.getElementById('stat-madness').textContent = GameState.player.madness;
 }
 let selectedGlossaryTerm = null;
 function updateGlossaryUI(selectTermId) {
@@ -1020,6 +1077,7 @@ function loadGame(slot) {
     const parsed = JSON.parse(data);
     GameState.player = parsed.player;
     if (!GameState.player.money) GameState.player.money = { nb: 10, vb: 0 };
+    if (GameState.player.madness === undefined) GameState.player.madness = 0;
     GameState.flags = parsed.flags || {};
     GameState.glossary = parsed.glossary || {};
     GameState.quests = parsed.quests || [];
@@ -1074,6 +1132,7 @@ function renderMirrorScene() {
 
   // Easter egg: clicking "Зеркало" title gives +1 WIS modifier
   const title = document.getElementById('scene-title');
+  title.classList.add('mirror-title');
   if (!GameState.flags.mirror_wisdom) {
     title.classList.add('clickable');
     title.onclick = function() {
@@ -1255,7 +1314,7 @@ function createToggle(id, leftText, rightText, initialState, onChange) {
 Scenes['intro_morning'] = {
   title: 'Утро',
   image: '10379ad94c18e2272faa805a38440b1e.jpg',
-  text: 'Умывая своё {beauty} лицо и одеваясь, ты вылезаешь из чердака на крышу через занавешенную дыру, не забывая свой дневник, и аккуратно спускаешься по лестнице на улицу.\n\nСегодня очередной рабочий день. Хотя, может, ну его — и просто пойти погулять по городу?',
+  text: 'Умывая своё {beauty} лицо и одеваясь, ты вылезаешь из чердака на крышу через занавешенную дыру, не забывая свой дневник, и аккуратно спускаешься по лестнице на улицу.\n\nСегодня очередной рабочий день.',
   action: function() {
     if (!GameState.flags.quest_work_added) {
       GameState.quests.push({ id: 'quest_work', name: 'Опять Работа', description: 'Пойти на работу. Или не пойти.', status: 'Активен' });
@@ -1276,12 +1335,6 @@ Scenes['intro_morning'] = {
     btn1.onclick = () => renderScene(work.next);
     container.appendChild(btn1);
 
-    const btn2 = document.createElement('button');
-    btn2.className = 'choice-btn';
-    btn2.textContent = 'Пойти гулять по городу';
-    btn2.onclick = () => renderScene('stub_walk');
-    container.appendChild(btn2);
-
     if (getModifier(GameState.player.stats.WIS) >= 2) {
       const btn3 = document.createElement('button');
       btn3.className = 'choice-btn hidden-path';
@@ -1298,11 +1351,12 @@ Scenes['intro_morning'] = {
 
 Scenes['work_warehouse_walk'] = {
   title: 'Путь на склад',
+  image: '%D0%A1%D0%BA%D0%BB%D0%B0%D0%B4.jpg',
   text: 'Ты медленно волочишь свои ноги по прохладным переулкам Грибного района, периодически встречая живущих здесь десов. Вид их истощённый и болезненный: некоторые тяжело сидят на сырой земле с заросшим грибами телом, медленно умирая; некоторые валяются на гамаках, покуривая <glossary id="pokoy_trava">покой-траву</glossary>; а некоторые так же вяло и слабо идут по своим делам.\n\nСпустя несколько десятков минут ты доходишь до верфей, что расположены за пределами многоярусного города. Для некоторых этот вид статного города, по которому ходят корабли, окружённый холодным сапфировым озером, в котором корабли кишат как десы в центре города, может показаться красивым. Но для тебя это вечное напоминание того, что ты заперт в этом проклятом городе, что твоя судьба — в конце умереть от зарастания всегриба.\n\nЭти мысли сразу улетучиваются, как только ты заходишь на склад. Вопящий голос твоего прораба будто бы кувалдой выбивает из тебя любое размышление. Не успев переступить порог, Рубин Тон Тон сразу обрушивает лавину из матов и обвинений на тебя, от чего ты сразу несёшься таскать ящики.',
   choices: [
     {
       text: 'Постараться не сорвать спину',
-      check: { stat: 'STR', dc: 5 },
+      check: { stat: 'STR', dc: 10 },
       success: 'work_warehouse_payday',
       failure: 'work_warehouse_injury'
     }
@@ -1311,6 +1365,7 @@ Scenes['work_warehouse_walk'] = {
 
 Scenes['work_warehouse_payday'] = {
   title: 'Склад — Конец смены',
+  image: '%D0%A1%D0%BA%D0%BB%D0%B0%D0%B4.jpg',
   text: 'Ты продолжаешь работать, правильно распределяя нагрузку по телу, и к концу дня выполняешь норму.\n\nКак обычно, по завершению рабочего дня выстраивается очередь к Тон Тону, и он, высокомерно сидя на высоком стуле, выплачивает плату за проделанную работу. Когда дело доходит до тебя, ты протягиваешь свою ладонь, в которую он кладёт 2 низших. Ты удивлённо смотришь на его ехидное лицо — ведь это в два раза меньше стандартной ставки.',
   action: function() {
     if (!GameState.flags.warehouse_paid) { GameState.flags.warehouse_paid = true; addMoney(2); }
@@ -1330,12 +1385,14 @@ Scenes['work_warehouse_payday'] = {
 
 Scenes['work_warehouse_accept'] = {
   title: 'Склад — Смирение',
+  image: '%D0%A1%D0%BA%D0%BB%D0%B0%D0%B4.jpg',
   text: 'А что тебе ещё оставалось, кроме как стерпеть? Подними шум — и он бы уволил тебя.',
   next: 'work_go_home'
 };
 
 Scenes['work_warehouse_confront'] = {
   title: 'Склад — Конфронтация',
+  image: '%D0%A1%D0%BA%D0%BB%D0%B0%D0%B4.jpg',
   text: 'Ты видишь, как лицо твоего прораба резко меняет свою гримасу на яростную.\n\nТЫ НЕБЛАГОДАРНАЯ СВОЛОЧЬ, НЕ ХВАТАЕТ?! МОЖЕТ ЭТО ТРУДОЛЮБИЯ БЛЯТЬ В ТЕБЕ НЕ ХВАТАЕТ, ЁБАНЫЙ ГРИБОЕД. ТЫ ВИДИМО СОВСЕМ СУКА ОБНАГЛЕЛ. ЕБАТЬ ЗВЕРЕЙ МЕЧОМ СУДЬБЫ, ВЫ ПОСМОТРИТЕ НА НЕГО...\n\nОн делает небольшую паузу, чтобы перевести дыхание.',
   choices: [
     { text: 'Извините, господин Тон Тон. Пожалуйста, я был не прав', next: 'work_warehouse_apologize' },
@@ -1346,12 +1403,14 @@ Scenes['work_warehouse_confront'] = {
 
 Scenes['work_warehouse_apologize'] = {
   title: 'Склад — Извинения',
+  image: '%D0%A1%D0%BA%D0%BB%D0%B0%D0%B4.jpg',
   text: 'ДРУГОЕ ДЕЛО, СУКА ГРИБНАЯ! А ТЕПЕРЬ ПШЁЛ ВОН ОТСЕДОВА, БЛЯТЬ!',
   next: 'work_go_home'
 };
 
 Scenes['work_warehouse_argue'] = {
   title: 'Склад — Спор',
+  image: '%D0%A1%D0%BA%D0%BB%D0%B0%D0%B4.jpg',
   text: 'ТЫ СУКА ЕЩЁ СПОРИТЬ СО МНОЙ БУДЕШЬ, ЁБАНЫЙ ГРИБНИК ТЫ БЛЯТЬ! Я СУКА ТУТ ВАМ ДЕНЬГИ ОТДАЮ, А ВЫ МНЕ ТУТ СУКА ВИДИТЕ ЛИ БЛЯТЬ ПРЕТЕНЗИИ СВОИ ЁБАНЫЕ ВЫСКАЗЫВАЕТЕ! КАТИСЬ В СВОЮ ЗЕМЛЯНКУ, ХУЕСОС!',
   choices: [
     { text: 'Молча развернуться и уйти', next: 'work_go_home' },
@@ -1361,12 +1420,26 @@ Scenes['work_warehouse_argue'] = {
 
 Scenes['work_warehouse_fired'] = {
   title: 'Склад — Увольнение',
+  image: '%D0%A1%D0%BA%D0%BB%D0%B0%D0%B4.jpg',
   text: 'БЛЯТЬ! СУКА! ВСЁ! ЗВЕРИ ТЕБЯ ЕБАЛИ, ТЫ УВОЛЕН! ПШЁЛ ВОН! ВОН ОТСЕДОВА!\n\nТон Тон встаёт со стула и начинает тебя толкать, выпроваживая со склада.',
   action: function() {
     GameState.flags.fired_from_warehouse = true;
     const container = document.getElementById('choices-container');
-    [{text:'Злобно ударить его', next:'stub_warehouse_fight'},
-     {text:'НУ И ПОШЁЛ НАХУЙ!', next:'stub_warehouse_curse'},
+
+    // Punch — STR DC 10 check
+    const punchBtn = document.createElement('button');
+    punchBtn.className = 'choice-btn dice-roll';
+    punchBtn.textContent = 'Злобно ударить его';
+    punchBtn.onclick = () => rollDice({
+      text: 'Злобно ударить его',
+      check: { stat: 'STR', dc: 10 },
+      success: 'work_warehouse_punch_success',
+      failure: 'work_warehouse_punch_fail'
+    });
+    container.appendChild(punchBtn);
+
+    [{text:'НУ И ПОШЁЛ НАХУЙ!', next:'work_warehouse_curse_leave'},
+     {text:'Молчаливо гордо уйти', next:'work_warehouse_silent_leave'},
      {text:'Развернуться и уйти', next:'work_go_home'}
     ].forEach(c => {
       const btn = document.createElement('button');
@@ -1380,32 +1453,339 @@ Scenes['work_warehouse_fired'] = {
 
 Scenes['work_warehouse_stare'] = {
   title: 'Склад',
+  image: '%D0%A1%D0%BA%D0%BB%D0%B0%D0%B4.jpg',
   text: '[Заглушка — продолжение следует]',
   next: 'work_go_home'
 };
 
 Scenes['work_warehouse_endure'] = {
   title: 'Склад — Терпение',
+  image: '%D0%A1%D0%BA%D0%BB%D0%B0%D0%B4.jpg',
   text: '[Заглушка — продолжение следует]',
+  next: 'work_go_home'
+};
+
+// --- Punch success/fail ---
+Scenes['work_warehouse_punch_success'] = {
+  title: 'Склад — Удар',
+  image: '%D0%A1%D0%BA%D0%BB%D0%B0%D0%B4.jpg',
+  text: 'Твой кулак летит прямиком в крючковатый длинный нос вопящему таодесу. Отчётливый хруст раздаётся эхом по складу, и твой прораб падает ниц, берясь за свой уже кривой нос.\n\n«ААААААААЙ СУЧЬЯ МОРДА!»',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    // Take just your 2
+    const btn1 = document.createElement('button');
+    btn1.className = 'choice-btn';
+    btn1.textContent = 'Быстро взять остаток монет';
+    btn1.onclick = () => {
+      if (!GameState.flags.punch_coins_taken) {
+        GameState.flags.punch_coins_taken = true;
+        addMoney(2);
+      }
+      renderScene('work_warehouse_punch_leave');
+    };
+    container.appendChild(btn1);
+
+    // Steal all 34
+    const btn2 = document.createElement('button');
+    btn2.className = 'choice-btn';
+    btn2.textContent = 'Забрать все монеты';
+    btn2.onclick = () => {
+      if (!GameState.flags.punch_coins_taken) {
+        GameState.flags.punch_coins_taken = true;
+        GameState.flags.stole_all_coins = true;
+        addMoney(34);
+        addMadness(2);
+      }
+      renderScene('work_warehouse_punch_steal');
+    };
+    container.appendChild(btn2);
+
+    // Save money
+    const btn3 = document.createElement('button');
+    btn3.className = 'choice-btn';
+    btn3.textContent = 'Сохранить деньги';
+    btn3.onclick = () => renderScene('work_go_home');
+    container.appendChild(btn3);
+
+    // Proud leave
+    const btn4 = document.createElement('button');
+    btn4.className = 'choice-btn';
+    btn4.textContent = 'Молчаливо гордо уйти';
+    btn4.onclick = () => renderScene('work_warehouse_proud_leave');
+    container.appendChild(btn4);
+
+    // Curse and leave
+    const btn5 = document.createElement('button');
+    btn5.className = 'choice-btn';
+    btn5.textContent = 'Пошёл нахуй, белый шарик!';
+    btn5.onclick = () => renderScene('work_warehouse_curse_punchleave');
+    container.appendChild(btn5);
+  }
+};
+
+Scenes['work_warehouse_punch_fail'] = {
+  title: 'Склад — Промах',
+  image: '%D0%A1%D0%BA%D0%BB%D0%B0%D0%B4.jpg',
+  text: 'Ты замахиваешься, но Тон Тон уворачивается, и твой кулак пролетает мимо. Он отпрыгивает назад и визжит ещё громче:\n\n«ТЫ ЧТО, СОВСЕМ ЁБНУЛСЯ?! ОХРАНА! ОХРАНА!!!»\n\nНесколько крепких грузчиков хватают тебя и выкидывают со склада.',
+  action: function() {
+    GameState.flags.fired_from_warehouse = true;
+    const container = document.getElementById('choices-container');
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = 'Уйти';
+    btn.onclick = () => renderScene('work_go_home');
+    container.appendChild(btn);
+  }
+};
+
+Scenes['work_warehouse_punch_leave'] = {
+  title: 'Склад — Уход',
+  image: 'tarmo-juhola-industrial-maantaso-kopio.jpg',
+  text: 'Ты забираешь свои законные 2 низших и выходишь из склада.\n\nТы устало волочишь свои ноги обратно домой, перед этим покупая себе еду.',
+  action: function() {
+    if (!GameState.flags.day1_food) { GameState.flags.day1_food = true; addMoney(-3); }
+    const container = document.getElementById('choices-container');
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = 'Далее';
+    btn.onclick = () => renderScene('stub_home');
+    container.appendChild(btn);
+  }
+};
+
+Scenes['work_warehouse_punch_steal'] = {
+  title: 'Склад — Кража',
+  image: 'tarmo-juhola-industrial-maantaso-kopio.jpg',
+  text: 'Пока Тон валяется на земле, ты решаешь забрать все монеты, пока он не встал. Быстро снимая у него кошель с пояса и стремясь к выходу, ты быстро идёшь домой, по пути проверяя сколько было в кошельке. 34 низших богоса. На эти деньги можно купить хороший ужин в корчме...',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    [{text:'Пойти и порадовать себя хорошим ужином', next:'tavern_enter'},
+     {text:'Идти домой', next:'work_go_home'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['work_warehouse_proud_leave'] = {
+  title: 'Склад — Гордый уход',
+  image: 'tarmo-juhola-industrial-maantaso-kopio.jpg',
+  text: 'Ты бросаешь быстрый, но презрительный взгляд на Тона, после чего резко разворачиваешься и тяжёлыми шагами уходишь со склада. Уныло идёшь домой.',
+  next: 'work_go_home'
+};
+
+Scenes['work_warehouse_curse_punchleave'] = {
+  title: 'Склад — Ярость',
+  image: 'tarmo-juhola-industrial-maantaso-kopio.jpg',
+  text: 'Тон ничего не отвечает в ответ, так как кровь, затекающая ему в рот, мешает сказать хоть слово. Под его фырканье ты уходишь со склада и направляешься в Грибной район.',
+  next: 'work_go_home'
+};
+
+Scenes['work_warehouse_curse_leave'] = {
+  title: 'Склад — Ярость',
+  image: 'tarmo-juhola-industrial-maantaso-kopio.jpg',
+  text: 'Ты выпаливаешь всё, что накопилось, и, не дожидаясь ответа, разворачиваешься и уходишь со склада. Уныло бредёшь домой.',
+  next: 'work_go_home'
+};
+
+Scenes['work_warehouse_silent_leave'] = {
+  title: 'Склад — Молчаливый уход',
+  image: 'tarmo-juhola-industrial-maantaso-kopio.jpg',
+  text: 'Ты молча разворачиваешься и тяжёлыми шагами уходишь со склада. Выходя на улицу, ты видишь, как озеро из-за заходящего багрового солнца стало выглядеть словно аметист — не зря его называют Озеро Самоцветов.\n\nТы медленно, волоча ноги, идёшь в свой дом.',
   next: 'work_go_home'
 };
 
 Scenes['work_warehouse_injury'] = {
   title: 'Склад — Травма',
-  text: 'В спешке ты неправильно поднял груз и сорвал себе спину.\n\n[Заглушка — продолжение следует]',
-  choices: [{ text: 'Далее', next: 'work_go_home' }]
+  image: '%D0%A1%D0%BA%D0%BB%D0%B0%D0%B4.jpg',
+  text: 'В спешке ты неправильно поднял груз и сорвал себе спину. От пробирающей всё тело боли ты падаешь на землю, хватаясь за свою спину. Твои коллеги сразу помогают тебе, кладя в правильную позу и прикладывая что-то прохладное к месту надрыва. К месту происшествия сразу подбегает Босс Тон, который как всегда крича разгоняет всех от тебя.\n\n«Идиот!!! Сколько раз вам говорить чтобы работали, крысы вы портовые, как надо. Из-за тебя остальным придётся больше работать, выродок грибной. Ты абуза трухлявая, а такие нам не нужны. Мне всё равно как, но пшёл вон отсюда! И больше не возвращайся» — подпрыгивая и махая своими малыми ручками, Тон орёт, разбрызгивая слюнями.',
+  action: function() {
+    GameState.flags.fired_from_warehouse = true;
+    const container = document.getElementById('choices-container');
+    [{text:'Ну и иди нахуй!', next:'work_warehouse_injury_leave_angry'},
+     {text:'Молча встать и уйти', next:'work_warehouse_injury_leave_silent'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
 };
 
-Scenes['stub_warehouse_fight'] = {
-  title: 'Склад — Драка',
-  text: '[Заглушка — продолжение следует]',
-  choices: [{ text: 'Далее', next: 'work_go_home' }]
+Scenes['work_warehouse_injury_leave_angry'] = {
+  title: 'Склад — Уход',
+  image: 'tarmo-juhola-industrial-maantaso-kopio.jpg',
+  text: 'После чего ты встаёшь и, держась за поясницу, неспеша уходишь, дабы не повредить себе ничего. Выходя на улицу ты видишь, как озеро из-за заходящего багрового солнца стало выглядеть словно аметист — не зря его называют Озеро Самоцветов. Жаль, что там нет настоящих самоцветов.\n\nТы медленно, волоча ноги, идёшь в свой дом.',
+  next: 'work_go_home'
 };
 
-Scenes['stub_warehouse_curse'] = {
-  title: 'Склад — Ярость',
-  text: '[Заглушка — продолжение следует]',
-  choices: [{ text: 'Далее', next: 'work_go_home' }]
+Scenes['work_warehouse_injury_leave_silent'] = {
+  title: 'Склад — Уход',
+  image: 'tarmo-juhola-industrial-maantaso-kopio.jpg',
+  text: 'Ты встаёшь и, держась за поясницу, неспеша уходишь, дабы не повредить себе ничего. Выходя на улицу ты видишь, как озеро из-за заходящего багрового солнца стало выглядеть словно аметист — не зря его называют Озеро Самоцветов. Жаль, что там нет настоящих самоцветов.\n\nТы медленно, волоча ноги, идёшь в свой дом.',
+  next: 'work_go_home'
+};
+
+// Tavern entry point (shared across all paths)
+Scenes['tavern_enter'] = {
+  title: 'Корчма «Большой на Мэри»',
+  image: 'fBC825EgHbE.jpg',
+  text: 'Ты незамедлительно меняешь маршрут к ближайшей корчме на 1 ярусе, не замечая ни стражников, которые поймали маленького плута и отчитывают его, грозно читая ему наставления, ни пару, которая громко ругается посреди улицы из-за измены мужа, ни зазывал небольших лавочек, которые чувствуют, что именно у тебя есть лишние деньги, которые ты хочешь потратить. Ты идёшь прямо к своей цели, словно Хранитель-Башня Конгрегации.\n\nЧерез пару минут ты уже стоишь у входа в корчму «Большой на Мэри», чтобы это не значило. Медленно и с трепетом тянешь свою руку к холодной ручке двери. Открыв её, тебя обволакивает тёплый воздух, который будто безвольно засасывает тебя внутрь.\n\nНо как только ты попадаешь в Корчму, тебя одолевает странное ощущение инородности и комфорта. Тебе не хочется уходить отсюда из-за сухости и тепла, но, находясь впервые в подобном месте, ты чувствуешь, что оно не твоё, что всё, что тут есть, не для тебя, будто бы ты конгрегат, который резко оказался в окружении послушников ордена отрицания.\n\nНесмотря на это, ты делаешь скованные шаги вперёд и направляешься в самый тёмный угол корчмы, стараясь как можно тише расположиться за столом. Не успеваешь ты как следует присесть, как к тебе подбегает юная официантка — садеска с красивыми блондинистыми кудрями. Она приветствует тебя и слегка улыбается своим утончённым и слегка худым лицом.\n\n«Что желаете?» — с заботой произнесла она.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    const money = GameState.player.money.vb * 100 + GameState.player.money.nb;
+
+    // 1. Самое сытное (-30)
+    if (money >= 30) {
+      const btn1 = document.createElement('button');
+      btn1.className = 'choice-btn';
+      btn1.textContent = 'Положить на стол 30 низших. «Самое сытное и вкусное за эти деньги»';
+      btn1.onclick = () => { if (!GameState.flags.tavern_ordered) { GameState.flags.tavern_ordered = true; addMoney(-30); } renderScene('tavern_feast'); };
+      container.appendChild(btn1);
+    }
+
+    // 2. Вяленое мясо (-30)
+    if (money >= 30) {
+      const btn2 = document.createElement('button');
+      btn2.className = 'choice-btn';
+      btn2.textContent = 'Вяленое мясо Ласки с пюре из сухожуйки и корнеплода, древесный салат. И Эль, самый дешёвый';
+      btn2.onclick = () => { if (!GameState.flags.tavern_ordered) { GameState.flags.tavern_ordered = true; addMoney(-30); } renderScene('tavern_meat'); };
+      container.appendChild(btn2);
+    }
+
+    // 3. Удиви меня (-30, +1 ОБ, требование ОБ >= 5)
+    if (money >= 30 && GameState.player.madness >= 5) {
+      const btn3 = document.createElement('button');
+      btn3.className = 'choice-btn';
+      btn3.textContent = 'Дерзко выложить мешочек с 30 низшими. «Удиви меня, детка»';
+      btn3.onclick = () => { if (!GameState.flags.tavern_ordered) { GameState.flags.tavern_ordered = true; addMoney(-30); addMadness(1); } renderScene('tavern_surprise'); };
+      container.appendChild(btn3);
+    }
+
+    // 4. Нажраться (-30)
+    if (money >= 30) {
+      const btn4 = document.createElement('button');
+      btn4.className = 'choice-btn';
+      btn4.textContent = '«Хочу нажраться как столичная свинья»';
+      btn4.onclick = () => { if (!GameState.flags.tavern_ordered) { GameState.flags.tavern_ordered = true; addMoney(-30); } renderScene('tavern_drunk'); };
+      container.appendChild(btn4);
+    }
+
+    // 5. Обычный ужин (-15)
+    if (money >= 15) {
+      const btn5 = document.createElement('button');
+      btn5.className = 'choice-btn';
+      btn5.textContent = 'Пожалуйста, обычный ужин';
+      btn5.onclick = () => { if (!GameState.flags.tavern_ordered) { GameState.flags.tavern_ordered = true; addMoney(-15); } renderScene('tavern_normal'); };
+      container.appendChild(btn5);
+    }
+
+    // 6. Просто хлеба (-5)
+    if (money >= 5) {
+      const btn6 = document.createElement('button');
+      btn6.className = 'choice-btn';
+      btn6.textContent = 'Просто хлеба';
+      btn6.onclick = () => { if (!GameState.flags.tavern_ordered) { GameState.flags.tavern_ordered = true; addMoney(-5); } renderScene('tavern_bread'); };
+      container.appendChild(btn6);
+    }
+
+    // Уйти
+    const btnLeave = document.createElement('button');
+    btnLeave.className = 'choice-btn';
+    btnLeave.textContent = 'Передумать и уйти';
+    btnLeave.onclick = () => renderScene('work_go_home');
+    container.appendChild(btnLeave);
+  }
+};
+
+// --- Tavern meal scenes ---
+Scenes['tavern_feast'] = {
+  title: 'Корчма — Пир',
+  image: 'fBC825EgHbE.jpg',
+  text: 'Официантка мило улыбается, берёт твои монеты и уходит к бару. Ожидая заказ, ты опускаешь голову вниз, дабы не дай Зверь с тобой никто не заговорил. Чувство чуждости постепенно проходит, и ты понимаешь, что тут играет бард — тихо, чуть ли не спя. Его музыка ещё сильнее успокаивает тебя, и, находясь в тепле после тяжёлого дня, ты начинаешь клевать носом.\n\nТы чувствуешь стук по своему столу, что пробуждает тебя. Открыв глаза и чуть подняв их наверх, ты видишь ароматную запечённую грудку и масляную картошечку с листьями салата. Приподняв глаза чуть выше, ты видишь всё то же милое лицо официантки, которая любезно ставит тебе кружечку мёда на стол, после желает приятного аппетита и уходит.\n\nТы не можешь в это поверить — целая запечённая куриная грудка. Чувствуя лёгкий тремор в руках, ты берёшь куру и откусываешь кусочек. Теплота обволакивает тебя изнутри, придавая уверенности и спокойствия. Около часа ты с наслаждением ужинаешь едой, которая будто бы была создана Зверями специально для тебя.\n\nЗакончив свой ужин, ты медленно и спокойно направляешься домой с довольным лицом. Доходя до нижних ярусов, тебе уже не кажется, что ты самый несчастный человек, хоть и виды сырых переулков, заросших грибами, подумеривают твоё удовольствие.',
+  next: 'stub_home'
+};
+
+Scenes['tavern_meat'] = {
+  title: 'Корчма — Вяленое мясо',
+  image: 'fBC825EgHbE.jpg',
+  text: 'Официантка мило улыбается, берёт твои монеты и уходит к бару. Ожидая заказ, ты опускаешь голову вниз, дабы не дай Зверь с тобой никто не заговорил. Чувство чуждости постепенно проходит, и ты понимаешь, что тут играет бард — тихо, чуть ли не спя. Его музыка ещё сильнее успокаивает тебя, и, находясь в тепле после тяжёлого дня, ты начинаешь клевать носом.\n\nТы чувствуешь стук по своему столу, что пробуждает тебя. Открыв глаза и чуть подняв их наверх, ты видишь аппетитное пюре, от которого идёт пар, рядом с которым лежит горсть свежего салата, а красивые слайсы вяленого мяса с искушением смотрят на тебя. Приподняв глаза чуть выше, ты видишь всё то же милое лицо официантки, которая любезно ставит тебе кружечку Эля — навряд ли у него есть название, учитывая его цену — после официантка желает приятного аппетита и уходит.\n\nТы не можешь в это поверить — целый ужин стоит на твоём столе. Чувствуя лёгкий тремор в руках, ты берёшь приборы и пробуешь немного пюре с мясом. Теплота обволакивает тебя изнутри, придавая уверенности и спокойствия. Около часа ты с наслаждением ужинаешь едой, которая будто бы была создана Зверями специально для тебя.\n\nЗакончив свой ужин, ты медленно и спокойно направляешься домой с довольным лицом. Доходя до нижних ярусов, тебе уже не кажется, что ты самый несчастный человек, хоть и виды сырых переулков, заросших грибами, подумеривают твоё удовольствие.',
+  next: 'stub_home'
+};
+
+Scenes['tavern_surprise'] = {
+  title: 'Корчма — Сюрприз',
+  image: 'fBC825EgHbE.jpg',
+  text: '',
+  action: function() {
+    // Passive WIS check DC 8 — no success/fail shown to player
+    const wisMod = getModifier(GameState.player.stats.WIS);
+    const roll = Math.floor(Math.random() * 20) + 1;
+    const passiveSuccess = (roll + wisMod) >= 8;
+
+    let introText = passiveSuccess
+      ? 'Ты замечаешь раздражение на лице у садески...'
+      : 'Ты думаешь, что ты ей понравился...';
+    introText += ' Она быстро берёт твои деньги и уходит.';
+
+    document.getElementById('scene-text').innerHTML =
+      introText + '\n\n' +
+      'Ожидая заказ, ты опускаешь голову вниз, дабы не дай Зверь с тобой никто не заговорил. Чувство чуждости постепенно проходит, и ты понимаешь, что тут играет бард — тихо, чуть ли не спя. Его музыка ещё сильнее успокаивает тебя, и, находясь в тепле после тяжёлого дня, ты начинаешь клевать носом.\n\n' +
+      'Ты чувствуешь стук по своему столу, что пробуждает тебя. Открыв глаза и чуть подняв их наверх, ты видишь тарелку жареных грибов и грибное вино. Поднимая глаза ещё чуть выше, ты видишь спину уходящей официантки, которая даже не пожелала тебе приятного аппетита. Возможно, не стоило так дерзко общаться с ней.\n\n' +
+      'Ты отводишь свой взгляд обратно на тарелку и тяжело смотришь на тарелку с грибами. Опять грибы. Ком в горле не даёт нормально вздохнуть, а ступор, охвативший твоё тело, не позволяет ни отвернуться от тарелки, ни встать и уйти.';
+
+    const container = document.getElementById('choices-container');
+    [{text:'Собраться с силами и съесть еду', next:'tavern_surprise_eat'},
+     {text:'Собраться с силами и уйти из корчмы', next:'tavern_surprise_leave'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['tavern_surprise_eat'] = {
+  title: 'Корчма — Грибы',
+  image: 'fBC825EgHbE.jpg',
+  text: 'Ты упорно смотришь на грибы стоимостью в целых 30 низших и, понимая, что ты не в том положении, чтоб разбрасываться такими деньгами и привередничать, собираешься и хватаешься за приборы, начиная уплетать один жареный гриб за другим.\n\nКаждый укус взрывается палитрой вкусов у тебя во рту, но вместе с тем текстура грибов напоминает тебе о твоей судьбе и привычной еде — невкусной, опасной и выворачивающей. Эта трапеза напоминает какое-то нездоровое мазохистическое удовольствие, семя удовольствия и боли, а грибное вино, которым ты активно запиваешь, ещё больше усиливает этот диссонанс.\n\nТы довольно быстро заканчиваешь есть и быстро выходишь на улицу, чтобы вздохнуть. Начиная медленно шагать, ты направляешься домой с полностью пустой головой. Никаких мыслей, ни угнетений, ни радости — только отстранённая пустота, которая витает у тебя в голове, распространяясь по всему телу.',
+  next: 'stub_home'
+};
+
+Scenes['tavern_surprise_leave'] = {
+  title: 'Корчма — Уход',
+  image: 'fBC825EgHbE.jpg',
+  text: 'Ты упорно смотришь на грибы стоимостью в целых 30 низших, понимая, что ты не в том положении, чтоб разбрасываться такими деньгами, и привередничать, собираешься и...\n\nНет, ты еле сдерживаешься, чтобы не блевануть прямо на стол. Ты физически не можешь смотреть на эти грибы. Быстро собираясь и оставляя свою еду нетронутой на столе, ты выбегаешь из корчмы и быстро идёшь домой. Но как только ты приближаешься к нижним ярусам, сырой запах грибов и плесени ударяет тебе в нос, и ты, не контролируя свои ноги, в панике бежишь прочь отсюда.\n\nЕщё пару часов ты ходишь в апатии по городу и в конце концов успокаиваешься, возвращаясь утомлённо домой, словно неся на своих плечах пятитонный груз.',
+  next: 'stub_home'
+};
+
+Scenes['tavern_drunk'] = {
+  title: 'Корчма — Запой',
+  image: 'fBC825EgHbE.jpg',
+  text: 'Не успевая привыкнуть к этому месту, тебе сразу приносят выпивку: Морозный Эль, Тушёный Бренди, Кактусовое вино. Одна за одной кружка пустеет — не проходит и получаса, как ты, напившись, вываливаешься из корчмы.\n\nВсё вокруг плывёт, и ты еле держишь себя на ногах. Отойдя в ближайший переулок, ты справляешь нужду, и как только делаешь шаг в сторону улицы — падаешь без сил и засыпаешь.',
+  next: 'stub_home'
+};
+
+Scenes['tavern_normal'] = {
+  title: 'Корчма — Обычный ужин',
+  image: 'fBC825EgHbE.jpg',
+  text: 'Официантка мило улыбается, берёт твои монеты и уходит к бару. Ожидая заказ, ты опускаешь голову вниз, дабы не дай Зверь с тобой никто не заговорил. Чувство чуждости постепенно проходит, и ты понимаешь, что тут играет бард — тихо, чуть ли не спя. Его музыка ещё сильнее успокаивает тебя, и, находясь в тепле после тяжёлого дня, ты начинаешь клевать носом.\n\nТы чувствуешь стук по своему столу, что пробуждает тебя. Открыв глаза и чуть подняв их наверх, ты видишь простой ужин: варёная картошка и небольшая жареная куриная ножка. Приподняв глаза чуть выше, ты видишь всё то же милое лицо официантки, которая желает приятного аппетита и уходит.\n\nТы начинаешь неспешно есть, с благодарностью — не конкретной, а с абстрактной, то ли зверям, то ли себе.\n\nДоев ужин, ты спокойно выходишь из корчмы и идёшь в сторону нижних ярусов. Мысли о том, что придётся снова спать на влажном чердаке, с каждым днём повышая шанс на смерть от зарастания, да ещё и работу надо искать... Несмотря на хороший ужин, ты приходишь к своему дому уже подавленный.',
+  next: 'stub_home'
+};
+
+Scenes['tavern_bread'] = {
+  title: 'Корчма — Хлеб',
+  image: 'fBC825EgHbE.jpg',
+  text: 'Официантка кивает и приносит тебе краюху свежего хлеба. Обычная еда для любых десов, но не для тебя. Даже хлеб — это лучик надежды в Грибном районе. Лучше растянуть удовольствие на несколько дней, пока не найдётся работа.\n\nПоклевав хлеб, ты устало выходишь из таверны и идёшь на нижние ярусы. Мысли о том, что придётся снова спать на влажном чердаке, с каждым днём повышая шанс на смерть от зарастания, да ещё и работу надо искать... Ты приходишь к своему дому подавленный.',
+  next: 'stub_home'
 };
 
 // Общая сцена: идём домой, покупаем еду
@@ -1425,6 +1805,7 @@ Scenes['work_go_home'] = {
 
 Scenes['stub_home'] = {
   title: 'Дом',
+  image: '10379ad94c18e2272faa805a38440b1e.jpg',
   text: '[Заглушка — продолжение следует]',
   choices: [{ text: 'Вернуться к началу', next: 'intro_map' }]
 };
@@ -1435,6 +1816,7 @@ Scenes['stub_home'] = {
 
 Scenes['work_newspaper_walk'] = {
   title: 'Путь на точку',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
   text: 'Ты медленно волочишь свои ноги по прохладным переулкам Грибного района, периодически встречая живущих здесь десов. Вид их истощённый и болезненный: некоторые тяжело сидят на сырой земле с заросшим грибами телом, медленно умирая; некоторые валяются на гамаках, покуривая <glossary id="pokoy_trava">покой-траву</glossary>; а некоторые так же вяло и слабо идут по своим делам.\n\nСпустя несколько десятков минут ты доходишь до 1 яруса, к небольшой площади у стен города. Людей тут мало, и живут преимущественно бедняки — конечно, не такие как ты. Даже для них ты бельмо на глазу: каждый раз проходя мимо местных, ты ловишь на себе косые взгляды и замечаешь, как от тебя шарахаются.\n\nЗаходя в местную газету, в полном игнорировании со стороны рабочих, ты молча берёшь выпуски, которые тебе надо раздать, и идёшь на свою точку. И вот опять — целый день стоять и чувствовать это отвратительное чувство полного безразличия и наплевательства со стороны окружающих.\n\n[Заглушка — продолжение следует]',
   choices: [{ text: 'Далее', next: 'work_go_home' }]
 };
@@ -1445,6 +1827,7 @@ Scenes['work_newspaper_walk'] = {
 
 Scenes['work_library_walk'] = {
   title: 'Путь в библиотеку',
+  image: 'Screenshot_17.png',
   text: 'Ты медленно волочишь свои ноги по прохладным переулкам Грибного района, периодически встречая живущих здесь десов. Вид их истощённый и болезненный: некоторые тяжело сидят на сырой земле с заросшим грибами телом, медленно умирая; некоторые валяются на гамаках, покуривая <glossary id="pokoy_trava">покой-траву</glossary>; а некоторые так же вяло и слабо идут по своим делам.\n\n[Заглушка — продолжение следует]',
   choices: [{ text: 'Далее', next: 'work_go_home' }]
 };
@@ -1454,7 +1837,8 @@ Scenes['work_library_walk'] = {
 // ========================================
 
 Scenes['stub_new_shop'] = {
-  title: 'Новая лавка',
+  title: 'Лавка странностей',
+  image: 'anatoliyblivernec-.jpg',
   text: 'Твоя наблюдательность не подвела. На углу, где раньше были заколоченные двери, появилась странная лавка. Вывеска покосилась, но на ней ещё можно разобрать: «Всякое-разное для всяких-разных».\n\n[Заглушка — продолжение следует]',
   choices: [{ text: 'Вернуться к началу', next: 'intro_map' }]
 };
@@ -1488,7 +1872,8 @@ function clearSavesAndStart() {
     traits: { beautiful: true, tall: true, fat: false, cool: true },
     stats: { STR: 10, DEX: 10, WIS: 10, CHA: 10, INT: 10 },
     inventory: [], questItems: [],
-    money: { nb: 10, vb: 0 }
+    money: { nb: 10, vb: 0 },
+    madness: 0
   };
   GameState.flags = {};
   GameState.quests = [];
