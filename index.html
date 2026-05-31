@@ -1817,8 +1817,143 @@ Scenes['stub_home'] = {
 Scenes['work_newspaper_walk'] = {
   title: 'Путь на точку',
   image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
-  text: 'Ты медленно волочишь свои ноги по прохладным переулкам Грибного района, периодически встречая живущих здесь десов. Вид их истощённый и болезненный: некоторые тяжело сидят на сырой земле с заросшим грибами телом, медленно умирая; некоторые валяются на гамаках, покуривая <glossary id="pokoy_trava">покой-траву</glossary>; а некоторые так же вяло и слабо идут по своим делам.\n\nСпустя несколько десятков минут ты доходишь до 1 яруса, к небольшой площади у стен города. Людей тут мало, и живут преимущественно бедняки — конечно, не такие как ты. Даже для них ты бельмо на глазу: каждый раз проходя мимо местных, ты ловишь на себе косые взгляды и замечаешь, как от тебя шарахаются.\n\nЗаходя в местную газету, в полном игнорировании со стороны рабочих, ты молча берёшь выпуски, которые тебе надо раздать, и идёшь на свою точку. И вот опять — целый день стоять и чувствовать это отвратительное чувство полного безразличия и наплевательства со стороны окружающих.\n\n[Заглушка — продолжение следует]',
-  choices: [{ text: 'Далее', next: 'work_go_home' }]
+  text: 'Ты медленно волочишь свои ноги по прохладным переулкам Грибного района, периодически встречая живущих здесь десов. Вид их истощённый и болезненный: некоторые тяжело сидят на сырой земле с заросшим грибами телом, медленно умирая; некоторые валяются на гамаках, покуривая <glossary id="pokoy_trava">покой-траву</glossary>; а некоторые так же вяло и слабо идут по своим делам.\n\nСпустя несколько десятков минут ты доходишь до 1 яруса, к небольшой площади у стен города. Людей тут мало, и живут преимущественно бедняки — конечно, не такие как ты. Даже для них ты бельмо на глазу: каждый раз проходя мимо местных, ты ловишь на себе косые взгляды и замечаешь, как от тебя шарахаются.\n\nЗаходя в местную газету, в полном игнорировании со стороны рабочих, ты молча берёшь выпуски, которые тебе надо раздать, и идёшь на свою точку. И вот опять — целый день стоять и чувствовать это отвратительное чувство полного безразличия и наплевательства со стороны окружающих.\n\nСтопка газет в твоих руках кажется тяжелее обычного. «Вестник Вастерсы» — так называется эта жалкая газетёнка, которую никто не читает. Ты встаёшь на своё привычное место у фонтана, который давно не работает, и начинаешь выкрикивать заголовки.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    [{text:'Стараться изо всех сил, кричать громче', next:'newspaper_try_hard'},
+     {text:'Работать как обычно, без усердия', next:'newspaper_normal'},
+     {text:'Забить на работу и просто стоять', next:'newspaper_slack'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['newspaper_try_hard'] = {
+  title: 'Газета — Усердие',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: '«СВЕЖИЙ ВЫПУСК! ВЕСТНИК ВАСТЕРСЫ! НОВОСТИ ПОРТА И ВЕРХНИХ ЯРУСОВ!» — надрываешь ты своё горло, размахивая газетами так, будто от этого зависит твоя жизнь. А ведь, по сути, так и есть.\n\nПервые пару часов — ничего. Десы проходят мимо, даже не поворачивая головы. Ты уже начинаешь хрипеть, когда к тебе подходит дес в потрёпанном, но когда-то явно дорогом плаще.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    // CHA check to sell extra
+    const chaBtn = document.createElement('button');
+    chaBtn.className = 'choice-btn dice-roll';
+    chaBtn.textContent = 'Попытаться продать ему побольше выпусков';
+    chaBtn.onclick = () => rollDice({
+      text: 'Попытаться продать ему побольше выпусков',
+      check: { stat: 'CHA', dc: 10 },
+      success: 'newspaper_big_sale',
+      failure: 'newspaper_normal_sale'
+    });
+    container.appendChild(chaBtn);
+
+    const btn2 = document.createElement('button');
+    btn2.className = 'choice-btn';
+    btn2.textContent = 'Просто продать один выпуск';
+    btn2.onclick = () => renderScene('newspaper_normal_sale');
+    container.appendChild(btn2);
+  }
+};
+
+Scenes['newspaper_big_sale'] = {
+  title: 'Газета — Удачный день',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Твои слова попадают точно в цель. Ты расписываешь каждый выпуск так, будто в каждом — тайна мироздания. Дес в плаще усмехается и покупает сразу пять штук.\n\n«Для слуг возьму, пусть читают» — бросает он, не глядя.\n\nЗа ним потянулись другие. К концу дня ты распродал всю стопку — такого ещё не бывало. Начальник молча вручает тебе плату, и ты видишь в его глазах что-то похожее на удивление. Или презрение. Сложно сказать.',
+  action: function() {
+    if (!GameState.flags.newspaper_paid) { GameState.flags.newspaper_paid = true; addMoney(30); }
+    const container = document.getElementById('choices-container');
+    [{text:'Идти домой с полным кошельком', next:'work_go_home'},
+     {text:'Зайти в корчму — ты это заслужил', next:'tavern_enter'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['newspaper_normal_sale'] = {
+  title: 'Газета — Обычный день',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Ты продаёшь один выпуск. Потом ещё один. К концу дня раздал чуть меньше половины стопки — обычная норма для такого места. Начальник безразлично протягивает тебе плату. 4 низших. Стандартная ставка для тебя, хотя другие получают больше.',
+  action: function() {
+    if (!GameState.flags.newspaper_paid) { GameState.flags.newspaper_paid = true; addMoney(4); }
+    const container = document.getElementById('choices-container');
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = 'Идти домой';
+    btn.onclick = () => renderScene('work_go_home');
+    container.appendChild(btn);
+  }
+};
+
+Scenes['newspaper_normal'] = {
+  title: 'Газета — Рутина',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Ты монотонно выкрикиваешь заголовки, не вкладывая ни капли души. Зачем стараться, если всем плевать? Десы проходят мимо, иногда бросая на тебя брезгливый взгляд, иногда — вообще не замечая.\n\nК обеду ты продал три выпуска. К вечеру — ещё пару. Обычный день, обычная пустота. Начальник молча вручает тебе 4 низших — стандартную ставку.',
+  action: function() {
+    if (!GameState.flags.newspaper_paid) { GameState.flags.newspaper_paid = true; addMoney(4); }
+    const container = document.getElementById('choices-container');
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = 'Идти домой';
+    btn.onclick = () => renderScene('work_go_home');
+    container.appendChild(btn);
+  }
+};
+
+Scenes['newspaper_slack'] = {
+  title: 'Газета — Безразличие',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Ты стоишь на своём месте, держа газеты подмышкой, и смотришь на проходящих десов. Ни одного выкрика, ни одной попытки. Просто стоишь и дышишь холодным воздухом, пропитанным сыростью нижних ярусов.\n\nЧасы тянутся как застывший мёд. К вечеру ты не продал ни одного выпуска. Начальник смотрит на полную стопку газет, потом на тебя.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    [{text:'Попытаться объясниться', next:'newspaper_slack_excuse'},
+     {text:'Молча принять', next:'newspaper_slack_accept'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['newspaper_slack_excuse'] = {
+  title: 'Газета — Оправдание',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: '«Сегодня мало людей было...» — начинаешь ты, но начальник даже не слушает. Он забирает газеты из твоих рук и молча уходит внутрь, захлопывая дверь перед твоим носом. Денег ты сегодня не получишь.',
+  action: function() {
+    GameState.flags.newspaper_paid = true;
+    const container = document.getElementById('choices-container');
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = 'Идти домой с пустыми руками';
+    btn.onclick = () => renderScene('work_go_home');
+    container.appendChild(btn);
+  }
+};
+
+Scenes['newspaper_slack_accept'] = {
+  title: 'Газета — Ничего',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Начальник забирает газеты из твоих рук. Ни слова, ни взгляда. Ты для него — пустое место, даже не заслуживающее ругани. Может, это хуже, чем если бы он орал, как Тон Тон на складе.',
+  action: function() {
+    GameState.flags.newspaper_paid = true;
+    const container = document.getElementById('choices-container');
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = 'Идти домой с пустыми руками';
+    btn.onclick = () => renderScene('work_go_home');
+    container.appendChild(btn);
+  }
 };
 
 // ========================================
@@ -1828,8 +1963,700 @@ Scenes['work_newspaper_walk'] = {
 Scenes['work_library_walk'] = {
   title: 'Путь в библиотеку',
   image: 'Screenshot_17.png',
-  text: 'Ты медленно волочишь свои ноги по прохладным переулкам Грибного района, периодически встречая живущих здесь десов. Вид их истощённый и болезненный: некоторые тяжело сидят на сырой земле с заросшим грибами телом, медленно умирая; некоторые валяются на гамаках, покуривая <glossary id="pokoy_trava">покой-траву</glossary>; а некоторые так же вяло и слабо идут по своим делам.\n\n[Заглушка — продолжение следует]',
-  choices: [{ text: 'Далее', next: 'work_go_home' }]
+  text: 'Ты медленно волочишь свои ноги по прохладным переулкам Грибного района, периодически встречая живущих здесь десов. Вид их истощённый и болезненный: некоторые тяжело сидят на сырой земле с заросшим грибами телом, медленно умирая; некоторые валяются на гамаках, покуривая <glossary id="pokoy_trava">покой-траву</glossary>; а некоторые так же вяло и слабо идут по своим делам.\n\nТы направляешься в центр города, в отделение Конгрегационной библиотеки. Не самая плохая работа, особенно для выходца из Грибного района. Платят хорошо, но вот есть только один минус — это старый волшебник, заведующий библиотекой, Раф Лат Телий. Маразматичный старик, который постоянно просит переделать одну и ту же работу. Мало того, в самой библиотеке вообще нет интересных книг — строгое перечисление всех тирх и деревень и других бюрократических данных.\n\nЗаходя в пустую библиотеку, ты чуешь запах протухшего мяса и сразу понимаешь, что безумный Раф завтракает. Этот безумец к своим годам почти полностью потерял способность к восприятию мира.\n\n«Лафей, это ты? Иди сюда!» — хрипло зовёт тебя волшебник своим высоким голосом.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    [{text:'Подойти к магу', next:'library_approach_raf'},
+     {text:'Господи, опять?!', next:'library_approach_raf'},
+     {text:'Старик, сколько раз я говорил, что нельзя есть в библиотеке', next:'library_scold_raf'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['library_scold_raf'] = {
+  title: 'Библиотека',
+  image: 'Screenshot_17.png',
+  text: '«А я сколько раз говорил не называть меня Старком, ммм? Тем более я люблю бобы. Я люблю бомбы, я!»\n\nОканчивая предложение, он сразу возвращается к уплетению бобов.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    [{text:'Подойти к нему', next:'library_approach_raf'},
+     {text:'Заняться работой', next:'library_work'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['library_approach_raf'] = {
+  title: 'Библиотека — Раф',
+  image: 'Screenshot_17.png',
+  text: 'Ты подходишь к Рафу и видишь мерзкую картину, как он своими костлявыми пальчиками ест склизкие бобы и ими же переворачивает страницы книг.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    [{text:'Что Вам надо, Заведующий?', next:'library_raf_task'},
+     {text:'Проигнорировать и пойти выполнять обычные поручения', next:'library_work'},
+     {text:'Заняться работой', next:'library_work'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['library_raf_task'] = {
+  title: 'Библиотека — Задание',
+  image: 'Screenshot_17.png',
+  text: '«Я даю тебе новое задание. Тебе надо сжечь 5 отдел. Полностью. Бромлостью. Громкостью!»\n\nОканчивая предложение, он сразу возвращается к уплетению бобов.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+
+    const btn1 = document.createElement('button');
+    btn1.className = 'choice-btn';
+    btn1.textContent = 'Пойти выполнять задание';
+    btn1.onclick = () => renderScene('library_section5');
+    container.appendChild(btn1);
+
+    const btn2 = document.createElement('button');
+    btn2.className = 'choice-btn';
+    btn2.textContent = 'Бред какой-то. Вернуться к обычной работе';
+    btn2.onclick = () => renderScene('library_work');
+    container.appendChild(btn2);
+  }
+};
+
+Scenes['library_section5'] = {
+  title: 'Библиотека — 5 Отдел',
+  image: 'Screenshot_17.png',
+  text: 'Ты с безразличием идёшь к 5 отделу — самому большому, что есть в библиотеке, где хранятся налоговые отчёты и информация о доходах населения.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+
+    // R-type: INT check adds info but doesn't gate choices
+    const thinkBtn = document.createElement('button');
+    thinkBtn.className = 'choice-btn dice-roll';
+    thinkBtn.textContent = 'Подумать о последствиях';
+    thinkBtn.onclick = () => rollDice({
+      text: 'Подумать о последствиях',
+      check: { stat: 'INT', dc: 10 },
+      success: 'library_think_success',
+      failure: 'library_think_fail'
+    });
+    container.appendChild(thinkBtn);
+
+    const btn2 = document.createElement('button');
+    btn2.className = 'choice-btn';
+    btn2.textContent = 'Бред какой-то. Вернуться к обычной работе';
+    btn2.onclick = () => renderScene('library_work');
+    container.appendChild(btn2);
+
+    const btn3 = document.createElement('button');
+    btn3.className = 'choice-btn';
+    btn3.textContent = 'Приступить к делу';
+    btn3.onclick = () => { addMadness(1); renderScene('library_burn'); };
+    container.appendChild(btn3);
+
+    const btn4 = document.createElement('button');
+    btn4.className = 'choice-btn';
+    btn4.textContent = '«О мой Зверь, тут Огнесферид!»';
+    btn4.onclick = () => { addMadness(2); renderScene('library_fake_alarm'); };
+    container.appendChild(btn4);
+  }
+};
+
+Scenes['library_think_success'] = {
+  title: 'Библиотека — Размышление',
+  image: 'Screenshot_17.png',
+  text: 'Их уничтожение не просто осложнит работу местного самоуправления, а нанесёт серьёзный удар по экономике всей Империи, учитывая то, что Вастерса — крупнейший портовый и торговый хаб Теомора.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    [{text:'Бред какой-то. Вернуться к работе', next:'library_work'},
+     {text:'Приступить к делу', next:'library_burn'},
+     {text:'«О мой Зверь, тут Огнесферид!»', next:'library_fake_alarm'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => {
+        if (c.next === 'library_burn') addMadness(1);
+        if (c.next === 'library_fake_alarm') addMadness(2);
+        renderScene(c.next);
+      };
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['library_think_fail'] = {
+  title: 'Библиотека — Размышление',
+  image: 'Screenshot_17.png',
+  text: 'Очередные бумажки, порождённые бюрократами. Их сожжение ничего не изменит.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    [{text:'Бред какой-то. Вернуться к работе', next:'library_work'},
+     {text:'Приступить к делу', next:'library_burn'},
+     {text:'«О мой Зверь, тут Огнесферид!»', next:'library_fake_alarm'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => {
+        if (c.next === 'library_burn') addMadness(1);
+        if (c.next === 'library_fake_alarm') addMadness(2);
+        renderScene(c.next);
+      };
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['library_burn'] = {
+  title: 'Библиотека — Поджог',
+  image: 'Screenshot_17.png',
+  text: 'Ты молча идёшь к ближайшей свече, заодно собирая старую и сухую бумагу для растопки. Распределяя растопку равномерно по всему 5 отделу, ты начинаешь поджигать, с каждым шагом ускоряясь. Доходя до последней растопки, ты начинаешь чувствовать запах гари. Дым начинает потихоньку заполнять пространство.\n\nПора уходить.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+
+    const btn1 = document.createElement('button');
+    btn1.className = 'choice-btn';
+    btn1.textContent = 'Выбежать на улицу';
+    btn1.onclick = () => { addMadness(1); renderScene('library_flee_outside'); };
+    container.appendChild(btn1);
+
+    const btn2 = document.createElement('button');
+    btn2.className = 'choice-btn';
+    btn2.textContent = 'Подойти к Рафу и отчитаться о проделанной работе';
+    btn2.onclick = () => { addMadness(2); renderScene('library_report_raf'); };
+    container.appendChild(btn2);
+
+    const btn3 = document.createElement('button');
+    btn3.className = 'choice-btn';
+    btn3.textContent = 'Осознать что происходит и начать тушить пожар';
+    btn3.onclick = () => {
+      addMadness(-3);
+      rollDice({
+        text: 'Тушить пожар',
+        check: { stat: 'DEX', dc: 12 },
+        success: 'library_extinguish_success',
+        failure: 'library_extinguish_fail'
+      });
+    };
+    container.appendChild(btn3);
+  }
+};
+
+Scenes['library_flee_outside'] = {
+  title: 'Библиотека — Побег',
+  image: 'Screenshot_17.png',
+  text: 'Ты выбегаешь на улицу и поворачиваешься лицом к библиотеке. Из окон начинает валить дым. Через несколько минут на место прибегают Конгрегаты и маги, которые оперативно тушат пожар заклинаниями.\n\nВ суматохе тебя никто не замечает. Ты тихо уходишь домой, оставив Рафа внутри.',
+  next: 'work_go_home'
+};
+
+Scenes['library_report_raf'] = {
+  title: 'Библиотека — Отчёт',
+  image: 'Screenshot_17.png',
+  text: '«О, Гердо, молодец, сынок. Вот твоя плата за сегодня. Можешь идти домой.»\n\nОн протягивает тебе склизкий от бобов мешок монет.',
+  action: function() {
+    if (!GameState.flags.library_paid) { GameState.flags.library_paid = true; addMoney(30); }
+    const container = document.getElementById('choices-container');
+
+    const btn1 = document.createElement('button');
+    btn1.className = 'choice-btn';
+    btn1.textContent = 'Взять монеты и выйти из библиотеки. Полностью забив на пожар';
+    btn1.onclick = () => renderScene('tavern_enter');
+    container.appendChild(btn1);
+
+    const btn2 = document.createElement('button');
+    btn2.className = 'choice-btn';
+    btn2.textContent = 'Господин Раф, Вы главное потушите пожар, чтобы вся библиотека не сгорела';
+    btn2.onclick = () => { addMadness(-1); renderScene('library_raf_extinguish'); };
+    container.appendChild(btn2);
+
+    const btn3 = document.createElement('button');
+    btn3.className = 'choice-btn';
+    btn3.textContent = 'Осознать что происходит и начать тушить пожар';
+    btn3.onclick = () => {
+      addMadness(-3);
+      rollDice({
+        text: 'Тушить пожар',
+        check: { stat: 'DEX', dc: 12 },
+        success: 'library_extinguish_success',
+        failure: 'library_extinguish_fail'
+      });
+    };
+    container.appendChild(btn3);
+  }
+};
+
+Scenes['library_raf_extinguish'] = {
+  title: 'Библиотека — Тушение',
+  image: 'Screenshot_17.png',
+  text: '«Да точно, ты прав» — спокойно произносит Безумный Библиотекарь, колдуя заклинание, которое тушит весь пожар за пару секунд.\n\n«Ну вот и всё!» — Ты видишь, как довольно, вприпрыжку, Раф идёт дальше наслаждаться своим мерзким завтраком.\n\nОстаётся только вернуться к работе.',
+  next: 'library_work'
+};
+
+Scenes['library_extinguish_success'] = {
+  title: 'Библиотека — Тушение',
+  image: 'Screenshot_17.png',
+  text: 'Ты начинаешь тушить пожар, несясь из стороны в сторону, бегая туда-сюда с вёдрами воды. Благо, пожар не успел разгореться, и ты, запотевший, его тушишь.\n\nОстаётся вернуться к работе.',
+  next: 'library_work'
+};
+
+Scenes['library_extinguish_fail'] = {
+  title: 'Библиотека — Пожар разгорается',
+  image: 'Screenshot_17.png',
+  text: 'Хоть ты и стараешься изо всех сил, но пожар распространяется быстрее, чем твои ноги. К тебе прибегает Раф и с удивлением смотрит на тебя.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+
+    const btn1 = document.createElement('button');
+    btn1.className = 'choice-btn';
+    btn1.textContent = 'Господин Раф, Вы же маг, просто потушите пожар магией';
+    btn1.onclick = () => renderScene('library_raf_extinguish');
+    container.appendChild(btn1);
+
+    const btn2 = document.createElement('button');
+    btn2.className = 'choice-btn';
+    btn2.textContent = 'Господин Раф, я Вас спасу!';
+    btn2.onclick = () => { addMadness(1); renderScene('library_save_raf'); };
+    container.appendChild(btn2);
+
+    const btn3 = document.createElement('button');
+    btn3.className = 'choice-btn';
+    btn3.textContent = 'Начать кричать «Пожар!»';
+    btn3.onclick = () => { addMadness(1); renderScene('library_shout_fire'); };
+    container.appendChild(btn3);
+
+    const btn4 = document.createElement('button');
+    btn4.className = 'choice-btn';
+    btn4.textContent = 'АААААА!';
+    btn4.onclick = () => { addMadness(1); renderScene('library_scream'); };
+    container.appendChild(btn4);
+  }
+};
+
+Scenes['library_fake_alarm'] = {
+  title: 'Библиотека — Ложная тревога',
+  image: 'Screenshot_17.png',
+  text: '«О мой Зверь, тут Огнесферид!»\n\nС этим возгласом ты бежишь к ближайшей свече, заодно собирая старую и сухую бумагу для растопки. Распределяя растопку равномерно по всему 5 отделу, ты начинаешь поджигать, с каждым шагом ускоряясь. Доходя до последней растопки, ты начинаешь чувствовать запах гари. Дым начинает потихоньку заполнять пространство. Пора уходить.\n\nНа твой крик прибегает Раф Лат Телий. Он испуганно смотрит на тебя с раскрытой книгой заклинаний, готовясь к битве.\n\n«Где Огненое Отродье, я его в желе превращу и отдам на корм собакам....» Раф делает озадаченную паузу. Вы смотрите друг на друга, и на пару секунд повисает неловкое молчание. Он переводит взгляд на горящий 5 отдел.\n\n«Проклятый Глаз! Пожар! Спасайся кто может!»',
+  action: function() {
+    const container = document.getElementById('choices-container');
+
+    const btn1 = document.createElement('button');
+    btn1.className = 'choice-btn';
+    btn1.textContent = 'Господин Раф, Вы же маг, просто потушите пожар магией';
+    btn1.onclick = () => renderScene('library_raf_extinguish');
+    container.appendChild(btn1);
+
+    const btn2 = document.createElement('button');
+    btn2.className = 'choice-btn';
+    btn2.textContent = 'Господин Раф, я Вас спасу!';
+    btn2.onclick = () => { addMadness(1); renderScene('library_save_raf'); };
+    container.appendChild(btn2);
+
+    const btn3 = document.createElement('button');
+    btn3.className = 'choice-btn';
+    btn3.textContent = 'Начать кричать «Пожар!»';
+    btn3.onclick = () => { addMadness(1); renderScene('library_shout_fire'); };
+    container.appendChild(btn3);
+
+    const btn4 = document.createElement('button');
+    btn4.className = 'choice-btn';
+    btn4.textContent = 'АААААА!';
+    btn4.onclick = () => { addMadness(1); renderScene('library_scream'); };
+    container.appendChild(btn4);
+  }
+};
+
+Scenes['library_save_raf'] = {
+  title: 'Библиотека — Спасение',
+  image: 'Screenshot_17.png',
+  text: 'Ты хватаешь своего начальника и несёшься к выходу. Выбежав из библиотеки, ты ставишь на землю Рафа, и он благодарно смотрит на тебя.\n\n«Висконтий, спасибо тебе!»',
+  action: function() {
+    const container = document.getElementById('choices-container');
+
+    const btn1 = document.createElement('button');
+    btn1.className = 'choice-btn';
+    btn1.textContent = 'Так стоп, библиотека такими темпами сгорит полностью';
+    btn1.onclick = () => renderScene('library_burning_dilemma');
+    container.appendChild(btn1);
+
+    const btn2 = document.createElement('button');
+    btn2.className = 'choice-btn';
+    btn2.textContent = 'Обнять старика. «Старик!»';
+    btn2.onclick = () => { addMadness(1); renderScene('library_hug_raf'); };
+    container.appendChild(btn2);
+
+    const btn3 = document.createElement('button');
+    btn3.className = 'choice-btn';
+    btn3.textContent = 'Начать кричать «Пожар!»';
+    btn3.onclick = () => { addMadness(1); renderScene('library_shout_fire'); };
+    container.appendChild(btn3);
+
+    const btn4 = document.createElement('button');
+    btn4.className = 'choice-btn';
+    btn4.textContent = 'АААААА!';
+    btn4.onclick = () => { addMadness(1); renderScene('library_scream'); };
+    container.appendChild(btn4);
+  }
+};
+
+Scenes['library_hug_raf'] = {
+  title: 'Библиотека — Объятие',
+  image: 'Screenshot_17.png',
+  text: 'Ты тепло обнимаешь это дряхлое и старое тело и чувствуешь, что оно так же обнимает тебя. Несмотря на контекст происходящего, тебе становится так хорошо и уютно.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    [{text:'Так стоп, библиотека сгорит', next:'library_burning_dilemma'},
+     {text:'Начать кричать «Пожар!»', next:'library_shout_fire'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['library_burning_dilemma'] = {
+  title: 'Библиотека — Дилемма',
+  image: 'Screenshot_17.png',
+  text: '«Да, ты прав, что же нам делать? Я бы сейчас пошёл бы в таверну.»',
+  action: function() {
+    const container = document.getElementById('choices-container');
+
+    if (GameState.player.madness >= 10) {
+      const btn1 = document.createElement('button');
+      btn1.className = 'choice-btn';
+      btn1.textContent = 'Да, пойдёмте';
+      btn1.onclick = () => { addMadness(1); renderScene('library_tavern_with_raf'); };
+      container.appendChild(btn1);
+    }
+
+    const btn2 = document.createElement('button');
+    btn2.className = 'choice-btn';
+    btn2.textContent = 'Нет, Господин Раф, Вам надо потушить';
+    btn2.onclick = () => { addMadness(-2); renderScene('library_raf_extinguish_outside'); };
+    container.appendChild(btn2);
+  }
+};
+
+Scenes['library_tavern_with_raf'] = {
+  title: 'Библиотека — В таверну с Рафом',
+  image: 'fBC825EgHbE.jpg',
+  text: 'Вы направляетесь в таверну, беззаботно и не спеша. Раф периодически бубнит себе что-то под нос, а ты, поддерживающе мыча, соглашаешься с каждым его словом. Пока вы идёте, мимо вас проносятся Конгрегаты и Маги — видимо, на пожар.',
+  next: 'tavern_enter'
+};
+
+Scenes['library_raf_extinguish_outside'] = {
+  title: 'Библиотека — Тушение',
+  image: 'Screenshot_17.png',
+  text: '«Да точно, ты прав!» — Раф забегает обратно в библиотеку. Через несколько секунд из окон перестаёт валить дым — заклинание сработало.\n\nРаф выходит довольный. «Ну вот и всё!» Остаётся вернуться к работе.',
+  next: 'library_work'
+};
+
+Scenes['library_shout_fire'] = {
+  title: 'Библиотека — Крик',
+  image: 'Screenshot_17.png',
+  text: 'Ты начинаешь кричать во весь голос. После первого же выкрика тебя начинает поддерживать Раф. Вы кричите, привлекая внимание зевак, которые суетно начинают толпиться возле вас, и конгрегатов, которые оперативно начинают собираться у места пожара, придя с магами и начиная тушить пожар заклинаниями. Не проходит и пары минут, как пожар уже потушен.\n\nК вам подходит суровый с виду Конгрегат, на голове которого красуется берет.',
+  action: function() {
+    // Passive INT check DC 12
+    const intMod = getModifier(GameState.player.stats.INT);
+    const roll = Math.floor(Math.random() * 20) + 1;
+    const passiveSuccess = (roll + intMod) >= 12;
+
+    if (passiveSuccess) {
+      document.getElementById('scene-text').innerHTML += '\n\n<span class="passive-check-success">Судя по его форме, это Хранитель из Ордена Паладинов.</span>';
+    }
+
+    const text2 = '\n\nОн сурово смотрит на вас двоих, переводя взгляд на старика.\n\n«Я удивлён, что этот отдел только сейчас воспламенился, учитывая, что ты был заведующим, Раф Лат.»\n\nСтрогий Хранитель переводит свой взгляд за ваши спины.\n\n«Эй, парни, пакуйте его!»\n\nДвое конгрегатов быстро подходят к Рафу и заковывают его в кандалы, уводя в сторону Верхних ярусов.';
+    document.getElementById('scene-text').innerHTML += text2;
+
+    setTimeout(() => renderScene('library_guardian'), 100);
+  }
+};
+
+Scenes['library_guardian'] = {
+  title: 'Библиотека — Хранитель',
+  image: 'Screenshot_17.png',
+  text: 'Ощущая на себе пристальный взгляд, ты поворачиваешь голову на Хранителя, не успевая попрощаться со своим начальником.\n\n«А ты, как я понял, его дешёвая рабочая сила и единственный разумный человек в библиотеке?»',
+  action: function() {
+    const container = document.getElementById('choices-container');
+
+    const btn1 = document.createElement('button');
+    btn1.className = 'choice-btn';
+    btn1.textContent = 'Да';
+    btn1.onclick = () => renderScene('library_guardian_yes');
+    container.appendChild(btn1);
+
+    const btn2 = document.createElement('button');
+    btn2.className = 'choice-btn';
+    btn2.textContent = 'Кто я?';
+    btn2.onclick = () => renderScene('library_guardian_who');
+    container.appendChild(btn2);
+
+    const btn3 = document.createElement('button');
+    btn3.className = 'choice-btn';
+    btn3.textContent = 'Профессор Занудной Работы, собственной персоной';
+    btn3.onclick = () => { addMadness(1); renderScene('library_guardian_joke'); };
+    container.appendChild(btn3);
+  }
+};
+
+Scenes['library_guardian_yes'] = {
+  title: 'Библиотека — Компенсация',
+  image: 'Screenshot_17.png',
+  text: '«Ты, в общем-то, можешь идти, но огорчу тебя. Тебе придётся искать новую работу. Вот твоя компенсация.»',
+  action: function() {
+    if (!GameState.flags.library_paid) { GameState.flags.library_paid = true; addMoney(30); }
+    const container = document.getElementById('choices-container');
+
+    const btn1 = document.createElement('button');
+    btn1.className = 'choice-btn';
+    btn1.textContent = 'Ништяк!';
+    btn1.onclick = () => renderScene('library_guardian_bye');
+    container.appendChild(btn1);
+
+    const btn2 = document.createElement('button');
+    btn2.className = 'choice-btn';
+    btn2.textContent = 'Спасибо большое';
+    btn2.onclick = () => renderScene('library_guardian_bye');
+    container.appendChild(btn2);
+
+    const btn3 = document.createElement('button');
+    btn3.className = 'choice-btn';
+    btn3.textContent = 'Нет! Я работаю не ради денег';
+    btn3.onclick = () => renderScene('library_guardian_no_money');
+    container.appendChild(btn3);
+  }
+};
+
+Scenes['library_guardian_bye'] = {
+  title: 'Библиотека — Прощание',
+  image: 'Screenshot_17.png',
+  text: '«Всего хорошего, парень.»',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    [{text:'В таверну', next:'tavern_enter'},
+     {text:'Идти домой', next:'work_go_home'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['library_guardian_no_money'] = {
+  title: 'Библиотека — Отказ',
+  image: 'Screenshot_17.png',
+  text: '«.... Эм... Ладно, тогда прощай.»',
+  next: 'work_go_home'
+};
+
+Scenes['library_guardian_who'] = {
+  title: 'Библиотека — Вопрос',
+  image: 'Screenshot_17.png',
+  text: '«Нет, блин, ты. Ну а кто ещё? Или его безумство тебе передалось? Ладно, вот твоя компенсация за увольнение. Пока.»',
+  action: function() {
+    if (!GameState.flags.library_paid) { GameState.flags.library_paid = true; addMoney(30); }
+    const container = document.getElementById('choices-container');
+    [{text:'В таверну', next:'tavern_enter'},
+     {text:'Идти домой', next:'work_go_home'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['library_guardian_joke'] = {
+  title: 'Библиотека — Шутка',
+  image: 'Screenshot_17.png',
+  text: '«Видимо, его безумство и на десов передаётся, ужасно.»\n\nОн просто берёт и разворачивается, уходя прочь от тебя.',
+  next: 'work_go_home'
+};
+
+Scenes['library_scream'] = {
+  title: 'Библиотека — Крик',
+  image: 'Screenshot_17.png',
+  text: 'Безумный старец смотрит на тебя и тоже начинает вопить своим хриплым голосом.\n\n«Мы все умрём! Помогите!»\n«ААААА!»\n«ААААА!»',
+  action: function() {
+    if (!GameState.flags.scream_count) GameState.flags.scream_count = 0;
+    GameState.flags.scream_count++;
+    const container = document.getElementById('choices-container');
+
+    if (GameState.flags.scream_count < 10) {
+      const btn1 = document.createElement('button');
+      btn1.className = 'choice-btn';
+      btn1.textContent = 'АААААА!';
+      btn1.onclick = () => { addMadness(1); renderScene('library_scream'); };
+      container.appendChild(btn1);
+    } else {
+      const info = document.createElement('p');
+      info.style.cssText = 'color:var(--red-wax);font-style:italic;margin-bottom:10px;';
+      info.textContent = 'Вы видите, как огонь перешёл и на другие секции. Пока вы стояли и красноречиво кричали друг на друга, библиотека уже заполнилась дымом. Надо что-то делать.';
+      container.appendChild(info);
+    }
+
+    const btn2 = document.createElement('button');
+    btn2.className = 'choice-btn';
+    btn2.textContent = 'Секундочку. Вы же маг, Господин Раф. Скорее потушите пожар';
+    btn2.onclick = () => { addMadness(-1); renderScene('library_raf_extinguish'); };
+    container.appendChild(btn2);
+
+    const btn3 = document.createElement('button');
+    btn3.className = 'choice-btn';
+    btn3.textContent = 'Крикнуть последний раз и спасти Рафа';
+    btn3.onclick = () => { addMadness(1); renderScene('library_save_raf'); };
+    container.appendChild(btn3);
+  }
+};
+
+// --- Library work (boring routine) ---
+Scenes['library_work'] = {
+  title: 'Библиотека — Работа',
+  image: 'Screenshot_17.png',
+  text: 'Ты идёшь за стол, который весь испачкан засохшими чернилами и завален килограммами макулатуры. Время приступать к ежедневной, до смерти рутинной работе. Начиная с проверки книг, заканчивая пересчётом и занесением новых данных в книги. Километры чисел и текста проскальзывают у тебя перед глазами, а отстранённое бормотание Рафа на фоне будто бы работает как искусное заклинание усыпления.\n\nКак было бы славно вздремнуть, всего пару минуточек...',
+  action: function() {
+    const container = document.getElementById('choices-container');
+
+    const btn1 = document.createElement('button');
+    btn1.className = 'choice-btn';
+    btn1.textContent = 'Поддаться сонливости';
+    btn1.onclick = () => renderScene('library_sleep');
+    container.appendChild(btn1);
+
+    const btn2 = document.createElement('button');
+    btn2.className = 'choice-btn dice-roll';
+    btn2.textContent = 'Сопротивляться';
+    btn2.onclick = () => rollDice({
+      text: 'Сопротивляться сну',
+      check: { stat: 'WIS', dc: 10 },
+      success: 'library_resist_success',
+      failure: 'library_sleep'
+    });
+    container.appendChild(btn2);
+  }
+};
+
+Scenes['library_resist_success'] = {
+  title: 'Библиотека — Стойкость',
+  image: 'Screenshot_17.png',
+  text: 'Ты резко встаёшь и идёшь заниматься более активным трудом, раскладывая книги по полкам и таская старые свитки по библиотеке.\n\nК концу дня Раф выдаёт тебе стандартную плату.',
+  action: function() {
+    if (!GameState.flags.library_paid) { GameState.flags.library_paid = true; addMoney(4); }
+    const container = document.getElementById('choices-container');
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = 'Идти домой';
+    btn.onclick = () => renderScene('work_go_home');
+    container.appendChild(btn);
+  }
+};
+
+Scenes['library_sleep'] = {
+  title: 'Библиотека — Сон',
+  image: 'Screenshot_17.png',
+  text: 'Твои глаза начинают смыкаться, а твоё тело медленно расслабляется, погружаясь в сон...\n\nВдруг ты чувствуешь, как что-то твёрдое тычется тебе в спину, тормоша тебя туда-сюда. Медленно открывая глаза, ты оборачиваешься назад, видя, как старик Раф тычет в тебя своей тростью.\n\n«Оооо, Изолий, я думал ты помер, ххахахаха!»',
+  action: function() {
+    const container = document.getElementById('choices-container');
+
+    const btn1 = document.createElement('button');
+    btn1.className = 'choice-btn';
+    btn1.textContent = 'Я просто уснул, старик';
+    btn1.onclick = () => renderScene('library_wakeup_angry');
+    container.appendChild(btn1);
+
+    const btn2 = document.createElement('button');
+    btn2.className = 'choice-btn';
+    btn2.textContent = 'Да, я и вправду умер';
+    btn2.onclick = () => { addMadness(1); renderScene('library_dead_joke'); };
+    container.appendChild(btn2);
+  }
+};
+
+Scenes['library_wakeup_angry'] = {
+  title: 'Библиотека — Гнев Рафа',
+  image: 'Screenshot_17.png',
+  text: 'Старик смотрит на тебя, и с каждой секундой его глаза наполняются яростью. Ты слышишь, как его зубы испускают раздражённый скрежет, а вены на лбу набухают как губчатый мох.\n\n«Как ты посмел, Леон! Я тебе дал всё, и ты взял и уснул на работе?! Нет, ты мне не нужен. Пошёл прочь!» — надрывисто кричит Раф.',
+  action: function() {
+    GameState.flags.fired_from_library = true;
+    const container = document.getElementById('choices-container');
+
+    const btn1 = document.createElement('button');
+    btn1.className = 'choice-btn';
+    btn1.textContent = 'Эм, ладно';
+    btn1.onclick = () => renderScene('library_fired_leave');
+    container.appendChild(btn1);
+
+    const btn2 = document.createElement('button');
+    btn2.className = 'choice-btn';
+    btn2.textContent = 'Но...';
+    btn2.onclick = () => renderScene('library_fired_but');
+    container.appendChild(btn2);
+  }
+};
+
+Scenes['library_fired_leave'] = {
+  title: 'Библиотека — Увольнение',
+  image: 'Screenshot_17.png',
+  text: 'Ты озадаченно встаёшь под крики полоумного Рафа и молча выходишь на улицу, видя, как улицы Вастерсы заполнены оранжевыми красками от заходящего солнца.',
+  next: 'work_go_home'
+};
+
+Scenes['library_fired_but'] = {
+  title: 'Библиотека — Увольнение',
+  image: 'Screenshot_17.png',
+  text: 'Ты видишь, как Маг топает ножкой, отворачиваясь от тебя и скрещивая руки.\n\n«Уходи» — бормочет он себе под нос.\n\nТы озадаченно встаёшь и молча выходишь на улицу, видя, как улицы Вастерсы заполнены оранжевыми красками от заходящего солнца.',
+  next: 'work_go_home'
+};
+
+Scenes['library_dead_joke'] = {
+  title: 'Библиотека — Кладбище',
+  image: 'Screenshot_17.png',
+  text: '«О боже! Тогда тебе надо на кладбище!»\n\nТы видишь, как он вздымает руки вверх, и внезапная искра появляется перед глазами. Ты осознаёшь, что оказался на городском кладбище, сидя в ещё не закопанном гробу. На тебя смотрит гробовщик озадаченным взглядом, держа лопату, запачканную сырой землёй.\n\n«Здравствуйте» — с тоской и безынициативно говорит лысый дед с седой бородой.\n\n«Вам помочь?»',
+  action: function() {
+    const container = document.getElementById('choices-container');
+
+    const btn1 = document.createElement('button');
+    btn1.className = 'choice-btn';
+    btn1.textContent = 'Простите, я уже иду домой';
+    btn1.onclick = () => renderScene('work_go_home');
+    container.appendChild(btn1);
+
+    if (GameState.player.madness >= 15) {
+      const btn2 = document.createElement('button');
+      btn2.className = 'choice-btn';
+      btn2.textContent = 'Да, меня надо закопать';
+      btn2.onclick = () => renderScene('library_cemetery_ending');
+      container.appendChild(btn2);
+    }
+  }
+};
+
+Scenes['library_cemetery_ending'] = {
+  title: 'Покой',
+  text: 'Гробовщик без эмоций смотрит на тебя и тяжело вздыхает: «Ладно».\n\nТы ложишься полностью в гроб. Дед начинает забивать гвозди в крышку гроба. Как только он забивает последний гвоздь, ты чувствуешь, как гроб начинает волочиться по земле и падает в могильную яму. Стук камня и земли, которые сыплются на крышку гроба, словно колыбельная вводит тебя в сон...\n\nЧерез какое-то время ты обретаешь долгожданный покой.',
+  choices: [{ text: 'Начать заново', next: 'intro_map' }]
 };
 
 // ========================================
@@ -1839,8 +2666,72 @@ Scenes['work_library_walk'] = {
 Scenes['stub_new_shop'] = {
   title: 'Лавка странностей',
   image: 'anatoliyblivernec-.jpg',
-  text: 'Твоя наблюдательность не подвела. На углу, где раньше были заколоченные двери, появилась странная лавка. Вывеска покосилась, но на ней ещё можно разобрать: «Всякое-разное для всяких-разных».\n\n[Заглушка — продолжение следует]',
-  choices: [{ text: 'Вернуться к началу', next: 'intro_map' }]
+  text: 'Ты подходишь к странной двери, которой, по твоей памяти, тут не было. Вообще, лавки в Грибном районе, да и на таком ярусе, не просто редки, а почти невозможны, и все подобные места ты знаешь. К тому же тебя очень смущает название: «Лавка странностей» — которое прекрасно описывает, что ты сейчас чувствуешь.\n\nСтоя перед дверью новообразовавшейся лавки, ты задумываешься — стоит ли туда входить?',
+  action: function() {
+    const container = document.getElementById('choices-container');
+
+    const workMap = {
+      worker:    'work_warehouse_walk',
+      seller:    'work_newspaper_walk',
+      librarian: 'work_library_walk'
+    };
+    const workScene = workMap[GameState.player.background] || workMap.worker;
+
+    const btn1 = document.createElement('button');
+    btn1.className = 'choice-btn';
+    btn1.textContent = 'Развернуться и пойти на работу';
+    btn1.onclick = () => renderScene(workScene);
+    container.appendChild(btn1);
+
+    const btn2 = document.createElement('button');
+    btn2.className = 'choice-btn';
+    btn2.textContent = 'Конечно же зайти';
+    btn2.onclick = () => { addMadness(1); renderScene('shop_enter'); };
+    container.appendChild(btn2);
+  }
+};
+
+Scenes['shop_enter'] = {
+  title: 'Лавка странностей',
+  image: 'anatoliyblivernec-.jpg',
+  text: 'Ты открываешь дверь лавки, делая неосознанно шаг вперёд, будто бы тебя магической силой затягивает внутрь. Мгновение спустя ты стоишь перед серым худощавым существом, у которого натянута улыбка на всё чрезмерно геометричное лицо в виде конуса. Всё твоё нутро говорит: «Беги отсюда, он опасен». Несмотря на это, нельзя сказать, что ты испытываешь страх — скорее смятение и абсолютное непонимание происходящего.\n\n«ПРИВВВВВВ ЕЕЕЕЕТ! Как твои дела, хорошечка моя!» — говорит худощавый дес, не размыкая зубы, сохраняя жутковатую улыбку.\n\n«Я наконец-то ки рад, ай, ай, больно!»',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    [{text:'Здравствуйте', next:'shop_hello'},
+     {text:'...', next:'shop_silence'},
+     {text:'Начать петь', next:'shop_sing'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => {
+        if (c.next === 'shop_sing') addMadness(2);
+        renderScene(c.next);
+      };
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['shop_hello'] = {
+  title: 'Лавка странностей',
+  image: 'anatoliyblivernec-.jpg',
+  text: '[Продолжение следует — Лавка странностей]',
+  choices: [{ text: 'Уйти', next: 'intro_morning' }]
+};
+
+Scenes['shop_silence'] = {
+  title: 'Лавка странностей',
+  image: 'anatoliyblivernec-.jpg',
+  text: '[Продолжение следует — Лавка странностей]',
+  choices: [{ text: 'Уйти', next: 'intro_morning' }]
+};
+
+Scenes['shop_sing'] = {
+  title: 'Лавка странностей',
+  image: 'anatoliyblivernec-.jpg',
+  text: '[Продолжение следует — Лавка странностей]',
+  choices: [{ text: 'Уйти', next: 'intro_morning' }]
 };
 
 Scenes['stub_walk'] = {
