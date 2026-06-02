@@ -2724,25 +2724,351 @@ Scenes['shop_enter'] = {
   }
 };
 
+// All three initial choices lead to the same dialogue after different intros
 Scenes['shop_hello'] = {
   title: 'Лавка странностей',
   image: 'Screenshot_17.png',
-  text: '[Продолжение следует — Лавка странностей]',
-  choices: [{ text: 'Уйти', next: 'intro_morning' }]
+  text: '«Ай, ну что за ' + (GameState && GameState.player && GameState.player.traits && GameState.player.traits.beautiful ? 'красавица' : 'уродец') + '! Ты почему не съел свой бутерброд?»',
+  action: function() {
+    const beautyWord = GameState.player.traits.beautiful ? 'красавица' : 'уродец';
+    document.getElementById('scene-text').innerHTML = '«Ай, ну что за ' + beautyWord + '! Ты почему не съел свой бутерброд?»';
+    const container = document.getElementById('choices-container');
+    [{text:'...', next:'shop_banter'},
+     {text:'Эммм?', next:'shop_banter'},
+     {text:'Какой бутерброд?', next:'shop_banter'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
 };
 
 Scenes['shop_silence'] = {
   title: 'Лавка странностей',
   image: 'Screenshot_17.png',
-  text: '[Продолжение следует — Лавка странностей]',
-  choices: [{ text: 'Уйти', next: 'intro_morning' }]
+  text: '',
+  action: function() {
+    const beautyWord = GameState.player.traits.beautiful ? 'красавица' : 'уродец';
+    document.getElementById('scene-text').innerHTML = '«Ай, ну что за ' + beautyWord + '! Ты почему не съел свой бутерброд?»';
+    const container = document.getElementById('choices-container');
+    [{text:'...', next:'shop_banter'},
+     {text:'Эммм?', next:'shop_banter'},
+     {text:'Какой бутерброд?', next:'shop_banter'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
 };
 
 Scenes['shop_sing'] = {
   title: 'Лавка странностей',
   image: 'Screenshot_17.png',
-  text: '[Продолжение следует — Лавка странностей]',
-  choices: [{ text: 'Уйти', next: 'intro_morning' }]
+  text: 'Ты ни то от растерянности, ни то от веселья начинаешь петь самую популярную песню в Империи СА «Серебряные сады: Путь 1» — красивую, но трагичную песню, которая как придаёт надежду, так и отнимает её. На припеве ты слышишь, как Худой в Шляпе начинает подпевать тебе, но полностью меняя слова. Не успевая закончить и строчку припева, ты замолкаешь, позволяя ему продолжить:\n\n«И пошли мы вместей с пиздой\nВолосатой и Чумной\nВ Сад Серебрянный как Сперм.. ОЙ\nТак не соси же ты родной!»',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    [{text:'...', next:'shop_post_sing'},
+     {text:'Это было странно', next:'shop_post_sing'},
+     {text:'Начать аплодировать', next:'shop_post_sing_applause'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => {
+        if (c.next === 'shop_post_sing_applause') addMadness(3);
+        renderScene(c.next);
+      };
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['shop_post_sing'] = {
+  title: 'Лавка странностей',
+  image: 'Screenshot_17.png',
+  text: '',
+  action: function() {
+    const beautyWord = GameState.player.traits.beautiful ? 'красавица' : 'уродец';
+    document.getElementById('scene-text').innerHTML = '«Ай, ну что за ' + beautyWord + '! Ты почему не съел свой бутерброд?»';
+    const container = document.getElementById('choices-container');
+    [{text:'...', next:'shop_banter'},
+     {text:'Эммм?', next:'shop_banter'},
+     {text:'Какой бутерброд?', next:'shop_banter'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['shop_post_sing_applause'] = {
+  title: 'Лавка странностей',
+  image: 'Screenshot_17.png',
+  text: 'Он начинает кланяться, после чего вроде как смотрит на тебя и начинает говорить. Внезапно. Всё-таки рот у него не открывается при разговоре. Странно.',
+  action: function() {
+    const beautyWord = GameState.player.traits.beautiful ? 'красавица' : 'уродец';
+    document.getElementById('scene-text').innerHTML += '\n\n«Ай, ну что за ' + beautyWord + '! Ты почему не съел свой бутерброд?»';
+    const container = document.getElementById('choices-container');
+    [{text:'...', next:'shop_banter'},
+     {text:'Эммм?', next:'shop_banter'},
+     {text:'Какой бутерброд?', next:'shop_banter'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['shop_banter'] = {
+  title: 'Лавка странностей',
+  image: 'Screenshot_17.png',
+  text: '«Плялима Осипова знаешь? Так вот он мой враг. ОН мо друг!»\n\nЧто он несёт? Будто бы перед тобой стоит абсолютно случайное в своих высказываниях существо. Ты не чувствуешь ни грамма логики в его словах — только бессвязный бред, но насколько уверенно сказанный. С ним вообще можно нормально поговорить?',
+  action: function() {
+    const container = document.getElementById('choices-container');
+
+    const btn1 = document.createElement('button');
+    btn1.className = 'choice-btn';
+    btn1.textContent = 'Прошу прощения, но мне пора';
+    btn1.onclick = () => renderScene('shop_try_leave');
+    container.appendChild(btn1);
+
+    const btn2 = document.createElement('button');
+    btn2.className = 'choice-btn';
+    btn2.textContent = 'А у вас можно что-то купить?';
+    btn2.onclick = () => renderScene('shop_buy_ask');
+    container.appendChild(btn2);
+
+    if (!GameState.flags.shop_silence_count) GameState.flags.shop_silence_count = 0;
+    if (GameState.flags.shop_silence_count < 3) {
+      const btn3 = document.createElement('button');
+      btn3.className = 'choice-btn';
+      btn3.textContent = '...';
+      btn3.onclick = () => {
+        GameState.flags.shop_silence_count++;
+        renderScene('shop_awkward_silence');
+      };
+      container.appendChild(btn3);
+    }
+  }
+};
+
+Scenes['shop_awkward_silence'] = {
+  title: 'Лавка странностей',
+  image: 'Screenshot_17.png',
+  text: 'Повисает неловкая пауза.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    [{text:'Прошу прощения, но мне пора', next:'shop_try_leave'},
+     {text:'А у вас можно что-то купить?', next:'shop_buy_ask'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+    if (GameState.flags.shop_silence_count < 3) {
+      const btn3 = document.createElement('button');
+      btn3.className = 'choice-btn';
+      btn3.textContent = '...';
+      btn3.onclick = () => {
+        GameState.flags.shop_silence_count++;
+        renderScene('shop_awkward_silence');
+      };
+      container.appendChild(btn3);
+    }
+  }
+};
+
+Scenes['shop_try_leave'] = {
+  title: 'Лавка странностей',
+  image: 'Screenshot_17.png',
+  text: 'Ты разворачиваешься и берёшься за ручку, ожидая, что она повернётся и ты спокойно выйдешь, но дверь заперта. Даже нет — будто бы это фальшивая дверь, за которой ничего и нет, просто стена. Ты чувствуешь уже не просто смятение, а сильное волнение. Да, магия — обыденность в твоей жизни, но в такой ситуации это что-то аномальное.\n\nТы слышишь за спиной глубокий и глумящийся смех.\n\n«Бабушка всегда съедается Волком, мой соплёночек-котёночек.»\n\nТы медленно поворачиваешься на него, думая, что эти его слова намекают на конец, хоть и не понимаешь, при чём тут бабушка и волк. Но ничего не происходит. Он всё так же стоит и улыбчиво смотрит на тебя.\n\nВидимо, просто так ты не уйдёшь.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = 'А у вас можно что-то купить?';
+    btn.onclick = () => renderScene('shop_buy_ask');
+    container.appendChild(btn);
+  }
+};
+
+Scenes['shop_buy_ask'] = {
+  title: 'Лавка странностей',
+  image: 'Screenshot_17.png',
+  text: '«Ой да ладушки, оладушки, конечно раз, конечно. Можеееено, тада. У меня есть много чего, сего, того. А?»',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    [{text:'Я молчал', next:'shop_inventory'},
+     {text:'А?', next:'shop_inventory'},
+     {text:'...', next:'shop_inventory'},
+     {text:'А что конкретное у вас есть?', next:'shop_inventory'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['shop_inventory'] = {
+  title: 'Лавка странностей',
+  image: 'Screenshot_17.png',
+  text: '«Всё! Древние магические артефакты, свитки с магией Зверей, говно дерьмоласок, луннасы, Ь, плюшки иииииииии самое прикольноееее.....»\n\nПрождав полминуты, ты понял, что от существа, стоящего перед тобой, бесполезно ожидать продолжения или конца, который хотя бы как-то мог логично продолжать нить повествования. Вся эта случайность медленно начинает давить тебе на голову, и всё больше появляется желание уйти.\n\nТы решаешь сам осмотреться в лавке и, пробегаясь взглядом по различному барахлу: картинке звезды, сделанной из макарон, розовому тотему, который уж очень похож на член, очень дорогой на вид мягкой игрушке в виде медведя, уточке из непонятного материала, мечам и ножам диковинной формы, шлемам и дерьму, которое не пахнет, а испускает жар — ты из всего этого хлама находишь лишь три более-менее нормальных предмета.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    [{text:'Купить красное зелье', item:'potion'},
+     {text:'Купить дорогую на вид безделушку', item:'trinket'},
+     {text:'Купить еды', item:'bread'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => { GameState.flags.shop_item = c.item; renderScene('shop_haggle'); };
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['shop_haggle'] = {
+  title: 'Лавка странностей',
+  image: 'Screenshot_17.png',
+  text: '«ООООО, у тебя глаз-гандураз......\n....\nАпчхи!! Один, один раз я чихал в жизни, и вот этот раз. Да, с тебя 1 000 000 000 000 000 000 000 высших!»',
+  action: function() {
+    const container = document.getElementById('choices-container');
+
+    const btn1 = document.createElement('button');
+    btn1.className = 'choice-btn';
+    btn1.textContent = '1 низший и точка!';
+    btn1.onclick = () => {
+      if (GameState.player.money.nb >= 1 || GameState.player.money.vb > 0) {
+        addMoney(-1);
+        renderScene('shop_deal');
+      } else {
+        renderScene('shop_no_money');
+      }
+    };
+    container.appendChild(btn1);
+
+    const btn2 = document.createElement('button');
+    btn2.className = 'choice-btn';
+    btn2.textContent = 'Хорошо...';
+    btn2.onclick = () => renderScene('shop_refuse');
+    container.appendChild(btn2);
+  }
+};
+
+Scenes['shop_refuse'] = {
+  title: 'Лавка странностей',
+  image: 'Screenshot_17.png',
+  text: '«Нет! Я отказываюсь. Не для того мне моя мама сисю давала. Как дела? Привет!»\n\nВидимо, придётся настоять.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = '1 низший и точка!';
+    btn.onclick = () => {
+      if (GameState.player.money.nb >= 1 || GameState.player.money.vb > 0) {
+        addMoney(-1);
+        renderScene('shop_deal');
+      } else {
+        renderScene('shop_no_money');
+      }
+    };
+    container.appendChild(btn);
+  }
+};
+
+Scenes['shop_no_money'] = {
+  title: 'Лавка странностей',
+  image: 'Screenshot_17.png',
+  text: 'У тебя нет даже одного низшего. Существо смотрит на тебя с чем-то, похожим на жалость, хотя его лицо не меняется.\n\n«Ладно, бесплатно. По дружбе. Мы ведь друзья, да? ДА?!»',
+  next: 'shop_deal'
+};
+
+Scenes['shop_deal'] = {
+  title: 'Лавка странностей',
+  image: 'Screenshot_17.png',
+  text: '«Полиция!!!! Грабят! Мама, я не хочу умирать!!!!\n\n...Да. По рукам.»',
+  action: function() {
+    const item = GameState.flags.shop_item;
+    let itemObj, desc;
+    if (item === 'potion') {
+      itemObj = { name: 'Красное зелье', icon: '🧪', consumable: false };
+      desc = 'Зелье из Лавки странностей. На вид хорошее зелье лечения. Его можно будет хорошо продать или использовать в час нужды.';
+    } else if (item === 'trinket') {
+      itemObj = { name: 'Безделушка', icon: '💎', consumable: false };
+      desc = 'Небольшая золотая статуэтка толстого человека с обвисшими ушами. Дорогая безделушка.';
+    } else {
+      itemObj = { name: 'Пол батона', icon: '🍞', consumable: false };
+      desc = 'На вид свежий белый хлеб, но он не имеет запаха. Может, и вкуса не имеет.';
+    }
+    addToInventory(itemObj);
+
+    document.getElementById('scene-text').innerHTML += '\n\nТы платишь за ' + itemObj.name + '. ' + desc;
+
+    const container = document.getElementById('choices-container');
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = 'Далее';
+    btn.onclick = () => renderScene('shop_celebration');
+    container.appendChild(btn);
+  }
+};
+
+Scenes['shop_celebration'] = {
+  title: 'Лавка странностей',
+  image: 'Screenshot_17.png',
+  text: 'Как только ты берёшь предмет в руки, из ниоткуда появляются конфетти и ты слышишь хлопки. Над Худощавым десом появляется какая-то, видимо, магическая табличка, на которой написано «Поздравляем», а вокруг неё какие-то светящиеся стеклянные колбы, которые мигают разными цветами.\n\n«По -- Здра --- Вляю!!! Ты какой-то там покупатель, ну и гнида, ХА! Шучу, без обид.»\n\nРезко на секунду его голос становится серьёзным, и тебя окутывает экзистенциальная пустота от столь резкой смены настроения.\n\n«ИТААААК! Ты получаешь...»\n\nТак же весело продолжает он:\n\n«Шанс! Новую Возможность! И что говоришь, мама?» — он резко достаёт череп из своей столешницы. «Да, ты права, новую жизнь! ХАХАХАХАХ!»\n\nТы видишь, как он щёлкает пальцем, и вдруг ты уже не в оборванном тряпье, а в неплохом костюме, с хорошей обувкой на ногах, а не в сандалях, и с каким-то пропуском в руках. По-видимому, он от центральной библиотеки.\n\n«Всё!!!!»',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    [{text:'Э-э-э, спасибо', next:'shop_farewell'},
+     {text:'Постойте, как вас зовут?', next:'shop_farewell'},
+     {text:'...', next:'shop_farewell'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['shop_farewell'] = {
+  title: 'Лавка странностей',
+  image: 'Screenshot_17.png',
+  text: '«Запомни моё имя, гадкий грибоголовый. Я Свен! БЕН! НЕТ, РЕН!»\n\nРезко он начинает петь очень странную мелодию, полностью игнорируя тебя.\n\nПонимая, что лучше уходить по-хорошему, ты направляешься к двери, которая открывается — так же будто бы затягивая на ту сторону...',
+  next: 'shop_exit'
+};
+
+Scenes['shop_exit'] = {
+  title: 'Центральный Ярус',
+  text: 'Выйдя из Лавки, ты видишь прекрасный Центральный Ярус с огромным водохранилищем в центре, а посреди этого искусственного озера высится Водопадная Башня — там, где заседают сливки этого города и Империи. Это хоть и странно, но не страннее того, что было до этого, но всё-таки неординарно.\n\nГлавное, чтобы конгрегаты не прознали про это, а то повесят за использование Запрещённой магии.\n\nНа работу ты опоздал, поэтому наверняка тебя с неё уволят. Зато можно сходить в библиотеку — она как раз рядом.',
+  action: function() {
+    GameState.flags.shop_visited = true;
+    const container = document.getElementById('choices-container');
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = 'Пойти в библиотеку';
+    btn.onclick = () => renderScene('work_library_walk');
+    container.appendChild(btn);
+  }
 };
 
 Scenes['stub_walk'] = {
