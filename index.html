@@ -508,6 +508,11 @@ body {
       <button class="side-btn" onclick="devNavBack()" style="flex:1;font-size:13px;" title="Ctrl+Z">◀ Назад</button>
       <button class="side-btn" onclick="devNavForward()" style="flex:1;font-size:13px;" title="Ctrl+Y">Вперёд ▶</button>
     </div>
+    <div style="display:flex;gap:3px;margin-top:5px;">
+      <button class="side-btn" id="dev-dice-auto" onclick="setDevDice('auto')" style="flex:1;font-size:11px;background:#c4a060;font-weight:bold;">🎲 Авто</button>
+      <button class="side-btn" id="dev-dice-win" onclick="setDevDice('win')" style="flex:1;font-size:11px;">✅ Успех</button>
+      <button class="side-btn" id="dev-dice-fail" onclick="setDevDice('fail')" style="flex:1;font-size:11px;">❌ Провал</button>
+    </div>
   </div>
 </div>
 
@@ -601,6 +606,18 @@ function formatMoney() {
   parts.push((m.nb || 0) + ' н.б.');
   return parts.join(' ');
 }
+// --- Dev Dice Override ---
+let _devDiceMode = 'auto';
+function setDevDice(mode) {
+  _devDiceMode = mode;
+  document.getElementById('dev-dice-auto').style.fontWeight = mode === 'auto' ? 'bold' : 'normal';
+  document.getElementById('dev-dice-auto').style.background = mode === 'auto' ? '#c4a060' : '';
+  document.getElementById('dev-dice-win').style.fontWeight = mode === 'win' ? 'bold' : 'normal';
+  document.getElementById('dev-dice-win').style.background = mode === 'win' ? '#4a8a4a' : '';
+  document.getElementById('dev-dice-fail').style.fontWeight = mode === 'fail' ? 'bold' : 'normal';
+  document.getElementById('dev-dice-fail').style.background = mode === 'fail' ? '#8a4a4a' : '';
+}
+
 // --- Безумие (ОБ) ---
 function addMadness(n) {
   GameState.player.madness += n;
@@ -820,7 +837,10 @@ function rollDice(choice) {
   }
 
   const bonus = bonusItem ? bonusItem.bonus : 0;
-  const roll = Math.floor(Math.random() * 20) + 1;
+  let roll;
+  if (_devDiceMode === 'win') roll = 20;
+  else if (_devDiceMode === 'fail') roll = 1;
+  else roll = Math.floor(Math.random() * 20) + 1;
   const total = roll + modifier + bonus;
 
   if (bonusItem) {
@@ -1198,15 +1218,6 @@ function renderMirrorScene() {
   nameInput.value = GameState.player.name || '';
   nameInput.id = 'mirror-name-input';
   container.appendChild(nameInput);
-
-  // Пол
-  const genderLabel = document.createElement('p');
-  genderLabel.innerHTML = '<strong>Пол:</strong>';
-  genderLabel.style.marginTop = '10px';
-  container.appendChild(genderLabel);
-  container.appendChild(createToggle('gender-male', 'Мужчина', 'Женщина', GameState.player.gender === 'male', (val) => {
-    GameState.player.gender = val ? 'male' : 'female';
-  }));
 
   container.appendChild(createToggle('beauty', 'Красивый', 'Некрасивый', GameState.player.traits.beautiful, (val) => {
     GameState.player.traits.beautiful = val;
@@ -1962,7 +1973,7 @@ Scenes['newspaper_slack_accept'] = {
 
 Scenes['work_library_walk'] = {
   title: 'Путь в библиотеку',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: 'Ты медленно волочишь свои ноги по прохладным переулкам Грибного района, периодически встречая живущих здесь десов. Вид их истощённый и болезненный: некоторые тяжело сидят на сырой земле с заросшим грибами телом, медленно умирая; некоторые валяются на гамаках, покуривая <glossary id="pokoy_trava">покой-траву</glossary>; а некоторые так же вяло и слабо идут по своим делам.\n\nТы направляешься в центр города, в отделение Конгрегационной библиотеки. Не самая плохая работа, особенно для выходца из Грибного района. Платят хорошо, но вот есть только один минус — это старый волшебник, заведующий библиотекой, Раф Лат Телий. Маразматичный старик, который постоянно просит переделать одну и ту же работу. Мало того, в самой библиотеке вообще нет интересных книг — строгое перечисление всех тирх и деревень и других бюрократических данных.\n\nЗаходя в пустую библиотеку, ты чуешь запах протухшего мяса и сразу понимаешь, что безумный Раф завтракает. Этот безумец к своим годам почти полностью потерял способность к восприятию мира.\n\n«Лафей, это ты? Иди сюда!» — хрипло зовёт тебя волшебник своим высоким голосом.',
   action: function() {
     const container = document.getElementById('choices-container');
@@ -1981,7 +1992,7 @@ Scenes['work_library_walk'] = {
 
 Scenes['library_scold_raf'] = {
   title: 'Библиотека',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: '«А я сколько раз говорил не называть меня Старком, ммм? Тем более я люблю бобы. Я люблю бомбы, я!»\n\nОканчивая предложение, он сразу возвращается к уплетению бобов.',
   action: function() {
     const container = document.getElementById('choices-container');
@@ -1999,7 +2010,7 @@ Scenes['library_scold_raf'] = {
 
 Scenes['library_approach_raf'] = {
   title: 'Библиотека — Раф',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: 'Ты подходишь к Рафу и видишь мерзкую картину, как он своими костлявыми пальчиками ест склизкие бобы и ими же переворачивает страницы книг.',
   action: function() {
     const container = document.getElementById('choices-container');
@@ -2018,7 +2029,7 @@ Scenes['library_approach_raf'] = {
 
 Scenes['library_raf_task'] = {
   title: 'Библиотека — Задание',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: '«Я даю тебе новое задание. Тебе надо сжечь 5 отдел. Полностью. Бромлостью. Громкостью!»\n\nОканчивая предложение, он сразу возвращается к уплетению бобов.',
   action: function() {
     const container = document.getElementById('choices-container');
@@ -2039,7 +2050,7 @@ Scenes['library_raf_task'] = {
 
 Scenes['library_section5'] = {
   title: 'Библиотека — 5 Отдел',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: 'Ты с безразличием идёшь к 5 отделу — самому большому, что есть в библиотеке, где хранятся налоговые отчёты и информация о доходах населения.',
   action: function() {
     const container = document.getElementById('choices-container');
@@ -2078,7 +2089,7 @@ Scenes['library_section5'] = {
 
 Scenes['library_think_success'] = {
   title: 'Библиотека — Размышление',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: 'Их уничтожение не просто осложнит работу местного самоуправления, а нанесёт серьёзный удар по экономике всей Империи, учитывая то, что Вастерса — крупнейший портовый и торговый хаб Теомора.',
   action: function() {
     const container = document.getElementById('choices-container');
@@ -2101,7 +2112,7 @@ Scenes['library_think_success'] = {
 
 Scenes['library_think_fail'] = {
   title: 'Библиотека — Размышление',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: 'Очередные бумажки, порождённые бюрократами. Их сожжение ничего не изменит.',
   action: function() {
     const container = document.getElementById('choices-container');
@@ -2124,7 +2135,7 @@ Scenes['library_think_fail'] = {
 
 Scenes['library_burn'] = {
   title: 'Библиотека — Поджог',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: 'Ты молча идёшь к ближайшей свече, заодно собирая старую и сухую бумагу для растопки. Распределяя растопку равномерно по всему 5 отделу, ты начинаешь поджигать, с каждым шагом ускоряясь. Доходя до последней растопки, ты начинаешь чувствовать запах гари. Дым начинает потихоньку заполнять пространство.\n\nПора уходить.',
   action: function() {
     const container = document.getElementById('choices-container');
@@ -2159,14 +2170,14 @@ Scenes['library_burn'] = {
 
 Scenes['library_flee_outside'] = {
   title: 'Библиотека — Побег',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: 'Ты выбегаешь на улицу и поворачиваешься лицом к библиотеке. Из окон начинает валить дым. Через несколько минут на место прибегают Конгрегаты и маги, которые оперативно тушат пожар заклинаниями.\n\nВ суматохе тебя никто не замечает. Ты тихо уходишь домой, оставив Рафа внутри.',
   next: 'work_go_home'
 };
 
 Scenes['library_report_raf'] = {
   title: 'Библиотека — Отчёт',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: '«О, Гердо, молодец, сынок. Вот твоя плата за сегодня. Можешь идти домой.»\n\nОн протягивает тебе склизкий от бобов мешок монет.',
   action: function() {
     if (!GameState.flags.library_paid) { GameState.flags.library_paid = true; addMoney(30); }
@@ -2202,21 +2213,21 @@ Scenes['library_report_raf'] = {
 
 Scenes['library_raf_extinguish'] = {
   title: 'Библиотека — Тушение',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: '«Да точно, ты прав» — спокойно произносит Безумный Библиотекарь, колдуя заклинание, которое тушит весь пожар за пару секунд.\n\n«Ну вот и всё!» — Ты видишь, как довольно, вприпрыжку, Раф идёт дальше наслаждаться своим мерзким завтраком.\n\nОстаётся только вернуться к работе.',
   next: 'library_work'
 };
 
 Scenes['library_extinguish_success'] = {
   title: 'Библиотека — Тушение',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: 'Ты начинаешь тушить пожар, несясь из стороны в сторону, бегая туда-сюда с вёдрами воды. Благо, пожар не успел разгореться, и ты, запотевший, его тушишь.\n\nОстаётся вернуться к работе.',
   next: 'library_work'
 };
 
 Scenes['library_extinguish_fail'] = {
   title: 'Библиотека — Пожар разгорается',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: 'Хоть ты и стараешься изо всех сил, но пожар распространяется быстрее, чем твои ноги. К тебе прибегает Раф и с удивлением смотрит на тебя.',
   action: function() {
     const container = document.getElementById('choices-container');
@@ -2249,7 +2260,7 @@ Scenes['library_extinguish_fail'] = {
 
 Scenes['library_fake_alarm'] = {
   title: 'Библиотека — Ложная тревога',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: '«О мой Зверь, тут Огнесферид!»\n\nС этим возгласом ты бежишь к ближайшей свече, заодно собирая старую и сухую бумагу для растопки. Распределяя растопку равномерно по всему 5 отделу, ты начинаешь поджигать, с каждым шагом ускоряясь. Доходя до последней растопки, ты начинаешь чувствовать запах гари. Дым начинает потихоньку заполнять пространство. Пора уходить.\n\nНа твой крик прибегает Раф Лат Телий. Он испуганно смотрит на тебя с раскрытой книгой заклинаний, готовясь к битве.\n\n«Где Огненое Отродье, я его в желе превращу и отдам на корм собакам....» Раф делает озадаченную паузу. Вы смотрите друг на друга, и на пару секунд повисает неловкое молчание. Он переводит взгляд на горящий 5 отдел.\n\n«Проклятый Глаз! Пожар! Спасайся кто может!»',
   action: function() {
     const container = document.getElementById('choices-container');
@@ -2282,7 +2293,7 @@ Scenes['library_fake_alarm'] = {
 
 Scenes['library_save_raf'] = {
   title: 'Библиотека — Спасение',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: 'Ты хватаешь своего начальника и несёшься к выходу. Выбежав из библиотеки, ты ставишь на землю Рафа, и он благодарно смотрит на тебя.\n\n«Висконтий, спасибо тебе!»',
   action: function() {
     const container = document.getElementById('choices-container');
@@ -2315,7 +2326,7 @@ Scenes['library_save_raf'] = {
 
 Scenes['library_hug_raf'] = {
   title: 'Библиотека — Объятие',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: 'Ты тепло обнимаешь это дряхлое и старое тело и чувствуешь, что оно так же обнимает тебя. Несмотря на контекст происходящего, тебе становится так хорошо и уютно.',
   action: function() {
     const container = document.getElementById('choices-container');
@@ -2333,7 +2344,7 @@ Scenes['library_hug_raf'] = {
 
 Scenes['library_burning_dilemma'] = {
   title: 'Библиотека — Дилемма',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: '«Да, ты прав, что же нам делать? Я бы сейчас пошёл бы в таверну.»',
   action: function() {
     const container = document.getElementById('choices-container');
@@ -2363,14 +2374,14 @@ Scenes['library_tavern_with_raf'] = {
 
 Scenes['library_raf_extinguish_outside'] = {
   title: 'Библиотека — Тушение',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: '«Да точно, ты прав!» — Раф забегает обратно в библиотеку. Через несколько секунд из окон перестаёт валить дым — заклинание сработало.\n\nРаф выходит довольный. «Ну вот и всё!» Остаётся вернуться к работе.',
   next: 'library_work'
 };
 
 Scenes['library_shout_fire'] = {
   title: 'Библиотека — Крик',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: 'Ты начинаешь кричать во весь голос. После первого же выкрика тебя начинает поддерживать Раф. Вы кричите, привлекая внимание зевак, которые суетно начинают толпиться возле вас, и конгрегатов, которые оперативно начинают собираться у места пожара, придя с магами и начиная тушить пожар заклинаниями. Не проходит и пары минут, как пожар уже потушен.\n\nК вам подходит суровый с виду Конгрегат, на голове которого красуется берет.',
   action: function() {
     // Passive INT check DC 12
@@ -2391,7 +2402,7 @@ Scenes['library_shout_fire'] = {
 
 Scenes['library_guardian'] = {
   title: 'Библиотека — Хранитель',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: 'Ощущая на себе пристальный взгляд, ты поворачиваешь голову на Хранителя, не успевая попрощаться со своим начальником.\n\n«А ты, как я понял, его дешёвая рабочая сила и единственный разумный человек в библиотеке?»',
   action: function() {
     const container = document.getElementById('choices-container');
@@ -2418,7 +2429,7 @@ Scenes['library_guardian'] = {
 
 Scenes['library_guardian_yes'] = {
   title: 'Библиотека — Компенсация',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: '«Ты, в общем-то, можешь идти, но огорчу тебя. Тебе придётся искать новую работу. Вот твоя компенсация.»',
   action: function() {
     if (!GameState.flags.library_paid) { GameState.flags.library_paid = true; addMoney(30); }
@@ -2446,7 +2457,7 @@ Scenes['library_guardian_yes'] = {
 
 Scenes['library_guardian_bye'] = {
   title: 'Библиотека — Прощание',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: '«Всего хорошего, парень.»',
   action: function() {
     const container = document.getElementById('choices-container');
@@ -2464,14 +2475,14 @@ Scenes['library_guardian_bye'] = {
 
 Scenes['library_guardian_no_money'] = {
   title: 'Библиотека — Отказ',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: '«.... Эм... Ладно, тогда прощай.»',
   next: 'work_go_home'
 };
 
 Scenes['library_guardian_who'] = {
   title: 'Библиотека — Вопрос',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: '«Нет, блин, ты. Ну а кто ещё? Или его безумство тебе передалось? Ладно, вот твоя компенсация за увольнение. Пока.»',
   action: function() {
     if (!GameState.flags.library_paid) { GameState.flags.library_paid = true; addMoney(30); }
@@ -2490,14 +2501,14 @@ Scenes['library_guardian_who'] = {
 
 Scenes['library_guardian_joke'] = {
   title: 'Библиотека — Шутка',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: '«Видимо, его безумство и на десов передаётся, ужасно.»\n\nОн просто берёт и разворачивается, уходя прочь от тебя.',
   next: 'work_go_home'
 };
 
 Scenes['library_scream'] = {
   title: 'Библиотека — Крик',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: 'Безумный старец смотрит на тебя и тоже начинает вопить своим хриплым голосом.\n\n«Мы все умрём! Помогите!»\n«ААААА!»\n«ААААА!»',
   action: function() {
     if (!GameState.flags.scream_count) GameState.flags.scream_count = 0;
@@ -2534,7 +2545,7 @@ Scenes['library_scream'] = {
 // --- Library work (boring routine) ---
 Scenes['library_work'] = {
   title: 'Библиотека — Работа',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: 'Ты идёшь за стол, который весь испачкан засохшими чернилами и завален килограммами макулатуры. Время приступать к ежедневной, до смерти рутинной работе. Начиная с проверки книг, заканчивая пересчётом и занесением новых данных в книги. Километры чисел и текста проскальзывают у тебя перед глазами, а отстранённое бормотание Рафа на фоне будто бы работает как искусное заклинание усыпления.\n\nКак было бы славно вздремнуть, всего пару минуточек...',
   action: function() {
     const container = document.getElementById('choices-container');
@@ -2560,7 +2571,7 @@ Scenes['library_work'] = {
 
 Scenes['library_resist_success'] = {
   title: 'Библиотека — Стойкость',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: 'Ты резко встаёшь и идёшь заниматься более активным трудом, раскладывая книги по полкам и таская старые свитки по библиотеке.\n\nК концу дня Раф выдаёт тебе стандартную плату.',
   action: function() {
     if (!GameState.flags.library_paid) { GameState.flags.library_paid = true; addMoney(4); }
@@ -2575,7 +2586,7 @@ Scenes['library_resist_success'] = {
 
 Scenes['library_sleep'] = {
   title: 'Библиотека — Сон',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: 'Твои глаза начинают смыкаться, а твоё тело медленно расслабляется, погружаясь в сон...\n\nВдруг ты чувствуешь, как что-то твёрдое тычется тебе в спину, тормоша тебя туда-сюда. Медленно открывая глаза, ты оборачиваешься назад, видя, как старик Раф тычет в тебя своей тростью.\n\n«Оооо, Изолий, я думал ты помер, ххахахаха!»',
   action: function() {
     const container = document.getElementById('choices-container');
@@ -2596,7 +2607,7 @@ Scenes['library_sleep'] = {
 
 Scenes['library_wakeup_angry'] = {
   title: 'Библиотека — Гнев Рафа',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: 'Старик смотрит на тебя, и с каждой секундой его глаза наполняются яростью. Ты слышишь, как его зубы испускают раздражённый скрежет, а вены на лбу набухают как губчатый мох.\n\n«Как ты посмел, Леон! Я тебе дал всё, и ты взял и уснул на работе?! Нет, ты мне не нужен. Пошёл прочь!» — надрывисто кричит Раф.',
   action: function() {
     GameState.flags.fired_from_library = true;
@@ -2618,21 +2629,21 @@ Scenes['library_wakeup_angry'] = {
 
 Scenes['library_fired_leave'] = {
   title: 'Библиотека — Увольнение',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: 'Ты озадаченно встаёшь под крики полоумного Рафа и молча выходишь на улицу, видя, как улицы Вастерсы заполнены оранжевыми красками от заходящего солнца.',
   next: 'work_go_home'
 };
 
 Scenes['library_fired_but'] = {
   title: 'Библиотека — Увольнение',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: 'Ты видишь, как Маг топает ножкой, отворачиваясь от тебя и скрещивая руки.\n\n«Уходи» — бормочет он себе под нос.\n\nТы озадаченно встаёшь и молча выходишь на улицу, видя, как улицы Вастерсы заполнены оранжевыми красками от заходящего солнца.',
   next: 'work_go_home'
 };
 
 Scenes['library_dead_joke'] = {
   title: 'Библиотека — Кладбище',
-  image: 'Screenshot_17.png',
+  image: 'anatoliyblivernec-.jpg',
   text: '«О боже! Тогда тебе надо на кладбище!»\n\nТы видишь, как он вздымает руки вверх, и внезапная искра появляется перед глазами. Ты осознаёшь, что оказался на городском кладбище, сидя в ещё не закопанном гробу. На тебя смотрит гробовщик озадаченным взглядом, держа лопату, запачканную сырой землёй.\n\n«Здравствуйте» — с тоской и безынициативно говорит лысый дед с седой бородой.\n\n«Вам помочь?»',
   action: function() {
     const container = document.getElementById('choices-container');
@@ -2665,7 +2676,7 @@ Scenes['library_cemetery_ending'] = {
 
 Scenes['stub_new_shop'] = {
   title: 'Лавка странностей',
-  image: 'anatoliyblivernec-.jpg',
+  image: 'Screenshot_17.png',
   text: 'Ты подходишь к странной двери, которой, по твоей памяти, тут не было. Вообще, лавки в Грибном районе, да и на таком ярусе, не просто редки, а почти невозможны, и все подобные места ты знаешь. К тому же тебя очень смущает название: «Лавка странностей» — которое прекрасно описывает, что ты сейчас чувствуешь.\n\nСтоя перед дверью новообразовавшейся лавки, ты задумываешься — стоит ли туда входить?',
   action: function() {
     const container = document.getElementById('choices-container');
@@ -2693,7 +2704,7 @@ Scenes['stub_new_shop'] = {
 
 Scenes['shop_enter'] = {
   title: 'Лавка странностей',
-  image: 'anatoliyblivernec-.jpg',
+  image: 'Screenshot_17.png',
   text: 'Ты открываешь дверь лавки, делая неосознанно шаг вперёд, будто бы тебя магической силой затягивает внутрь. Мгновение спустя ты стоишь перед серым худощавым существом, у которого натянута улыбка на всё чрезмерно геометричное лицо в виде конуса. Всё твоё нутро говорит: «Беги отсюда, он опасен». Несмотря на это, нельзя сказать, что ты испытываешь страх — скорее смятение и абсолютное непонимание происходящего.\n\n«ПРИВВВВВВ ЕЕЕЕЕТ! Как твои дела, хорошечка моя!» — говорит худощавый дес, не размыкая зубы, сохраняя жутковатую улыбку.\n\n«Я наконец-то ки рад, ай, ай, больно!»',
   action: function() {
     const container = document.getElementById('choices-container');
@@ -2715,21 +2726,21 @@ Scenes['shop_enter'] = {
 
 Scenes['shop_hello'] = {
   title: 'Лавка странностей',
-  image: 'anatoliyblivernec-.jpg',
+  image: 'Screenshot_17.png',
   text: '[Продолжение следует — Лавка странностей]',
   choices: [{ text: 'Уйти', next: 'intro_morning' }]
 };
 
 Scenes['shop_silence'] = {
   title: 'Лавка странностей',
-  image: 'anatoliyblivernec-.jpg',
+  image: 'Screenshot_17.png',
   text: '[Продолжение следует — Лавка странностей]',
   choices: [{ text: 'Уйти', next: 'intro_morning' }]
 };
 
 Scenes['shop_sing'] = {
   title: 'Лавка странностей',
-  image: 'anatoliyblivernec-.jpg',
+  image: 'Screenshot_17.png',
   text: '[Продолжение следует — Лавка странностей]',
   choices: [{ text: 'Уйти', next: 'intro_morning' }]
 };
