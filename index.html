@@ -2171,8 +2171,16 @@ Scenes['library_burn'] = {
 Scenes['library_flee_outside'] = {
   title: 'Библиотека — Побег',
   image: 'anatoliyblivernec-.jpg',
-  text: 'Ты выбегаешь на улицу и поворачиваешься лицом к библиотеке. Из окон начинает валить дым. Через несколько минут на место прибегают Конгрегаты и маги, которые оперативно тушат пожар заклинаниями.\n\nВ суматохе тебя никто не замечает. Ты тихо уходишь домой, оставив Рафа внутри.',
-  next: 'work_go_home'
+  text: 'Ты выбегаешь на улицу и поворачиваешься лицом к библиотеке. Из окон начинает валить густой дым. Не проходит и минуты, как за тобой выбегает и Раф, кашляя и размахивая тростью. Безумный маг даже не понимает, что произошло — он просто увидел дым и инстинктивно побежал за тобой.\n\nВскоре на место прибегают конгрегаты и маги, которые оперативно тушат пожар заклинаниями. Не проходит и пары минут, как пожар уже потушен.\n\nК вам подходит суровый с виду Конгрегат, на голове которого красуется берет.',
+  action: function() {
+    // Passive INT check DC 12
+    const intMod = getModifier(GameState.player.stats.INT);
+    const roll = _devDiceMode === 'win' ? 20 : _devDiceMode === 'fail' ? 1 : Math.floor(Math.random() * 20) + 1;
+    if ((roll + intMod) >= 12) {
+      document.getElementById('scene-text').innerHTML += '\n\n<span class="passive-check-success">Судя по его форме, это Хранитель из Ордена Паладинов.</span>';
+    }
+    setTimeout(() => renderScene('library_guardian'), 100);
+  }
 };
 
 Scenes['library_report_raf'] = {
@@ -2386,17 +2394,19 @@ Scenes['library_shout_fire'] = {
   action: function() {
     // Passive INT check DC 12
     const intMod = getModifier(GameState.player.stats.INT);
-    const roll = Math.floor(Math.random() * 20) + 1;
-    const passiveSuccess = (roll + intMod) >= 12;
-
-    if (passiveSuccess) {
+    const roll = _devDiceMode === 'win' ? 20 : _devDiceMode === 'fail' ? 1 : Math.floor(Math.random() * 20) + 1;
+    if ((roll + intMod) >= 12) {
       document.getElementById('scene-text').innerHTML += '\n\n<span class="passive-check-success">Судя по его форме, это Хранитель из Ордена Паладинов.</span>';
     }
 
-    const text2 = '\n\nОн сурово смотрит на вас двоих, переводя взгляд на старика.\n\n«Я удивлён, что этот отдел только сейчас воспламенился, учитывая, что ты был заведующим, Раф Лат.»\n\nСтрогий Хранитель переводит свой взгляд за ваши спины.\n\n«Эй, парни, пакуйте его!»\n\nДвое конгрегатов быстро подходят к Рафу и заковывают его в кандалы, уводя в сторону Верхних ярусов.';
-    document.getElementById('scene-text').innerHTML += text2;
+    document.getElementById('scene-text').innerHTML += '\n\nОн сурово смотрит на вас двоих, переводя взгляд на старика.\n\n«Я удивлён, что этот отдел только сейчас воспламенился, учитывая, что ты был заведующим, Раф Лат.»\n\nСтрогий Хранитель переводит свой взгляд за ваши спины.\n\n«Эй, парни, пакуйте его!»\n\nДвое конгрегатов быстро подходят к Рафу и заковывают его в кандалы, уводя в сторону Верхних ярусов.';
 
-    setTimeout(() => renderScene('library_guardian'), 100);
+    const container = document.getElementById('choices-container');
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = 'Далее';
+    btn.onclick = () => renderScene('library_guardian');
+    container.appendChild(btn);
   }
 };
 
