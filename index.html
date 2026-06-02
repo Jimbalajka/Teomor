@@ -1828,12 +1828,12 @@ Scenes['stub_home'] = {
 Scenes['work_newspaper_walk'] = {
   title: 'Путь на точку',
   image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
-  text: 'Ты медленно волочишь свои ноги по прохладным переулкам Грибного района, периодически встречая живущих здесь десов. Вид их истощённый и болезненный: некоторые тяжело сидят на сырой земле с заросшим грибами телом, медленно умирая; некоторые валяются на гамаках, покуривая <glossary id="pokoy_trava">покой-траву</glossary>; а некоторые так же вяло и слабо идут по своим делам.\n\nСпустя несколько десятков минут ты доходишь до 1 яруса, к небольшой площади у стен города. Людей тут мало, и живут преимущественно бедняки — конечно, не такие как ты. Даже для них ты бельмо на глазу: каждый раз проходя мимо местных, ты ловишь на себе косые взгляды и замечаешь, как от тебя шарахаются.\n\nЗаходя в местную газету, в полном игнорировании со стороны рабочих, ты молча берёшь выпуски, которые тебе надо раздать, и идёшь на свою точку. И вот опять — целый день стоять и чувствовать это отвратительное чувство полного безразличия и наплевательства со стороны окружающих.\n\nСтопка газет в твоих руках кажется тяжелее обычного. «Вестник Вастерсы» — так называется эта жалкая газетёнка, которую никто не читает. Ты встаёшь на своё привычное место у фонтана, который давно не работает, и начинаешь выкрикивать заголовки.',
+  text: 'Ты медленно волочишь свои ноги по прохладным переулкам Грибного района, периодически встречая живущих здесь десов. Вид их истощённый и болезненный: некоторые тяжело сидят на сырой земле с заросшим грибами телом, медленно умирая; некоторые валяются на гамаках, покуривая <glossary id="pokoy_trava">покой-траву</glossary>; а некоторые так же вяло и слабо идут по своим делам.\n\nСпустя несколько десятков минут ты доходишь до 1 яруса, к небольшой площади у стен города. Людей тут мало, и живут преимущественно бедняки — конечно, не такие как ты. Даже для них ты бельмо на глазу: каждый раз проходя мимо местных, ты ловишь на себе косые взгляды и замечаешь, как от тебя шарахаются.\n\nЗаходя в местную газету, в полном игнорировании со стороны рабочих, ты молча берёшь выпуски, которые тебе надо раздать. Но сегодня что-то не так. Главный редактор Ферис Мол — сухой, как его перо, дес с вечно прищуренными глазами — внезапно поднимает на тебя взгляд из-за своей горы бумаг.\n\n«Стой. Сегодня у тебя особое задание.»',
   action: function() {
     const container = document.getElementById('choices-container');
-    [{text:'Стараться изо всех сил, кричать громче', next:'newspaper_try_hard'},
-     {text:'Работать как обычно, без усердия', next:'newspaper_normal'},
-     {text:'Забить на работу и просто стоять', next:'newspaper_slack'}
+    [{text:'Что за задание?', next:'newspaper_task'},
+     {text:'Я просто раздаю газеты...', next:'newspaper_refuse_task'},
+     {text:'Молча слушать', next:'newspaper_task'}
     ].forEach(c => {
       const btn = document.createElement('button');
       btn.className = 'choice-btn';
@@ -1844,41 +1844,212 @@ Scenes['work_newspaper_walk'] = {
   }
 };
 
-Scenes['newspaper_try_hard'] = {
-  title: 'Газета — Усердие',
+Scenes['newspaper_refuse_task'] = {
+  title: 'Газета — Отказ',
   image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
-  text: '«СВЕЖИЙ ВЫПУСК! ВЕСТНИК ВАСТЕРСЫ! НОВОСТИ ПОРТА И ВЕРХНИХ ЯРУСОВ!» — надрываешь ты своё горло, размахивая газетами так, будто от этого зависит твоя жизнь. А ведь, по сути, так и есть.\n\nПервые пару часов — ничего. Десы проходят мимо, даже не поворачивая головы. Ты уже начинаешь хрипеть, когда к тебе подходит дес в потрёпанном, но когда-то явно дорогом плаще.',
+  text: 'Ферис поднимает бровь так высоко, что она почти сливается с его залысиной.\n\n«Ты раздаёшь то, что я тебе скажу раздавать. Или не раздаёшь ничего. Выбирай.»\n\nЕго тон не допускает возражений.',
   action: function() {
     const container = document.getElementById('choices-container');
-    // CHA check to sell extra
+    [{text:'Ладно, что за задание?', next:'newspaper_task'},
+     {text:'Тогда я пойду', next:'newspaper_walk_away'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['newspaper_walk_away'] = {
+  title: 'Газета — Уход',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Ты разворачиваешься и идёшь к выходу. Ферис не окликает тебя — он уже вернулся к своим бумагам, будто тебя и не существовало. Ни денег, ни газет. Просто пустота.\n\nВыходя на улицу, ты осознаёшь, что, возможно, потерял единственную работу, которая хоть как-то терпела твоё присутствие.',
+  action: function() {
+    GameState.flags.newspaper_paid = true;
+    GameState.flags.fired_from_newspaper = true;
+    const container = document.getElementById('choices-container');
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = 'Идти домой';
+    btn.onclick = () => renderScene('work_go_home');
+    container.appendChild(btn);
+  }
+};
+
+Scenes['newspaper_task'] = {
+  title: 'Газета — Задание',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Ферис достаёт из-под стола отдельную стопку листовок — не обычных выпусков «Вестника Вастерсы», а чего-то другого. Бумага плотнее, шрифт мельче, а содержание... Ты пробегаешь глазами первые строки.\n\nЭто памфлет. Злобный, едкий, направленный против торговой гильдии 2-го яруса — конкретно против купца Сорго Белля, одного из богатейших торговцев города. Обвинения в контрабанде, уклонении от налогов, связях с пиратами из Тройного Султаната.\n\n«Раздашь эти листовки вместо обычных газет. По всему 1 ярусу. За это — 30 низших. Если раздашь только обычные газеты — стандартные 4. Если ничего не раздашь... ну, ты понимаешь.»\n\nФерис откидывается на спинку стула и скрещивает руки.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+
+    // R-type INT check: understand consequences
+    const thinkBtn = document.createElement('button');
+    thinkBtn.className = 'choice-btn dice-roll';
+    thinkBtn.textContent = 'Подумать, чем это может грозить';
+    thinkBtn.onclick = () => rollDice({
+      text: 'Подумать о последствиях',
+      check: { stat: 'INT', dc: 10 },
+      success: 'newspaper_think_success',
+      failure: 'newspaper_think_fail'
+    });
+    container.appendChild(thinkBtn);
+
+    const btn2 = document.createElement('button');
+    btn2.className = 'choice-btn';
+    btn2.textContent = 'Взять памфлеты и идти раздавать';
+    btn2.onclick = () => renderScene('newspaper_take_pamphlets');
+    container.appendChild(btn2);
+
+    const btn3 = document.createElement('button');
+    btn3.className = 'choice-btn';
+    btn3.textContent = 'Взять обычные газеты и работать как всегда';
+    btn3.onclick = () => renderScene('newspaper_take_regular');
+    container.appendChild(btn3);
+  }
+};
+
+Scenes['newspaper_think_success'] = {
+  title: 'Газета — Размышление',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Сорго Белль — не просто торговец. Это один из немногих десов, у которого достаточно денег и связей, чтобы нанять людей из <glossary id="birzha_naemn">Биржи Наемничества</glossary>. Если он узнает, кто раздавал памфлеты — а на 1 ярусе все всех знают — тебе не поздоровится. С другой стороны, 30 низших — это больше, чем ты видел за последний месяц.\n\nА ещё... этот памфлет мог написать не Ферис. Слишком грамотно для него. Кто-то заказал это.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    [{text:'Всё равно взять памфлеты — деньги важнее', next:'newspaper_take_pamphlets'},
+     {text:'Слишком опасно. Взять обычные газеты', next:'newspaper_take_regular'},
+     {text:'Спросить Фериса, кто заказал памфлет', next:'newspaper_ask_who'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['newspaper_think_fail'] = {
+  title: 'Газета — Размышление',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Какой-то торгаш из 2-го яруса. Кому какое дело до разборок богатеев? Главное — 30 низших.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    [{text:'Взять памфлеты', next:'newspaper_take_pamphlets'},
+     {text:'Взять обычные газеты', next:'newspaper_take_regular'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['newspaper_ask_who'] = {
+  title: 'Газета — Вопрос',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Ферис замирает на секунду. Его прищуренные глаза сужаются ещё сильнее, если это вообще возможно.\n\n«Тебе не надо это знать. Тебе надо раздать бумажки и получить деньги. Всё. Или ты хочешь, чтобы я нашёл кого-то более... послушного?»\n\nОн выдерживает паузу.\n\n«Скажу одно — человек, который это заказал, не из тех, кому отказывают.»',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    [{text:'Ладно, давай памфлеты', next:'newspaper_take_pamphlets'},
+     {text:'Нет. Обычные газеты', next:'newspaper_take_regular'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+// --- ПАМФЛЕТЫ (опасный путь, 30 низших) ---
+Scenes['newspaper_take_pamphlets'] = {
+  title: 'Газета — Памфлеты',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Ты берёшь стопку памфлетов и выходишь на площадь. Бумага в руках будто жжёт пальцы — или это просто твоё воображение.\n\nМесто у сломанного фонтана. Ты начинаешь раздавать листовки прохожим. Большинство берут не глядя, некоторые отмахиваются. Один старик прочитал прямо при тебе и выругался так, что даже покой-травники на гамаках проснулись.\n\nК обеду ты раздал почти половину стопки, когда замечаешь, что к тебе целенаправленно идёт крепкий дес в кожаном жилете. Взгляд недобрый.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    [{text:'Продолжить раздавать, не обращая внимания', next:'newspaper_thug_confront'},
+     {text:'Спрятать оставшиеся памфлеты', next:'newspaper_hide_pamphlets'},
+     {text:'Попытаться уйти', next:'newspaper_flee_attempt'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['newspaper_thug_confront'] = {
+  title: 'Газета — Столкновение',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Дес в жилете подходит вплотную и выхватывает памфлет из твоих рук. Он читает первые строки, и его лицо перекашивает.\n\n«Ты что, совсем ёбнулся? Ты знаешь, чьё имя тут написано? Тебя Белль на корм рыбам пустит, грибоед.»\n\nОн хватает тебя за ворот и притягивает к себе.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+
     const chaBtn = document.createElement('button');
     chaBtn.className = 'choice-btn dice-roll';
-    chaBtn.textContent = 'Попытаться продать ему побольше выпусков';
+    chaBtn.textContent = 'Попытаться убедить, что ты просто раздатчик';
     chaBtn.onclick = () => rollDice({
-      text: 'Попытаться продать ему побольше выпусков',
-      check: { stat: 'CHA', dc: 10 },
-      success: 'newspaper_big_sale',
-      failure: 'newspaper_normal_sale'
+      text: 'Убедить громилу',
+      check: { stat: 'CHA', dc: 12 },
+      success: 'newspaper_talk_out',
+      failure: 'newspaper_beaten'
     });
     container.appendChild(chaBtn);
 
     const btn2 = document.createElement('button');
     btn2.className = 'choice-btn';
-    btn2.textContent = 'Просто продать один выпуск';
-    btn2.onclick = () => renderScene('newspaper_normal_sale');
+    btn2.textContent = 'Молча отдать все памфлеты';
+    btn2.onclick = () => renderScene('newspaper_surrender_pamphlets');
     container.appendChild(btn2);
+
+    const btn3 = document.createElement('button');
+    btn3.className = 'choice-btn';
+    btn3.textContent = 'Вырваться и бежать';
+    btn3.onclick = () => rollDice({
+      text: 'Вырваться',
+      check: { stat: 'DEX', dc: 10 },
+      success: 'newspaper_escape_success',
+      failure: 'newspaper_beaten'
+    });
+    container.appendChild(btn3);
   }
 };
 
-Scenes['newspaper_big_sale'] = {
-  title: 'Газета — Удачный день',
+Scenes['newspaper_talk_out'] = {
+  title: 'Газета — Слова',
   image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
-  text: 'Твои слова попадают точно в цель. Ты расписываешь каждый выпуск так, будто в каждом — тайна мироздания. Дес в плаще усмехается и покупает сразу пять штук.\n\n«Для слуг возьму, пусть читают» — бросает он, не глядя.\n\nЗа ним потянулись другие. К концу дня ты распродал всю стопку — такого ещё не бывало. Начальник молча вручает тебе плату, и ты видишь в его глазах что-то похожее на удивление. Или презрение. Сложно сказать.',
+  text: '«Послушай, мне просто дали бумажки и сказали раздавать. Я даже читать толком не умею. Ты же видишь — я грибоед, какие мне памфлеты?»\n\nТвои слова звучат настолько убедительно-жалко, что дес ослабляет хватку. Он смотрит на тебя с отвращением, но без злости.\n\n«Запомни, крыса. Если я ещё раз увижу тебя с этим дерьмом — утоплю в канале. А теперь отдавай остальные и проваливай.»\n\nОн забирает оставшиеся памфлеты и уходит.',
   action: function() {
-    if (!GameState.flags.newspaper_paid) { GameState.flags.newspaper_paid = true; addMoney(30); }
+    if (!GameState.flags.newspaper_paid) {
+      GameState.flags.newspaper_paid = true;
+      addMoney(4);
+    }
     const container = document.getElementById('choices-container');
-    [{text:'Идти домой с полным кошельком', next:'work_go_home'},
-     {text:'Зайти в корчму — ты это заслужил', next:'tavern_enter'}
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = 'Вернуться к Ферису за обычными газетами';
+    btn.onclick = () => renderScene('newspaper_return_feris');
+    container.appendChild(btn);
+  }
+};
+
+Scenes['newspaper_beaten'] = {
+  title: 'Газета — Избиение',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Удар в живот выбивает из тебя весь воздух. Ты сгибаешься пополам, и второй удар приходится по спине. Памфлеты разлетаются по мокрой мостовой.\n\n«Передай своему начальничку — в следующий раз будет не газетчик, а он сам.»\n\nДес в жилете плюёт рядом с тобой и уходит, забрав с собой несколько листовок. Ты лежишь на земле, чувствуя, как холодная вода просачивается через одежду. Мимо проходят десы, обходя тебя, как лужу.\n\nЧерез какое-то время ты поднимаешься и, шатаясь, бредёшь обратно в редакцию.',
+  action: function() {
+    GameState.flags.newspaper_paid = true;
+    const container = document.getElementById('choices-container');
+    [{text:'Потребовать у Фериса обещанные деньги', next:'newspaper_demand_pay'},
+     {text:'Молча уйти', next:'newspaper_leave_beaten'}
     ].forEach(c => {
       const btn = document.createElement('button');
       btn.className = 'choice-btn';
@@ -1889,10 +2060,286 @@ Scenes['newspaper_big_sale'] = {
   }
 };
 
-Scenes['newspaper_normal_sale'] = {
-  title: 'Газета — Обычный день',
+Scenes['newspaper_demand_pay'] = {
+  title: 'Газета — Требование',
   image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
-  text: 'Ты продаёшь один выпуск. Потом ещё один. К концу дня раздал чуть меньше половины стопки — обычная норма для такого места. Начальник безразлично протягивает тебе плату. 4 низших. Стандартная ставка для тебя, хотя другие получают больше.',
+  text: 'Ты вваливаешься в редакцию, держась за бок. Ферис даже не поднимает глаз.\n\n«Раздал?»\n\n«Меня избили из-за ваших листовок! Где мои 30 низших?!»\n\nФерис медленно поднимает взгляд и оценивает твоё состояние.\n\n«Ты раздал половину. Половина от 30 — это 15. Но за то, что тебя поймали — минус 10. Итого: 5. Бери и проваливай. И не вздумай рассказывать кому-то, откуда эти листовки.»',
+  action: function() {
+    if (!GameState.flags.newspaper_paid) { GameState.flags.newspaper_paid = true; addMoney(5); }
+    const container = document.getElementById('choices-container');
+    [{text:'Взять 5 низших и уйти', next:'work_go_home'},
+     {text:'Это нечестно!', next:'newspaper_argue_feris'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['newspaper_argue_feris'] = {
+  title: 'Газета — Спор',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Ферис встаёт. Он на голову выше тебя и, несмотря на худобу, в его движениях есть что-то змеиное.\n\n«Нечестно? А что честно? Что ты, <glossary id="nikchemysh">никчемыш</glossary>, вообще имеешь работу? Что кто-то платит тебе деньги за то, чтобы ты стоял и орал на площади? Забирай свои 5 монет и радуйся, что я не вычел за испорченные листовки.»\n\nОн бросает монеты на стол и отворачивается.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    [{text:'Забрать монеты и уйти', next:'work_go_home'},
+     {text:'Перевернуть его стол', next:'newspaper_flip_table'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['newspaper_flip_table'] = {
+  title: 'Газета — Ярость',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Ты хватаешь край стола и с силой переворачиваешь его. Бумаги, чернильницы, перья — всё летит на пол. Ферис отскакивает, и впервые ты видишь удивление на его лице.\n\n«Ты... ты совсем безумный!»\n\nРабочие в редакции замирают. Все смотрят на тебя. Впервые за всё время работы здесь на тебя смотрят.\n\n«Вон! И больше не приходи!» — Ферис указывает на дверь, его рука дрожит — не от страха, от злости.',
+  action: function() {
+    addMadness(2);
+    GameState.flags.fired_from_newspaper = true;
+    const container = document.getElementById('choices-container');
+    [{text:'Уйти, хлопнув дверью', next:'newspaper_storm_out'},
+     {text:'Забрать свои 5 низших со стола', next:'newspaper_grab_coins'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['newspaper_storm_out'] = {
+  title: 'Газета — Уход',
+  image: 'tarmo-juhola-industrial-maantaso-kopio.jpg',
+  text: 'Ты разворачиваешься и выходишь, с такой силой хлопнув дверью, что со стены падает рамка с первым выпуском «Вестника». Стекло разбивается с приятным звоном.\n\nНа улице холодно. Работы больше нет. Но внутри горит что-то странное — не злость, не отчаяние. Что-то новое.',
+  next: 'work_go_home'
+};
+
+Scenes['newspaper_grab_coins'] = {
+  title: 'Газета — Монеты',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Среди разлетевшихся бумаг ты находишь 5 монет и сгребаешь их в ладонь. Ферис смотрит на тебя так, будто ты украл у него ребёнка.\n\n«Грибоед проклятый...» — шипит он тебе в спину, когда ты выходишь.',
+  action: function() {
+    if (!GameState.flags.newspaper_paid) { GameState.flags.newspaper_paid = true; addMoney(5); }
+    const container = document.getElementById('choices-container');
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = 'Уйти';
+    btn.onclick = () => renderScene('work_go_home');
+    container.appendChild(btn);
+  }
+};
+
+Scenes['newspaper_leave_beaten'] = {
+  title: 'Газета — Уход',
+  image: 'tarmo-juhola-industrial-maantaso-kopio.jpg',
+  text: 'Ты даже не заходишь обратно. Просто бредёшь домой, чувствуя, как с каждым шагом тупая боль в боку напоминает тебе о цене чужих интриг.',
+  next: 'work_go_home'
+};
+
+Scenes['newspaper_surrender_pamphlets'] = {
+  title: 'Газета — Сдача',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Ты молча протягиваешь оставшиеся памфлеты. Дес выхватывает их, рвёт пополам и бросает на землю.\n\n«Умный грибоед. Редкость.» — бросает он и уходит.\n\nОставшуюся часть дня ты раздаёшь обычные газеты, которые прихватил на всякий случай.',
+  action: function() {
+    if (!GameState.flags.newspaper_paid) { GameState.flags.newspaper_paid = true; addMoney(4); }
+    const container = document.getElementById('choices-container');
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = 'Вернуться к Ферису за платой';
+    btn.onclick = () => renderScene('newspaper_return_feris');
+    container.appendChild(btn);
+  }
+};
+
+Scenes['newspaper_hide_pamphlets'] = {
+  title: 'Газета — Укрытие',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Ты быстро запихиваешь оставшиеся памфлеты за пазуху и достаёшь из сумки обычные газеты — ты предусмотрительно прихватил несколько выпусков. Когда дес в жилете подходит, ты стоишь с безобидным «Вестником Вастерсы» в руках.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    const dexBtn = document.createElement('button');
+    dexBtn.className = 'choice-btn dice-roll';
+    dexBtn.textContent = 'Выглядеть невинно';
+    dexBtn.onclick = () => rollDice({
+      text: 'Не выдать себя',
+      check: { stat: 'CHA', dc: 10 },
+      success: 'newspaper_hide_success',
+      failure: 'newspaper_hide_fail'
+    });
+    container.appendChild(dexBtn);
+  }
+};
+
+Scenes['newspaper_hide_success'] = {
+  title: 'Газета — Успех',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Дес оглядывает тебя, хмурится, но ничего не находит. Он выхватывает газету из твоих рук, просматривает — обычный выпуск.\n\n«Ладно, грибоед. Ошибся.» — бурчит он и уходит.\n\nТы ждёшь, пока он скроется за углом, и продолжаешь раздавать памфлеты — теперь осторожнее, подальше от этого района. К концу дня стопка пуста.',
+  action: function() {
+    if (!GameState.flags.newspaper_paid) { GameState.flags.newspaper_paid = true; addMoney(30); }
+    const container = document.getElementById('choices-container');
+    [{text:'Вернуться к Ферису за платой', next:'newspaper_paid_full'},
+     {text:'Зайти в корчму — заслужил', next:'tavern_enter'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['newspaper_hide_fail'] = {
+  title: 'Газета — Провал',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Твоё лицо тебя выдаёт. Дес замечает, как ты нервно прижимаешь руку к груди, и рывком распахивает твою куртку. Памфлеты сыплются на землю.\n\n«Ах ты, сучий потрох!»',
+  next: 'newspaper_beaten'
+};
+
+Scenes['newspaper_escape_success'] = {
+  title: 'Газета — Побег',
+  image: 'tarmo-juhola-industrial-maantaso-kopio.jpg',
+  text: 'Ты резко дёргаешься в сторону и вырываешься из его хватки, оставив в его руках клок ткани от воротника. Ноги несут тебя по переулкам Грибного района — тут ты знаешь каждый поворот, каждую щель. Дес в жилете пытается бежать за тобой, но быстро отстаёт в лабиринте сырых проходов.\n\nСердце колотится так, что, кажется, его слышит весь ярус. Памфлеты растерялись по дороге — осталось всего несколько штук.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    [{text:'Выбросить остатки памфлетов и идти домой', next:'newspaper_escape_home'},
+     {text:'Вернуться к Ферису и потребовать хоть что-то', next:'newspaper_return_feris_partial'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['newspaper_escape_home'] = {
+  title: 'Газета — Домой',
+  image: 'tarmo-juhola-industrial-maantaso-kopio.jpg',
+  text: 'Ты выбрасываешь мятые листовки в ближайшую канаву и, тяжело дыша, бредёшь домой. Ни денег, ни газет, ни спокойствия.',
+  action: function() {
+    GameState.flags.newspaper_paid = true;
+    const container = document.getElementById('choices-container');
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = 'Далее';
+    btn.onclick = () => renderScene('work_go_home');
+    container.appendChild(btn);
+  }
+};
+
+Scenes['newspaper_return_feris_partial'] = {
+  title: 'Газета — Частичная работа',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Ферис выслушивает тебя с каменным лицом.\n\n«Половина раздана, половина потеряна. 10 низших. И больше не попадайся — мне нужны раздатчики, а не бегуны.»',
+  action: function() {
+    if (!GameState.flags.newspaper_paid) { GameState.flags.newspaper_paid = true; addMoney(10); }
+    const container = document.getElementById('choices-container');
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = 'Забрать деньги и уйти';
+    btn.onclick = () => renderScene('work_go_home');
+    container.appendChild(btn);
+  }
+};
+
+Scenes['newspaper_paid_full'] = {
+  title: 'Газета — Полная оплата',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Ферис считает оставшиеся листовки — точнее, их отсутствие. Он молча отсчитывает 30 низших и кладёт на стол.\n\n«Неплохо. Может, в следующий раз будет что-то посерьёзнее.»\n\nТы не уверен, хочешь ли ты знать, что он имеет в виду.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    [{text:'Идти домой', next:'work_go_home'},
+     {text:'Зайти в корчму', next:'tavern_enter'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+// --- ОБЫЧНЫЕ ГАЗЕТЫ (безопасный путь, 4 низших) ---
+Scenes['newspaper_take_regular'] = {
+  title: 'Газета — Обычная работа',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: '«Как знаешь» — Ферис безразлично пожимает плечами и возвращается к своим бумагам.\n\nТы берёшь стопку обычных «Вестников» и выходишь на площадь. Привычная рутина. Встаёшь у сломанного фонтана и начинаешь свою ежедневную пытку — кричать в пустоту о вещах, которые никому не интересны.\n\n«ВЕСТНИК ВАСТЕРСЫ! СВЕЖИЕ НОВОСТИ!»\n\nТишина. Безразличие. Косые взгляды.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    [{text:'Стараться изо всех сил', next:'newspaper_regular_hard'},
+     {text:'Работать спокойно', next:'newspaper_regular_calm'},
+     {text:'Забить и просто стоять', next:'newspaper_regular_slack'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['newspaper_regular_hard'] = {
+  title: 'Газета — Усердие',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: '«СВЕЖИЙ ВЫПУСК! ВЕСТНИК ВАСТЕРСЫ! СКАНДАЛ В ПОРТУ! НОВЫЕ ПОШЛИНЫ!» — надрываешь ты горло.\n\nК обеду ты охрип, но к тебе подходит дес в потрёпанном, но когда-то явно дорогом плаще.',
+  action: function() {
+    const container = document.getElementById('choices-container');
+    const chaBtn = document.createElement('button');
+    chaBtn.className = 'choice-btn dice-roll';
+    chaBtn.textContent = 'Попытаться продать ему побольше';
+    chaBtn.onclick = () => rollDice({
+      text: 'Продать побольше',
+      check: { stat: 'CHA', dc: 12 },
+      success: 'newspaper_regular_big_sale',
+      failure: 'newspaper_regular_normal_end'
+    });
+    container.appendChild(chaBtn);
+
+    const btn2 = document.createElement('button');
+    btn2.className = 'choice-btn';
+    btn2.textContent = 'Просто продать один';
+    btn2.onclick = () => renderScene('newspaper_regular_normal_end');
+    container.appendChild(btn2);
+  }
+};
+
+Scenes['newspaper_regular_big_sale'] = {
+  title: 'Газета — Удача',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Ты расписываешь содержимое каждого выпуска так, будто это секретные документы Конгрегации. Дес в плаще усмехается и покупает пять штук.\n\n«Для слуг возьму, пусть читают» — бросает он, не глядя.\n\nЗа ним потянулись другие. К концу дня ты распродал всю стопку. Ферис молча вручает тебе плату, и ты видишь в его глазах что-то похожее на удивление.\n\n«30 низших. Не привыкай.»',
+  action: function() {
+    if (!GameState.flags.newspaper_paid) { GameState.flags.newspaper_paid = true; addMoney(30); }
+    const container = document.getElementById('choices-container');
+    [{text:'Идти домой с полным кошельком', next:'work_go_home'},
+     {text:'Зайти в корчму', next:'tavern_enter'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['newspaper_regular_normal_end'] = {
+  title: 'Газета — Конец дня',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Обычный день, обычная пустота. Ферис молча вручает тебе 4 низших.\n\n«Стандарт. Завтра приходи.»\n\nТы засовываешь монеты в карман и выходишь в вечерний холод Вастерсы.',
   action: function() {
     if (!GameState.flags.newspaper_paid) { GameState.flags.newspaper_paid = true; addMoney(4); }
     const container = document.getElementById('choices-container');
@@ -1904,29 +2351,53 @@ Scenes['newspaper_normal_sale'] = {
   }
 };
 
-Scenes['newspaper_normal'] = {
-  title: 'Газета — Рутина',
+Scenes['newspaper_regular_calm'] = {
+  title: 'Газета — Спокойная работа',
   image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
-  text: 'Ты монотонно выкрикиваешь заголовки, не вкладывая ни капли души. Зачем стараться, если всем плевать? Десы проходят мимо, иногда бросая на тебя брезгливый взгляд, иногда — вообще не замечая.\n\nК обеду ты продал три выпуска. К вечеру — ещё пару. Обычный день, обычная пустота. Начальник молча вручает тебе 4 низших — стандартную ставку.',
+  text: 'Ты монотонно выкрикиваешь заголовки, не вкладывая особой энергии. К обеду продал три выпуска, к вечеру — ещё пару. Обычная норма.\n\nНа обратном пути к редакции ты замечаешь на земле один из памфлетов — видимо, кто-то всё же их раздавал. Подняв листовку, ты пробегаешь глазами текст.',
   action: function() {
     if (!GameState.flags.newspaper_paid) { GameState.flags.newspaper_paid = true; addMoney(4); }
     const container = document.getElementById('choices-container');
-    const btn = document.createElement('button');
-    btn.className = 'choice-btn';
-    btn.textContent = 'Идти домой';
-    btn.onclick = () => renderScene('work_go_home');
-    container.appendChild(btn);
+    [{text:'Прочитать памфлет внимательно', next:'newspaper_read_pamphlet'},
+     {text:'Выбросить и забыть', next:'newspaper_regular_normal_end'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
   }
 };
 
-Scenes['newspaper_slack'] = {
+Scenes['newspaper_read_pamphlet'] = {
+  title: 'Газета — Памфлет',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Содержимое памфлета заставляет тебя остановиться. Обвинения против Сорго Белля — конкретные, с датами и суммами. Внизу — странная пометка, почти невидимая: «Правда стоит дороже молчания. Кто ищет — тот найдёт. Фонтан. Полночь.»\n\nКто-то оставил послание для тех, кто умеет читать между строк. Может, стоит прийти к фонтану в полночь?',
+  action: function() {
+    GameState.flags.found_pamphlet_message = true;
+    const container = document.getElementById('choices-container');
+    [{text:'Запомнить и идти домой', next:'work_go_home'},
+     {text:'Выбросить — это не твоё дело', next:'work_go_home'}
+    ].forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.text;
+      btn.onclick = () => renderScene(c.next);
+      container.appendChild(btn);
+    });
+  }
+};
+
+Scenes['newspaper_regular_slack'] = {
   title: 'Газета — Безразличие',
   image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
-  text: 'Ты стоишь на своём месте, держа газеты подмышкой, и смотришь на проходящих десов. Ни одного выкрика, ни одной попытки. Просто стоишь и дышишь холодным воздухом, пропитанным сыростью нижних ярусов.\n\nЧасы тянутся как застывший мёд. К вечеру ты не продал ни одного выпуска. Начальник смотрит на полную стопку газет, потом на тебя.',
+  text: 'Ты стоишь на месте, держа газеты подмышкой, и просто дышишь. Часы тянутся. К вечеру ты не продал ни одного выпуска.\n\nФерис смотрит на полную стопку. Потом на тебя. Без слов забирает газеты.',
   action: function() {
+    GameState.flags.newspaper_paid = true;
     const container = document.getElementById('choices-container');
     [{text:'Попытаться объясниться', next:'newspaper_slack_excuse'},
-     {text:'Молча принять', next:'newspaper_slack_accept'}
+     {text:'Молча уйти', next:'newspaper_slack_accept'}
     ].forEach(c => {
       const btn = document.createElement('button');
       btn.className = 'choice-btn';
@@ -1940,30 +2411,48 @@ Scenes['newspaper_slack'] = {
 Scenes['newspaper_slack_excuse'] = {
   title: 'Газета — Оправдание',
   image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
-  text: '«Сегодня мало людей было...» — начинаешь ты, но начальник даже не слушает. Он забирает газеты из твоих рук и молча уходит внутрь, захлопывая дверь перед твоим носом. Денег ты сегодня не получишь.',
+  text: '«Сегодня мало людей было...» — начинаешь ты, но Ферис даже не слушает. Он уже вернулся к своим бумагам, захлопнув перед тобой окно выдачи. Денег сегодня не будет.',
+  next: 'work_go_home'
+};
+
+Scenes['newspaper_slack_accept'] = {
+  title: 'Газета — Тишина',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Ни слова, ни взгляда. Ты для него — пустое место, даже не заслуживающее ругани. Может, это хуже, чем если бы он орал, как Тон Тон на складе.',
+  next: 'work_go_home'
+};
+
+Scenes['newspaper_return_feris'] = {
+  title: 'Газета — Возврат',
+  image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
+  text: 'Ферис видит, что памфлетов у тебя нет. Он щурится ещё сильнее.\n\n«Где листовки?»\n\n«Отобрали» — коротко отвечаешь ты.\n\nФерис молча вздыхает и выдаёт тебе обычную стопку газет. К концу дня ты раздал половину — стандартный результат. 4 низших.',
   action: function() {
-    GameState.flags.newspaper_paid = true;
+    if (!GameState.flags.newspaper_paid) { GameState.flags.newspaper_paid = true; addMoney(4); }
     const container = document.getElementById('choices-container');
     const btn = document.createElement('button');
     btn.className = 'choice-btn';
-    btn.textContent = 'Идти домой с пустыми руками';
+    btn.textContent = 'Идти домой';
     btn.onclick = () => renderScene('work_go_home');
     container.appendChild(btn);
   }
 };
 
-Scenes['newspaper_slack_accept'] = {
-  title: 'Газета — Ничего',
+Scenes['newspaper_flee_attempt'] = {
+  title: 'Газета — Побег',
   image: '5d6c16d7d4c8a82a0d0986d3e006ac08411821dd.png',
-  text: 'Начальник забирает газеты из твоих рук. Ни слова, ни взгляда. Ты для него — пустое место, даже не заслуживающее ругани. Может, это хуже, чем если бы он орал, как Тон Тон на складе.',
+  text: 'Ты пытаешься незаметно отойти, но дес в жилете уже заметил тебя.',
   action: function() {
-    GameState.flags.newspaper_paid = true;
     const container = document.getElementById('choices-container');
-    const btn = document.createElement('button');
-    btn.className = 'choice-btn';
-    btn.textContent = 'Идти домой с пустыми руками';
-    btn.onclick = () => renderScene('work_go_home');
-    container.appendChild(btn);
+    const dexBtn = document.createElement('button');
+    dexBtn.className = 'choice-btn dice-roll';
+    dexBtn.textContent = 'Рвануть в переулок';
+    dexBtn.onclick = () => rollDice({
+      text: 'Убежать',
+      check: { stat: 'DEX', dc: 10 },
+      success: 'newspaper_escape_success',
+      failure: 'newspaper_beaten'
+    });
+    container.appendChild(dexBtn);
   }
 };
 
