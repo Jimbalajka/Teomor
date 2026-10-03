@@ -33,6 +33,18 @@ const C_WOOD := Color(0.4, 0.28, 0.16)
 const C_STONE := Color(0.28, 0.24, 0.22)
 const C_DAMP := Color(0.3, 0.26, 0.22)
 
+const TEX_DIR := "res://assets/textures/style/"
+const TEX_PLASTER := "tex_attic_plaster_512.png"
+const TEX_WOOD := "tex_attic_wood_512.png"
+const TEX_STONE := "tex_alley_stone_512.png"
+const TEX_FLOOR := "tex_alley_floor_512.png"
+const TEX_FLESH := "tex_vsegrib_flesh_512.png"
+const TEX_CAP := "tex_vsegrib_cap_512.png"
+const TEX_METAL := "tex_metal_barrel_512.png"
+const TEX_INK := "tex_ink_grime_512.png"
+
+var _tex_cache: Dictionary = {}
+
 
 func _hash01(x: int, y: int, salt: int = 0) -> float:
 	var n := x * 374761393 + y * 668265263 + salt * 1274126177
@@ -56,11 +68,73 @@ func _noise_tex(base: Color, ink_amt: float = 0.18, size: int = 48, salt: int = 
 	return tex
 
 
-func _style_mat(base: Color, ink_amt: float = 0.18, rough: float = 0.92, emit: Color = Color(0, 0, 0, 1), emit_e: float = 0.0, salt: int = 1) -> StandardMaterial3D:
+func _load_style_tex(file_name: String) -> Texture2D:
+	if file_name.is_empty():
+		return null
+	if _tex_cache.has(file_name):
+		return _tex_cache[file_name]
+	var path := TEX_DIR + file_name
+	if ResourceLoader.exists(path):
+		var tex := load(path) as Texture2D
+		if tex != null:
+			_tex_cache[file_name] = tex
+			return tex
+	# Headless / pre-import fallback
+	var img := Image.new()
+	var err := img.load(path)
+	if err != OK:
+		return null
+	var itex := ImageTexture.create_from_image(img)
+	_tex_cache[file_name] = itex
+	return itex
+
+
+func _color_dist(a: Color, b: Color) -> float:
+	var dr := a.r - b.r
+	var dg := a.g - b.g
+	var db := a.b - b.b
+	return dr * dr + dg * dg + db * db
+
+
+func _pick_tex_for_color(color: Color) -> String:
+	# Purple family -> vsegrib
+	if _color_dist(color, C_PURPLE_GLOW) < 0.04 or _color_dist(color, C_PURPLE) < 0.045:
+		return TEX_FLESH
+	if color.r > 0.35 and color.b > color.g and color.r > color.g:
+		return TEX_FLESH
+	# Wood / warm boards
+	if _color_dist(color, C_WOOD) < 0.03 or (color.r > 0.3 and color.g > 0.2 and color.b < 0.22 and color.r >= color.g):
+		return TEX_WOOD
+	# Parchment plaster
+	if _color_dist(color, C_PARCHMENT) < 0.05 or _color_dist(color, C_PARCHMENT_DARK) < 0.04 or _color_dist(color, C_DAMP) < 0.025:
+		return TEX_PLASTER
+	# Stone
+	if _color_dist(color, C_STONE) < 0.03:
+		return TEX_STONE
+	# Near-black / floor
+	if color.r + color.g + color.b < 0.35:
+		return TEX_FLOOR
+	# Cool grey metal-ish
+	if abs(color.r - color.g) < 0.05 and abs(color.g - color.b) < 0.08 and color.r < 0.55:
+		return TEX_METAL
+	return TEX_PLASTER
+
+
+func _style_mat(base: Color, ink_amt: float = 0.18, rough: float = 0.92, emit: Color = Color(0, 0, 0, 1), emit_e: float = 0.0, salt: int = 1, tex_name: String = "", uv_scale: float = 0.45) -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(1, 1, 1)
-	mat.albedo_texture = _noise_tex(base, ink_amt, 48, salt)
+	var file_name := tex_name if not tex_name.is_empty() else _pick_tex_for_color(base)
+	var tex: Texture2D = _load_style_tex(file_name)
+	if tex == null:
+		tex = _noise_tex(base, ink_amt, 48, salt)
+		mat.albedo_color = Color(1, 1, 1)
+	else:
+		# Mild tint so props keep identity without killing baked grade
+		mat.albedo_color = base.lerp(Color(1, 1, 1), 0.72)
+	mat.albedo_texture = tex
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	mat.uv1_triplanar = true
+	mat.uv1_triplanar_sharpness = 6.0
+	mat.uv1_scale = Vector3(uv_scale, uv_scale, uv_scale)
 	mat.roughness = rough
 	mat.metallic = 0.0
 	if emit_e > 0.0:
@@ -70,7 +144,7 @@ func _style_mat(base: Color, ink_amt: float = 0.18, rough: float = 0.92, emit: C
 	return mat
 
 
-func _box_mesh(size: Vector3, color: Color) -> MeshInstance3D:
+func _box_mesh(size: Vector3, color: Color, tex_name: String = "") -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	mi.name = "Mesh"
 	var mesh := BoxMesh.new()
@@ -79,15 +153,16 @@ func _box_mesh(size: Vector3, color: Color) -> MeshInstance3D:
 	var ink := 0.2
 	if color.r + color.g + color.b < 0.35:
 		ink = 0.35
-	mi.material_override = _style_mat(color, ink, 0.95, Color(0, 0, 0), 0.0, int(color.r * 97 + color.g * 53 + color.b * 31))
+	var uv := clampf(1.1 / maxf(0.35, (size.x + size.y + size.z) * 0.22), 0.18, 1.4)
+	mi.material_override = _style_mat(color, ink, 0.95, Color(0, 0, 0), 0.0, int(color.r * 97 + color.g * 53 + color.b * 31), tex_name, uv)
 	return mi
 
 
-func _static_box(name: String, size: Vector3, pos: Vector3, color: Color) -> StaticBody3D:
+func _static_box(name: String, size: Vector3, pos: Vector3, color: Color, tex_name: String = "") -> StaticBody3D:
 	var body := StaticBody3D.new()
 	body.name = name
 	body.position = pos
-	body.add_child(_box_mesh(size, color))
+	body.add_child(_box_mesh(size, color, tex_name))
 	var col := CollisionShape3D.new()
 	col.name = "Collision"
 	var shape := BoxShape3D.new()
@@ -101,7 +176,7 @@ func _mushroom(name: String, pos: Vector3, scale: float = 1.0) -> StaticBody3D:
 	var body := StaticBody3D.new()
 	body.name = name
 	body.position = pos
-	var stem_mat := _style_mat(C_PURPLE.darkened(0.25), 0.25, 0.9, Color(0, 0, 0), 0.0, 11)
+	var stem_mat := _style_mat(C_PURPLE.darkened(0.25), 0.25, 0.9, Color(0, 0, 0), 0.0, 11, TEX_FLESH, 1.1)
 	var stem := MeshInstance3D.new()
 	stem.name = "Stem"
 	var stem_mesh := CylinderMesh.new()
@@ -119,7 +194,7 @@ func _mushroom(name: String, pos: Vector3, scale: float = 1.0) -> StaticBody3D:
 	cap_mesh.height = 0.18 * scale
 	cap.mesh = cap_mesh
 	cap.position = Vector3(0, 0.32 * scale, 0)
-	cap.material_override = _style_mat(C_PURPLE_GLOW, 0.12, 0.85, C_PURPLE_GLOW, 0.35, 17)
+	cap.material_override = _style_mat(C_PURPLE_GLOW, 0.12, 0.85, C_PURPLE_GLOW, 0.35, 17, TEX_CAP, 1.3)
 	body.add_child(cap)
 	# tiny spores around base
 	for i in range(3):
@@ -131,7 +206,7 @@ func _mushroom(name: String, pos: Vector3, scale: float = 1.0) -> StaticBody3D:
 		spore.mesh = sm
 		var ang := float(i) * 2.1
 		spore.position = Vector3(cos(ang) * 0.12 * scale, 0.03 * scale, sin(ang) * 0.12 * scale)
-		spore.material_override = _style_mat(C_PURPLE, 0.2, 0.9, C_PURPLE, 0.15, 20 + i)
+		spore.material_override = _style_mat(C_PURPLE, 0.2, 0.9, C_PURPLE, 0.15, 20 + i, TEX_FLESH, 1.6)
 		body.add_child(spore)
 	var col := CollisionShape3D.new()
 	col.name = "Collision"
@@ -152,9 +227,9 @@ func _growth_blob(root: Node, name: String, pos: Vector3, radius: float, glow: b
 	mesh.height = radius * 1.7
 	mi.mesh = mesh
 	if glow:
-		mi.material_override = _style_mat(C_PURPLE_GLOW, 0.15, 0.88, C_PURPLE_GLOW, 0.45, 41)
+		mi.material_override = _style_mat(C_PURPLE_GLOW, 0.15, 0.88, C_PURPLE_GLOW, 0.45, 41, TEX_CAP, 1.2)
 	else:
-		mi.material_override = _style_mat(C_PURPLE.darkened(0.1), 0.28, 0.95, Color(0, 0, 0), 0.0, 43)
+		mi.material_override = _style_mat(C_PURPLE.darkened(0.1), 0.28, 0.95, Color(0, 0, 0), 0.0, 43, TEX_FLESH, 1.1)
 	root.add_child(mi)
 	# satellite spores
 	for i in range(4):
@@ -166,12 +241,12 @@ func _growth_blob(root: Node, name: String, pos: Vector3, radius: float, glow: b
 		s.mesh = sm
 		var a := float(i) * 1.7
 		s.position = pos + Vector3(cos(a) * radius * 0.9, -radius * 0.2 + float(i) * 0.03, sin(a) * radius * 0.9)
-		s.material_override = _style_mat(C_PURPLE, 0.22, 0.9, C_PURPLE if glow else Color(0, 0, 0), 0.2 if glow else 0.0, 50 + i)
+		s.material_override = _style_mat(C_PURPLE, 0.22, 0.9, C_PURPLE if glow else Color(0, 0, 0), 0.2 if glow else 0.0, 50 + i, TEX_FLESH, 1.5)
 		root.add_child(s)
 
 
 func _ink_streak(root: Node, name: String, pos: Vector3, size: Vector3) -> void:
-	root.add_child(_static_box(name, size, pos, C_INK))
+	root.add_child(_static_box(name, size, pos, C_INK, TEX_INK))
 
 
 func _mark_owners(node: Node, owner: Node) -> void:
@@ -333,16 +408,16 @@ func _save_attic() -> Error:
 	var damp := C_DAMP
 
 	# Small cramped attic ~6x2.6x5
-	root.add_child(_static_box("Floor", Vector3(6, 0.2, 5), Vector3(0, -0.1, 0), wood))
-	root.add_child(_static_box("Ceiling", Vector3(6, 0.2, 5), Vector3(0, 2.6, 0), dark))
-	root.add_child(_static_box("WallBack", Vector3(6, 2.6, 0.2), Vector3(0, 1.3, -2.5), plaster))
-	root.add_child(_static_box("WallFront", Vector3(6, 2.6, 0.2), Vector3(0, 1.3, 2.5), plaster))
-	root.add_child(_static_box("WallLeft", Vector3(0.2, 2.6, 5), Vector3(-3.0, 1.3, 0), damp))
-	root.add_child(_static_box("WallRight", Vector3(0.2, 2.6, 5), Vector3(3.0, 1.3, 0), plaster))
+	root.add_child(_static_box("Floor", Vector3(6, 0.2, 5), Vector3(0, -0.1, 0), wood, TEX_WOOD))
+	root.add_child(_static_box("Ceiling", Vector3(6, 0.2, 5), Vector3(0, 2.6, 0), dark, TEX_INK))
+	root.add_child(_static_box("WallBack", Vector3(6, 2.6, 0.2), Vector3(0, 1.3, -2.5), plaster, TEX_PLASTER))
+	root.add_child(_static_box("WallFront", Vector3(6, 2.6, 0.2), Vector3(0, 1.3, 2.5), plaster, TEX_PLASTER))
+	root.add_child(_static_box("WallLeft", Vector3(0.2, 2.6, 5), Vector3(-3.0, 1.3, 0), damp, TEX_PLASTER))
+	root.add_child(_static_box("WallRight", Vector3(0.2, 2.6, 5), Vector3(3.0, 1.3, 0), plaster, TEX_PLASTER))
 
 	# Bed stub
-	root.add_child(_static_box("Bed", Vector3(2.0, 0.35, 1.0), Vector3(-1.6, 0.2, -1.6), Color(0.35, 0.3, 0.28)))
-	root.add_child(_static_box("BedPillow", Vector3(0.5, 0.15, 0.4), Vector3(-2.2, 0.45, -1.6), Color(0.45, 0.42, 0.4)))
+	root.add_child(_static_box("Bed", Vector3(2.0, 0.35, 1.0), Vector3(-1.6, 0.2, -1.6), Color(0.35, 0.3, 0.28), TEX_WOOD))
+	root.add_child(_static_box("BedPillow", Vector3(0.5, 0.15, 0.4), Vector3(-2.2, 0.45, -1.6), Color(0.45, 0.42, 0.4), TEX_PLASTER))
 
 	# Mirror stub (no character select)
 	var mirror := _make_interactable(
@@ -407,7 +482,7 @@ func _save_attic() -> Error:
 	root.add_child(ladder)
 
 	# damp props
-	root.add_child(_static_box("Crate", Vector3(0.7, 0.5, 0.7), Vector3(-2.2, 0.25, 1.4), Color(0.38, 0.28, 0.18)))
+	root.add_child(_static_box("Crate", Vector3(0.7, 0.5, 0.7), Vector3(-2.2, 0.25, 1.4), Color(0.38, 0.28, 0.18), TEX_WOOD))
 	root.add_child(_mushroom("Mushroom_Attic1", Vector3(-2.7, 0.9, -0.4), 0.9))
 	root.add_child(_mushroom("Mushroom_Attic2", Vector3(2.7, 1.4, 0.3), 1.1))
 
@@ -447,8 +522,8 @@ func _save_attic() -> Error:
 	return ResourceSaver.save(packed, "res://scenes/attic.tscn")
 
 
-func _slab(root: Node, name: String, size: Vector3, pos: Vector3, color: Color) -> void:
-	root.add_child(_static_box(name, size, pos, color))
+func _slab(root: Node, name: String, size: Vector3, pos: Vector3, color: Color, tex_name: String = "") -> void:
+	root.add_child(_static_box(name, size, pos, color, tex_name))
 
 
 func _npc_stub(name: String, pos: Vector3, sitting: bool, prompt: String, lines: PackedStringArray) -> StaticBody3D:
@@ -560,23 +635,23 @@ func _save_alley() -> Error:
 	var wide_z1 := 1.3
 	var wide_x0 := -8.0
 	var wide_x1 := 8.0
-	_slab(root, "WideFloor", Vector3(wide_x1 - wide_x0, 0.2, wide_z1 - wide_z0), Vector3(0, -0.1, 0), floor_c)
-	_slab(root, "WideCeil", Vector3(wide_x1 - wide_x0, 0.2, wide_z1 - wide_z0), Vector3(0, height, 0), ceil_c)
-	_slab(root, "WideWallSouth", Vector3(wide_x1 - wide_x0, height, 0.2), Vector3(0, height * 0.5, wide_z0), stone2)
+	_slab(root, "WideFloor", Vector3(wide_x1 - wide_x0, 0.2, wide_z1 - wide_z0), Vector3(0, -0.1, 0), floor_c, TEX_FLOOR)
+	_slab(root, "WideCeil", Vector3(wide_x1 - wide_x0, 0.2, wide_z1 - wide_z0), Vector3(0, height, 0), ceil_c, TEX_INK)
+	_slab(root, "WideWallSouth", Vector3(wide_x1 - wide_x0, height, 0.2), Vector3(0, height * 0.5, wide_z0), stone2, TEX_STONE)
 	# north wall with gap for narrow alley mouth
-	_slab(root, "WideWallNorthL", Vector3(7.35, height, 0.2), Vector3(-4.325, height * 0.5, wide_z1), stone2)
-	_slab(root, "WideWallNorthR", Vector3(7.35, height, 0.2), Vector3(4.325, height * 0.5, wide_z1), stone2)
-	_slab(root, "WideWallWest", Vector3(0.2, height, wide_z1 - wide_z0), Vector3(wide_x0, height * 0.5, 0), stone)
+	_slab(root, "WideWallNorthL", Vector3(7.35, height, 0.2), Vector3(-4.325, height * 0.5, wide_z1), stone2, TEX_STONE)
+	_slab(root, "WideWallNorthR", Vector3(7.35, height, 0.2), Vector3(4.325, height * 0.5, wide_z1), stone2, TEX_STONE)
+	_slab(root, "WideWallWest", Vector3(0.2, height, wide_z1 - wide_z0), Vector3(wide_x0, height * 0.5, 0), stone, TEX_STONE)
 
 	# Narrow dead-end alley along +Z, ~2x longer
 	var nar_x0 := -0.65
 	var nar_x1 := 0.65
 	var nar_z0 := wide_z1
 	var nar_z1 := 13.5
-	_slab(root, "NarFloor", Vector3(nar_x1 - nar_x0, 0.2, nar_z1 - nar_z0), Vector3(0, -0.1, (nar_z0 + nar_z1) * 0.5), floor_c)
-	_slab(root, "NarCeil", Vector3(nar_x1 - nar_x0, 0.2, nar_z1 - nar_z0), Vector3(0, height, (nar_z0 + nar_z1) * 0.5), ceil_c)
-	_slab(root, "NarWallL", Vector3(0.2, height, nar_z1 - nar_z0), Vector3(nar_x0, height * 0.5, (nar_z0 + nar_z1) * 0.5), stone)
-	_slab(root, "NarWallR", Vector3(0.2, height, nar_z1 - nar_z0), Vector3(nar_x1, height * 0.5, (nar_z0 + nar_z1) * 0.5), stone)
+	_slab(root, "NarFloor", Vector3(nar_x1 - nar_x0, 0.2, nar_z1 - nar_z0), Vector3(0, -0.1, (nar_z0 + nar_z1) * 0.5), floor_c, TEX_FLOOR)
+	_slab(root, "NarCeil", Vector3(nar_x1 - nar_x0, 0.2, nar_z1 - nar_z0), Vector3(0, height, (nar_z0 + nar_z1) * 0.5), ceil_c, TEX_INK)
+	_slab(root, "NarWallL", Vector3(0.2, height, nar_z1 - nar_z0), Vector3(nar_x0, height * 0.5, (nar_z0 + nar_z1) * 0.5), stone, TEX_STONE)
+	_slab(root, "NarWallR", Vector3(0.2, height, nar_z1 - nar_z0), Vector3(nar_x1, height * 0.5, (nar_z0 + nar_z1) * 0.5), stone, TEX_STONE)
 	_slab(root, "NarDeadEnd", Vector3(1.5, height, 0.2), Vector3(0, height * 0.5, nar_z1), stone)
 
 	root.add_child(_static_box("Barrel1", Vector3(0.45, 0.7, 0.45), Vector3(-0.15, 0.35, nar_z1 - 0.9), Color(0.4, 0.28, 0.18)))
