@@ -269,18 +269,70 @@ func _save_attic() -> Error:
 	return ResourceSaver.save(packed, "res://scenes/attic.tscn")
 
 
-func _alley_walls(root: Node, x0: float, x1: float, z0: float, z1: float, height: float, color: Color) -> void:
-	# floor
-	var w := absf(x1 - x0)
-	var d := absf(z1 - z0)
-	var cx := (x0 + x1) * 0.5
-	var cz := (z0 + z1) * 0.5
-	root.add_child(_static_box("FloorSeg_%s" % str(cz), Vector3(w, 0.2, d), Vector3(cx, -0.1, cz), Color(0.22, 0.22, 0.2)))
-	# ceiling (underground)
-	root.add_child(_static_box("CeilSeg_%s" % str(cz), Vector3(w, 0.2, d), Vector3(cx, height, cz), Color(0.16, 0.17, 0.16)))
-	# left/right walls
-	root.add_child(_static_box("WallL_%s" % str(cz), Vector3(0.2, height, d), Vector3(x0, height * 0.5, cz), color))
-	root.add_child(_static_box("WallR_%s" % str(cz), Vector3(0.2, height, d), Vector3(x1, height * 0.5, cz), color))
+func _slab(root: Node, name: String, size: Vector3, pos: Vector3, color: Color) -> void:
+	root.add_child(_static_box(name, size, pos, color))
+
+
+func _npc_stub(name: String, pos: Vector3, sitting: bool, prompt: String, lines: PackedStringArray) -> StaticBody3D:
+	var body := _make_interactable(name, pos, prompt, lines)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.45, 0.42, 0.4)
+	var torso := MeshInstance3D.new()
+	torso.name = "Torso"
+	var torso_mesh := CylinderMesh.new()
+	if sitting:
+		torso_mesh.height = 0.7
+		torso.position = Vector3(0, 0.45, 0)
+	else:
+		torso_mesh.height = 1.1
+		torso.position = Vector3(0, 0.9, 0)
+	torso_mesh.top_radius = 0.2
+	torso_mesh.bottom_radius = 0.22
+	torso.mesh = torso_mesh
+	torso.material_override = mat
+	body.add_child(torso)
+	var head := MeshInstance3D.new()
+	head.name = "Head"
+	var head_mesh := SphereMesh.new()
+	head_mesh.radius = 0.16
+	head_mesh.height = 0.32
+	head.mesh = head_mesh
+	head.position = Vector3(0, 1.05 if sitting else 1.6, 0)
+	head.material_override = mat
+	body.add_child(head)
+	var col := CollisionShape3D.new()
+	col.name = "Collision"
+	var shape := CapsuleShape3D.new()
+	shape.radius = 0.28
+	shape.height = 1.2 if sitting else 1.7
+	col.shape = shape
+	col.position = Vector3(0, 0.6 if sitting else 0.95, 0)
+	body.add_child(col)
+	return body
+
+
+func _corpse_stub(name: String, pos: Vector3, prompt: String, lines: PackedStringArray) -> StaticBody3D:
+	var body := _make_interactable(name, pos, prompt, lines)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.35, 0.32, 0.28)
+	var torso := MeshInstance3D.new()
+	torso.name = "Body"
+	var mesh := CapsuleMesh.new()
+	mesh.radius = 0.22
+	mesh.height = 1.5
+	torso.mesh = mesh
+	torso.rotation_degrees = Vector3(0, 0, 90)
+	torso.position = Vector3(0, 0.22, 0)
+	torso.material_override = mat
+	body.add_child(torso)
+	var col := CollisionShape3D.new()
+	col.name = "Collision"
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(1.6, 0.4, 0.5)
+	col.shape = shape
+	col.position = Vector3(0, 0.2, 0)
+	body.add_child(col)
+	return body
 
 
 func _save_alley() -> Error:
@@ -291,42 +343,63 @@ func _save_alley() -> Error:
 
 	var fill := OmniLight3D.new()
 	fill.name = "Fill"
-	fill.position = Vector3(0, 2.5, 4)
+	fill.position = Vector3(0, 2.8, 0)
 	fill.light_color = Color(0.75, 0.85, 0.8)
-	fill.light_energy = 0.9
-	fill.omni_range = 12.0
+	fill.light_energy = 1.0
+	fill.omni_range = 18.0
 	root.add_child(fill)
+	var fill2 := OmniLight3D.new()
+	fill2.name = "FillWide"
+	fill2.position = Vector3(4, 2.5, 0)
+	fill2.light_color = Color(0.7, 0.8, 0.75)
+	fill2.light_energy = 0.8
+	fill2.omni_range = 14.0
+	root.add_child(fill2)
 
 	var stone := Color(0.32, 0.34, 0.33)
+	var stone2 := Color(0.3, 0.33, 0.32)
+	var floor_c := Color(0.22, 0.22, 0.2)
+	var ceil_c := Color(0.16, 0.17, 0.16)
 	var height := 4.5
 
-	# Narrow dead-end alley: width ~1.3 (x -0.65..0.65), length ~6 toward -Z end
-	# Player arrives near junction (z~0), dead-end at z negative with barrels
-	_alley_walls(root, -0.65, 0.65, -6.0, 1.0, height, stone)
-	# back wall of dead-end
-	root.add_child(_static_box("DeadEndWall", Vector3(1.5, height, 0.2), Vector3(0, height * 0.5, -6.0), stone))
+	# Wide street along X (perpendicular). Width in Z ≈ 2.6; length ≈ 16.
+	var wide_z0 := -1.3
+	var wide_z1 := 1.3
+	var wide_x0 := -8.0
+	var wide_x1 := 8.0
+	_slab(root, "WideFloor", Vector3(wide_x1 - wide_x0, 0.2, wide_z1 - wide_z0), Vector3(0, -0.1, 0), floor_c)
+	_slab(root, "WideCeil", Vector3(wide_x1 - wide_x0, 0.2, wide_z1 - wide_z0), Vector3(0, height, 0), ceil_c)
+	_slab(root, "WideWallSouth", Vector3(wide_x1 - wide_x0, height, 0.2), Vector3(0, height * 0.5, wide_z0), stone2)
+	# north wall with gap for narrow alley mouth
+	_slab(root, "WideWallNorthL", Vector3(7.35, height, 0.2), Vector3(-4.325, height * 0.5, wide_z1), stone2)
+	_slab(root, "WideWallNorthR", Vector3(7.35, height, 0.2), Vector3(4.325, height * 0.5, wide_z1), stone2)
+	_slab(root, "WideWallWest", Vector3(0.2, height, wide_z1 - wide_z0), Vector3(wide_x0, height * 0.5, 0), stone)
 
-	# barrels in dead end
-	root.add_child(_static_box("Barrel1", Vector3(0.45, 0.7, 0.45), Vector3(-0.2, 0.35, -5.2), Color(0.4, 0.28, 0.18)))
-	root.add_child(_static_box("Barrel2", Vector3(0.4, 0.6, 0.4), Vector3(0.25, 0.3, -4.7), Color(0.38, 0.26, 0.16)))
-	root.add_child(_static_box("Barrel3", Vector3(0.35, 0.55, 0.35), Vector3(-0.15, 0.28, -4.4), Color(0.36, 0.25, 0.15)))
+	# Narrow dead-end alley along +Z, ~2x longer
+	var nar_x0 := -0.65
+	var nar_x1 := 0.65
+	var nar_z0 := wide_z1
+	var nar_z1 := 13.5
+	_slab(root, "NarFloor", Vector3(nar_x1 - nar_x0, 0.2, nar_z1 - nar_z0), Vector3(0, -0.1, (nar_z0 + nar_z1) * 0.5), floor_c)
+	_slab(root, "NarCeil", Vector3(nar_x1 - nar_x0, 0.2, nar_z1 - nar_z0), Vector3(0, height, (nar_z0 + nar_z1) * 0.5), ceil_c)
+	_slab(root, "NarWallL", Vector3(0.2, height, nar_z1 - nar_z0), Vector3(nar_x0, height * 0.5, (nar_z0 + nar_z1) * 0.5), stone)
+	_slab(root, "NarWallR", Vector3(0.2, height, nar_z1 - nar_z0), Vector3(nar_x1, height * 0.5, (nar_z0 + nar_z1) * 0.5), stone)
+	_slab(root, "NarDeadEnd", Vector3(1.5, height, 0.2), Vector3(0, height * 0.5, nar_z1), stone)
 
-	# Wider alley ahead (+Z), about 2x width (~2.6), not very long (~10)
-	_alley_walls(root, -1.3, 1.3, 1.0, 11.0, height, Color(0.3, 0.33, 0.32))
-	# end wall of short wide alley
-	root.add_child(_static_box("WideEndWall", Vector3(2.8, height, 0.2), Vector3(0, height * 0.5, 11.0), stone))
+	root.add_child(_static_box("Barrel1", Vector3(0.45, 0.7, 0.45), Vector3(-0.15, 0.35, nar_z1 - 0.9), Color(0.4, 0.28, 0.18)))
+	root.add_child(_static_box("Barrel2", Vector3(0.4, 0.6, 0.4), Vector3(0.2, 0.3, nar_z1 - 1.5), Color(0.38, 0.26, 0.16)))
+	root.add_child(_static_box("Barrel3", Vector3(0.35, 0.55, 0.35), Vector3(-0.2, 0.28, nar_z1 - 2.0), Color(0.36, 0.25, 0.15)))
 
-	# building faces / mushroom stubs
-	root.add_child(_mushroom("Mush1", Vector3(-0.55, 1.2, -2.0), 1.0))
-	root.add_child(_mushroom("Mush2", Vector3(0.55, 1.8, -3.5), 1.2))
-	root.add_child(_mushroom("Mush3", Vector3(-1.15, 1.5, 3.0), 1.3))
-	root.add_child(_mushroom("Mush4", Vector3(1.15, 2.2, 6.5), 1.5))
-	root.add_child(_mushroom("Mush5", Vector3(-1.1, 0.8, 8.5), 0.9))
+	root.add_child(_mushroom("Mush1", Vector3(nar_x0 + 0.12, 1.2, 4.0), 1.0))
+	root.add_child(_mushroom("Mush2", Vector3(nar_x1 - 0.12, 1.8, 8.0), 1.2))
+	root.add_child(_mushroom("Mush3", Vector3(nar_x0 + 0.12, 1.5, 11.0), 1.1))
+	root.add_child(_mushroom("Mush4", Vector3(-3.0, 1.6, wide_z1 - 0.15), 1.3))
+	root.add_child(_mushroom("Mush5", Vector3(3.5, 2.0, wide_z0 + 0.15), 1.4))
 
-	# Ladder back up (Skyrim-style activate)
+	# Ladder flush to LEFT wall — center free
 	var up := _make_interactable(
 		"LadderUp",
-		Vector3(0.0, 0.0, 0.2),
+		Vector3(nar_x0 + 0.18, 0.0, 2.2),
 		"[E] Подняться на чердак",
 		PackedStringArray([
 			"Ты снова хватаешься за холодные перекладины.",
@@ -334,20 +407,80 @@ func _save_alley() -> Error:
 		]),
 		"res://scenes/attic.tscn"
 	)
-	var up_mesh := _box_mesh(Vector3(0.5, 2.5, 0.2), Color(0.3, 0.22, 0.15))
+	var up_mesh := _box_mesh(Vector3(0.12, 2.5, 0.55), Color(0.3, 0.22, 0.15))
 	up_mesh.position = Vector3(0, 1.25, 0)
 	up.add_child(up_mesh)
 	var ucol := CollisionShape3D.new()
 	ucol.name = "Collision"
 	var ushape := BoxShape3D.new()
-	ushape.size = Vector3(0.7, 2.5, 0.5)
+	ushape.size = Vector3(0.25, 2.5, 0.7)
 	ucol.shape = ushape
 	ucol.position = Vector3(0, 1.25, 0)
 	up.add_child(ucol)
 	root.add_child(up)
 
-	# spawn facing toward wider alley
-	_add_player(root, Vector3(0, 0.9, -1.5))
+	var npc_sit := _npc_stub(
+		"NpcSitting",
+		Vector3(-3.2, 0.0, -0.7),
+		true,
+		"[E] Посмотреть на деса",
+		PackedStringArray([
+			"Дес тяжело сидит на сырой земле. Тело уже заросло грибами.",
+			"Он почти не двигается — медленно умирает."
+		])
+	)
+	npc_sit.add_child(_mushroom("MushOnNpc", Vector3(0.15, 0.7, 0.1), 0.7))
+	root.add_child(npc_sit)
+
+	var npc_walk := _npc_stub(
+		"NpcWalking",
+		Vector3(2.4, 0.0, 0.5),
+		false,
+		"[E] Посмотреть на прохожего",
+		PackedStringArray([
+			"Ещё один дес — вяло и слабо идёт по своим делам.",
+			"Взгляд пустой, шаг тяжёлый."
+		])
+	)
+	root.add_child(npc_walk)
+
+	var corpse := _corpse_stub(
+		"CorpseFungal",
+		Vector3(-5.5, 0.0, 0.6),
+		"[E] Осмотреть труп",
+		PackedStringArray([
+			"Труп. Грибная проказа доела своё.",
+			"От тела тянет сыростью и сладковатой гнилью.",
+			"В Грибном районе к такому привыкают быстро."
+		])
+	)
+	corpse.add_child(_mushroom("MushCorpse1", Vector3(0.3, 0.25, 0.0), 0.8))
+	corpse.add_child(_mushroom("MushCorpse2", Vector3(-0.2, 0.2, 0.15), 0.6))
+	root.add_child(corpse)
+
+	var work := _make_interactable(
+		"ExitToWork",
+		Vector3(7.3, 0.0, 0.0),
+		"[E] Идти на работу",
+		PackedStringArray([
+			"Ты медленно волочишь ноги по прохладным переулкам Грибного района.",
+			"Спустя несколько десятков минут путь приведёт к работе.",
+			"(Дальше маршрута пока нет — заглушка конца этого куска.)"
+		])
+	)
+	var gate := _box_mesh(Vector3(0.25, 2.4, 2.2), Color(0.25, 0.28, 0.26))
+	gate.position = Vector3(0, 1.2, 0)
+	work.add_child(gate)
+	var gcol := CollisionShape3D.new()
+	gcol.name = "Collision"
+	var gshape := BoxShape3D.new()
+	gshape.size = Vector3(0.5, 2.4, 2.4)
+	gcol.shape = gshape
+	gcol.position = Vector3(0, 1.2, 0)
+	work.add_child(gcol)
+	root.add_child(work)
+
+	_add_player(root, Vector3(0.15, 0.9, 2.8))
 
 	_mark_owners(root, root)
 	var packed := PackedScene.new()
