@@ -9,8 +9,10 @@ func _init() -> void:
 	var e1 := _save_attic()
 	var e2 := _save_alley()
 	var e3 := _save_warehouse()
-	if e1 != OK or e2 != OK or e3 != OK:
-		push_error("BUILD_FAIL attic=%s alley=%s warehouse=%s" % [e1, e2, e3])
+	var e4 := _save_library_street()
+	var e5 := _save_library()
+	if e1 != OK or e2 != OK or e3 != OK or e4 != OK or e5 != OK:
+		push_error("BUILD_FAIL attic=%s alley=%s warehouse=%s libstreet=%s library=%s" % [e1, e2, e3, e4, e5])
 		quit(1)
 		return
 	if FileAccess.file_exists("res://scenes/outside_stub.tscn"):
@@ -458,27 +460,50 @@ func _save_alley() -> Error:
 	corpse.add_child(_mushroom("MushCorpse2", Vector3(-0.2, 0.2, 0.15), 0.6))
 	root.add_child(corpse)
 
-	var work := _make_interactable(
-		"ExitToWork",
-		Vector3(7.3, 0.0, 0.0),
-		"[E] Идти на работу",
+	# Work choice: warehouse OR library
+	var to_wh := _make_interactable(
+		"GoWarehouse",
+		Vector3(7.3, 0.0, -0.7),
+		"[E] На склад / верфи",
 		PackedStringArray([
-			"Ты медленно волочишь ноги по прохладным переулкам Грибного района.",
-			"Спустя несколько десятков минут ты доходишь до верфей за пределами города."
+			"Ты бредешь к верфям за стенами города — путь на двадцать-тридцать минут.",
+			"Впереди порт, пирсы и ор Тон Тона."
 		]),
 		"res://scenes/warehouse.tscn"
 	)
-	var gate := _box_mesh(Vector3(0.25, 2.4, 2.2), Color(0.25, 0.28, 0.26))
-	gate.position = Vector3(0, 1.2, 0)
-	work.add_child(gate)
-	var gcol := CollisionShape3D.new()
-	gcol.name = "Collision"
-	var gshape := BoxShape3D.new()
-	gshape.size = Vector3(0.5, 2.4, 2.4)
-	gcol.shape = gshape
-	gcol.position = Vector3(0, 1.2, 0)
-	work.add_child(gcol)
-	root.add_child(work)
+	var wh_gate := _box_mesh(Vector3(0.25, 2.4, 1.1), Color(0.25, 0.28, 0.26))
+	wh_gate.position = Vector3(0, 1.2, 0)
+	to_wh.add_child(wh_gate)
+	var whcol := CollisionShape3D.new()
+	whcol.name = "Collision"
+	var whshape := BoxShape3D.new()
+	whshape.size = Vector3(0.5, 2.4, 1.3)
+	whcol.shape = whshape
+	whcol.position = Vector3(0, 1.2, 0)
+	to_wh.add_child(whcol)
+	root.add_child(to_wh)
+
+	var to_lib := _make_interactable(
+		"GoLibrary",
+		Vector3(7.3, 0.0, 0.7),
+		"[E] В Конгрегационную библиотеку",
+		PackedStringArray([
+			"Ты направляешься к центру — в отделение Конгрегационной библиотеки.",
+			"Платят лучше, чем на складе. Минус один: безумный Раф Лат Телий."
+		]),
+		"res://scenes/library_street.tscn"
+	)
+	var lib_gate := _box_mesh(Vector3(0.25, 2.4, 1.1), Color(0.28, 0.26, 0.32))
+	lib_gate.position = Vector3(0, 1.2, 0)
+	to_lib.add_child(lib_gate)
+	var lcol := CollisionShape3D.new()
+	lcol.name = "Collision"
+	var lshape := BoxShape3D.new()
+	lshape.size = Vector3(0.5, 2.4, 1.3)
+	lcol.shape = lshape
+	lcol.position = Vector3(0, 1.2, 0)
+	to_lib.add_child(lcol)
+	root.add_child(to_lib)
 
 	_add_player(root, Vector3(0.15, 0.9, 2.8))
 
@@ -490,137 +515,185 @@ func _save_alley() -> Error:
 	return ResourceSaver.save(packed, "res://scenes/alley.tscn")
 
 
+
+func _barrier(root: Node, name: String, size: Vector3, pos: Vector3) -> void:
+	# soft player-block: crates/junk wall
+	var body := _static_box(name, size, pos, Color(0.38, 0.28, 0.18))
+	root.add_child(body)
+
+
+func _cargo_ship(root: Node, name: String, pos: Vector3, yaw_deg: float = 0.0) -> void:
+	var ship := Node3D.new()
+	ship.name = name
+	ship.position = pos
+	ship.rotation_degrees = Vector3(0, yaw_deg, 0)
+	var hull := _box_mesh(Vector3(10, 2.2, 3.2), Color(0.25, 0.28, 0.3))
+	hull.position = Vector3(0, 1.0, 0)
+	ship.add_child(hull)
+	var bridge := _box_mesh(Vector3(2.5, 1.6, 2.4), Color(0.3, 0.32, 0.35))
+	bridge.position = Vector3(-2.5, 2.6, 0)
+	ship.add_child(bridge)
+	var stack := _box_mesh(Vector3(1.2, 2.0, 1.2), Color(0.2, 0.2, 0.22))
+	stack.position = Vector3(1.5, 2.8, 0)
+	ship.add_child(stack)
+	root.add_child(ship)
+
+
 func _add_vastersa_silhouette(root: Node, pos: Vector3, scale: float = 1.0) -> void:
-	var stone := Color(0.35, 0.38, 0.42)
-	var dark := Color(0.22, 0.24, 0.28)
-	var water_blue := Color(0.25, 0.4, 0.55)
-	# lake disc
+	# Megastructure: hundreds of floors feel via enormous massing.
+	var stone := Color(0.32, 0.35, 0.4)
+	var dark := Color(0.18, 0.2, 0.24)
+	var water_blue := Color(0.18, 0.32, 0.48)
 	var lake := MeshInstance3D.new()
 	lake.name = "Lake"
 	var lake_mesh := CylinderMesh.new()
-	lake_mesh.top_radius = 55.0 * scale
-	lake_mesh.bottom_radius = 55.0 * scale
-	lake_mesh.height = 0.4
+	lake_mesh.top_radius = 220.0 * scale
+	lake_mesh.bottom_radius = 220.0 * scale
+	lake_mesh.height = 1.0
 	lake.mesh = lake_mesh
 	var lake_mat := StandardMaterial3D.new()
 	lake_mat.albedo_color = water_blue
 	lake.material_override = lake_mat
-	lake.position = pos + Vector3(0, -0.2, 0)
+	lake.position = pos + Vector3(0, -0.4, 0)
 	root.add_child(lake)
-	# base cylinder ~25% of tower height feel
-	var base := _static_box("CityBase", Vector3(28 * scale, 10 * scale, 28 * scale), pos + Vector3(0, 5 * scale, 0), stone)
-	root.add_child(base)
-	# narrowing mid (inverted cone approximated by stacked boxes)
-	root.add_child(_static_box("CityWaist", Vector3(10 * scale, 8 * scale, 10 * scale), pos + Vector3(0, 14 * scale, 0), dark))
-	# upper widening cylinder
-	root.add_child(_static_box("CityUpper", Vector3(18 * scale, 16 * scale, 18 * scale), pos + Vector3(0, 26 * scale, 0), stone))
-	# top tower shaft
-	root.add_child(_static_box("CitySpire", Vector3(8 * scale, 14 * scale, 8 * scale), pos + Vector3(0, 41 * scale, 0), dark))
-	# dome + diamond symbol
+	# base cylinder ~25%
+	root.add_child(_static_box("CityBase", Vector3(140 * scale, 70 * scale, 140 * scale), pos + Vector3(0, 35 * scale, 0), stone))
+	# waist narrow
+	root.add_child(_static_box("CityWaist", Vector3(55 * scale, 50 * scale, 55 * scale), pos + Vector3(0, 95 * scale, 0), dark))
+	# upper flare
+	root.add_child(_static_box("CityUpper", Vector3(110 * scale, 120 * scale, 110 * scale), pos + Vector3(0, 180 * scale, 0), stone))
+	# shaft + dome + diamond
+	root.add_child(_static_box("CitySpire", Vector3(45 * scale, 100 * scale, 45 * scale), pos + Vector3(0, 290 * scale, 0), dark))
 	var dome := MeshInstance3D.new()
 	dome.name = "CityDome"
 	var dome_mesh := SphereMesh.new()
-	dome_mesh.radius = 5.0 * scale
-	dome_mesh.height = 7.0 * scale
+	dome_mesh.radius = 28.0 * scale
+	dome_mesh.height = 36.0 * scale
 	dome.mesh = dome_mesh
 	var dome_mat := StandardMaterial3D.new()
-	dome_mat.albedo_color = Color(0.45, 0.48, 0.55)
+	dome_mat.albedo_color = Color(0.4, 0.45, 0.52)
 	dome.material_override = dome_mat
-	dome.position = pos + Vector3(0, 50 * scale, 0)
+	dome.position = pos + Vector3(0, 360 * scale, 0)
 	root.add_child(dome)
 	var diamond := MeshInstance3D.new()
 	diamond.name = "CityDiamond"
 	var dmesh := BoxMesh.new()
-	dmesh.size = Vector3(3 * scale, 3 * scale, 0.4 * scale)
+	dmesh.size = Vector3(16 * scale, 16 * scale, 2 * scale)
 	diamond.mesh = dmesh
 	var dmat := StandardMaterial3D.new()
-	dmat.albedo_color = Color(0.75, 0.55, 0.25)
+	dmat.albedo_color = Color(0.8, 0.6, 0.25)
 	diamond.material_override = dmat
 	diamond.rotation_degrees = Vector3(0, 0, 45)
-	diamond.position = pos + Vector3(0, 55 * scale, 0)
+	diamond.position = pos + Vector3(0, 385 * scale, 0)
 	root.add_child(diamond)
-	# thin bridges outward
-	root.add_child(_static_box("BridgeA", Vector3(70 * scale, 1.2 * scale, 3 * scale), pos + Vector3(40 * scale, 6 * scale, 0), Color(0.3, 0.32, 0.35)))
-	root.add_child(_static_box("BridgeB", Vector3(3 * scale, 1.2 * scale, 70 * scale), pos + Vector3(0, 6 * scale, 40 * scale), Color(0.3, 0.32, 0.35)))
+	# two-lane canal-bridges (in/out) with cargo ships
+	root.add_child(_static_box("CanalDeckA", Vector3(320 * scale, 3 * scale, 28 * scale), pos + Vector3(180 * scale, 38 * scale, 0), Color(0.28, 0.3, 0.34)))
+	root.add_child(_static_box("CanalDividerA", Vector3(300 * scale, 1.2 * scale, 2 * scale), pos + Vector3(180 * scale, 40 * scale, 0), Color(0.2, 0.22, 0.25)))
+	root.add_child(_static_box("CanalDeckB", Vector3(28 * scale, 3 * scale, 320 * scale), pos + Vector3(0, 38 * scale, 180 * scale), Color(0.28, 0.3, 0.34)))
+	root.add_child(_static_box("CanalDividerB", Vector3(2 * scale, 1.2 * scale, 300 * scale), pos + Vector3(0, 40 * scale, 180 * scale), Color(0.2, 0.22, 0.25)))
+	_cargo_ship(root, "ShipInA", pos + Vector3(120 * scale, 41 * scale, -8 * scale), 0)
+	_cargo_ship(root, "ShipOutA", pos + Vector3(200 * scale, 41 * scale, 8 * scale), 180)
+	_cargo_ship(root, "ShipInB", pos + Vector3(-8 * scale, 41 * scale, 140 * scale), 90)
+	_cargo_ship(root, "ShipOutB", pos + Vector3(8 * scale, 41 * scale, 210 * scale), -90)
+	# distant fog towers along bridge direction
+	root.add_child(_static_box("FogTower1", Vector3(20 * scale, 80 * scale, 20 * scale), pos + Vector3(300 * scale, 50 * scale, 0), Color(0.25, 0.28, 0.32)))
+	root.add_child(_static_box("FogTower2", Vector3(16 * scale, 60 * scale, 16 * scale), pos + Vector3(340 * scale, 40 * scale, 30 * scale), Color(0.22, 0.25, 0.3)))
 
 
 func _save_warehouse() -> Error:
 	var root := Node3D.new()
 	root.name = "Warehouse"
 
-	# open air at docks — cooler, less foggy underground feel
 	var world_env := WorldEnvironment.new()
 	world_env.name = "WorldEnvironment"
 	var env := Environment.new()
 	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color(0.35, 0.42, 0.48)
+	env.background_color = Color(0.4, 0.48, 0.55)
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.55, 0.6, 0.65)
-	env.ambient_light_energy = 0.85
+	env.ambient_light_color = Color(0.6, 0.65, 0.7)
+	env.ambient_light_energy = 0.9
 	env.fog_enabled = true
-	env.fog_light_color = Color(0.45, 0.55, 0.6)
-	env.fog_density = 0.008
+	env.fog_light_color = Color(0.55, 0.62, 0.68)
+	env.fog_density = 0.012
+	env.volumetric_fog_enabled = false
 	world_env.environment = env
 	root.add_child(world_env)
 
 	var sun := DirectionalLight3D.new()
 	sun.name = "Sun"
-	sun.rotation_degrees = Vector3(-35, 120, 0)
-	sun.light_energy = 1.1
+	sun.rotation_degrees = Vector3(-30, 140, 0)
+	sun.light_energy = 1.15
 	sun.shadow_enabled = true
 	root.add_child(sun)
 
 	var wood := Color(0.4, 0.3, 0.2)
-	var plank := Color(0.35, 0.32, 0.28)
 	var metal := Color(0.3, 0.33, 0.36)
+	var plank := Color(0.35, 0.32, 0.28)
 
-	# dock yard ground
-	root.add_child(_static_box("Yard", Vector3(40, 0.2, 28), Vector3(0, -0.1, 0), Color(0.28, 0.28, 0.26)))
-	# water near edge
+	# Mainland dock plateau — city far across water (20-30 min feel)
+	root.add_child(_static_box("Yard", Vector3(70, 0.25, 50), Vector3(0, -0.1, 8), Color(0.27, 0.27, 0.25)))
 	var water := MeshInstance3D.new()
-	water.name = "DockWater"
+	water.name = "HarborWater"
 	var wmesh := BoxMesh.new()
-	wmesh.size = Vector3(40, 0.15, 18)
+	wmesh.size = Vector3(160, 0.2, 120)
 	water.mesh = wmesh
 	var wmat := StandardMaterial3D.new()
-	wmat.albedo_color = Color(0.2, 0.35, 0.5)
+	wmat.albedo_color = Color(0.15, 0.3, 0.45)
 	water.material_override = wmat
-	water.position = Vector3(0, -0.05, -20)
+	water.position = Vector3(0, -0.2, -55)
 	root.add_child(water)
 
-	# city far across water
-	_add_vastersa_silhouette(root, Vector3(0, 0, -70), 1.0)
+	# megacity far away
+	_add_vastersa_silhouette(root, Vector3(0, 0, -220), 1.2)
 
-	# two-tier warehouse building (+Z side)
-	var wh_z := 8.0
-	# outer shell
-	root.add_child(_static_box("WH_Floor", Vector3(18, 0.2, 14), Vector3(0, -0.05, wh_z), plank))
-	root.add_child(_static_box("WH_WallBack", Vector3(18, 8, 0.3), Vector3(0, 4, wh_z + 7), metal))
-	root.add_child(_static_box("WH_WallL", Vector3(0.3, 8, 14), Vector3(-9, 4, wh_z), metal))
-	root.add_child(_static_box("WH_WallR", Vector3(0.3, 8, 14), Vector3(9, 4, wh_z), metal))
-	# front wall with door gap
-	root.add_child(_static_box("WH_FrontL", Vector3(6.5, 8, 0.3), Vector3(-5.75, 4, wh_z - 7), metal))
-	root.add_child(_static_box("WH_FrontR", Vector3(6.5, 8, 0.3), Vector3(5.75, 4, wh_z - 7), metal))
-	root.add_child(_static_box("WH_FrontTop", Vector3(5, 3, 0.3), Vector3(0, 6.5, wh_z - 7), metal))
-	root.add_child(_static_box("WH_Roof", Vector3(18.5, 0.3, 14.5), Vector3(0, 8.1, wh_z), Color(0.25, 0.27, 0.3)))
+	# Piers / docks
+	root.add_child(_static_box("Pier1", Vector3(8, 0.4, 28), Vector3(-12, 0.1, -10), plank))
+	root.add_child(_static_box("Pier2", Vector3(8, 0.4, 28), Vector3(12, 0.1, -10), plank))
+	root.add_child(_static_box("PierCross", Vector3(40, 0.4, 6), Vector3(0, 0.1, 2), plank))
+	_cargo_ship(root, "DockShip1", Vector3(-12, 0.2, -18), 90)
+	_cargo_ship(root, "DockShip2", Vector3(12, 0.2, -22), 90)
+	# port clutter
+	for i in range(8):
+		root.add_child(_static_box("PortCrate_%d" % i, Vector3(1.2, 1.0 + (i % 3) * 0.3, 1.2), Vector3(-20 + i * 2.2, 0.6, 6 + (i % 2)), wood))
+	root.add_child(_static_box("CraneBase", Vector3(2, 8, 2), Vector3(20, 4, -2), metal))
+	root.add_child(_static_box("CraneArm", Vector3(14, 1, 1.2), Vector3(14, 8, -2), metal))
 
-	# second tier / mezzanine
-	root.add_child(_static_box("WH_Mezz", Vector3(16, 0.25, 6), Vector3(0, 4.0, wh_z + 2.5), wood))
-	root.add_child(_static_box("WH_Rail", Vector3(16, 0.8, 0.15), Vector3(0, 4.6, wh_z - 0.5), Color(0.45, 0.35, 0.25)))
-	# support pillars
+	# Soft barriers — player cannot leave dock bowl
+	_barrier(root, "BlockNorth", Vector3(80, 4, 2), Vector3(0, 2, 30))
+	_barrier(root, "BlockEast", Vector3(2, 4, 60), Vector3(36, 2, 0))
+	_barrier(root, "BlockWest", Vector3(2, 4, 60), Vector3(-36, 2, 0))
+	_barrier(root, "BlockSouthL", Vector3(28, 4, 2), Vector3(-20, 2, -20))
+	_barrier(root, "BlockSouthR", Vector3(28, 4, 2), Vector3(20, 2, -20))
+	# crate wall blocking "back to open world" near return path sides
+	_barrier(root, "CrateGateL", Vector3(8, 3, 3), Vector3(-14, 1.5, 18))
+	_barrier(root, "CrateGateR", Vector3(8, 3, 3), Vector3(14, 1.5, 18))
+
+	# Warehouse building (two-tier) near pier root
+	var wh_z := 14.0
+	root.add_child(_static_box("WH_Floor", Vector3(20, 0.2, 16), Vector3(0, 0.0, wh_z), plank))
+	root.add_child(_static_box("WH_WallBack", Vector3(20, 9, 0.3), Vector3(0, 4.5, wh_z + 8), metal))
+	root.add_child(_static_box("WH_WallL", Vector3(0.3, 9, 16), Vector3(-10, 4.5, wh_z), metal))
+	root.add_child(_static_box("WH_WallR", Vector3(0.3, 9, 16), Vector3(10, 4.5, wh_z), metal))
+	root.add_child(_static_box("WH_FrontL", Vector3(7.5, 9, 0.3), Vector3(-6.25, 4.5, wh_z - 8), metal))
+	root.add_child(_static_box("WH_FrontR", Vector3(7.5, 9, 0.3), Vector3(6.25, 4.5, wh_z - 8), metal))
+	root.add_child(_static_box("WH_FrontTop", Vector3(5, 3.5, 0.3), Vector3(0, 7.25, wh_z - 8), metal))
+	root.add_child(_static_box("WH_Roof", Vector3(20.5, 0.3, 16.5), Vector3(0, 9.1, wh_z), Color(0.25, 0.27, 0.3)))
+	# mezzanine + STAIRS
+	root.add_child(_static_box("WH_Mezz", Vector3(18, 0.25, 7), Vector3(0, 4.2, wh_z + 3), wood))
+	root.add_child(_static_box("WH_Rail", Vector3(18, 0.7, 0.15), Vector3(0, 4.7, wh_z - 0.4), Color(0.45, 0.35, 0.25)))
+	for i in range(10):
+		var step := _static_box("Stair_%d" % i, Vector3(2.2, 0.2, 0.55), Vector3(-7.5, 0.2 + i * 0.4, wh_z - 5.5 + i * 0.45), wood)
+		root.add_child(step)
 	for x in [-6.0, 0.0, 6.0]:
-		root.add_child(_static_box("Pillar_%s" % str(x), Vector3(0.4, 4, 0.4), Vector3(x, 2, wh_z + 2.5), wood))
+		root.add_child(_static_box("Pillar_%s" % str(x), Vector3(0.45, 4.2, 0.45), Vector3(x, 2.1, wh_z + 3), wood))
 
-	# crates
-	root.add_child(_static_box("CrateA", Vector3(1.2, 1.0, 1.2), Vector3(-4, 0.5, wh_z - 2), wood))
-	root.add_child(_static_box("CrateB", Vector3(1.0, 0.8, 1.0), Vector3(-2.5, 0.4, wh_z - 1), wood))
-	root.add_child(_static_box("CrateC", Vector3(1.4, 1.2, 1.0), Vector3(3.5, 0.6, wh_z + 1), wood))
-	root.add_child(_static_box("CrateStack", Vector3(1.2, 2.0, 1.2), Vector3(5, 1.0, wh_z + 3), wood))
+	root.add_child(_static_box("CrateA", Vector3(1.2, 1.0, 1.2), Vector3(-3, 0.5, wh_z - 2), wood))
+	root.add_child(_static_box("CrateB", Vector3(1.4, 1.2, 1.0), Vector3(4, 0.6, wh_z + 1), wood))
+	root.add_child(_static_box("CrateStack", Vector3(1.2, 2.2, 1.2), Vector3(6, 1.1, wh_z + 4), wood))
 
-	# work crate interactable
 	var haul := _make_interactable(
 		"HaulCrate",
-		Vector3(-1.0, 0.0, wh_z - 3.0),
+		Vector3(-1.0, 0.0, wh_z - 3.5),
 		"[E] Таскать ящики",
 		PackedStringArray([
 			"Ты хватаешь ящик. Спина уже ноет — день только начался.",
@@ -639,10 +712,9 @@ func _save_warehouse() -> Error:
 	haul.add_child(hcol)
 	root.add_child(haul)
 
-	# Ton Ton — yell on interact / threshold feel
 	var ton := _npc_stub(
 		"TonTon",
-		Vector3(2.0, 0.0, wh_z - 5.5),
+		Vector3(2.2, 0.0, wh_z - 6.5),
 		false,
 		"[E] Рубин Тон Тон",
 		PackedStringArray([
@@ -653,15 +725,14 @@ func _save_warehouse() -> Error:
 	)
 	root.add_child(ton)
 
-	# lookout plaque toward city
 	var vista := _make_interactable(
 		"LookAtCity",
-		Vector3(0.0, 0.0, -6.0),
+		Vector3(0.0, 0.0, -4.0),
 		"[E] Посмотреть на Вастерсу",
 		PackedStringArray([
-			"За холодным сапфировым озером — многоярусный город. Кораблики кишат у его стен.",
-			"Для кого-то это красота. Для тебя — клетка: судьба умереть от зарастания всегриба.",
-			"Мысли обрываются — склад ждёт."
+			"За озером — мегаструктура города. По мосткам-каналам ходят грузовые, двумя полосами — в город и из города.",
+			"Для кого-то это красота. Для тебя — клетка и напоминание про зарастание.",
+			"Мосток уходит к далёким башням в тумане — туда пути нет."
 		])
 	)
 	var post := _box_mesh(Vector3(0.25, 1.6, 0.25), Color(0.35, 0.3, 0.25))
@@ -676,28 +747,26 @@ func _save_warehouse() -> Error:
 	vista.add_child(vcol)
 	root.add_child(vista)
 
-	# back to alley
 	var back := _make_interactable(
 		"BackToAlley",
-		Vector3(-10.0, 0.0, -2.0),
+		Vector3(0.0, 0.0, 22.0),
 		"[E] Вернуться в Грибной район",
-		PackedStringArray(["Ты оставляешь верфи за спиной и снова ныряешь в сырые переулки."]),
+		PackedStringArray(["Узкий проход между штабелями ящиков — единственная дорога назад."]),
 		"res://scenes/alley.tscn"
 	)
-	var bmesh := _box_mesh(Vector3(0.4, 2.2, 2.0), Color(0.3, 0.28, 0.25))
+	var bmesh := _box_mesh(Vector3(2.2, 2.2, 0.4), Color(0.3, 0.28, 0.25))
 	bmesh.position = Vector3(0, 1.1, 0)
 	back.add_child(bmesh)
 	var bcol := CollisionShape3D.new()
 	bcol.name = "Collision"
 	var bshape := BoxShape3D.new()
-	bshape.size = Vector3(0.6, 2.2, 2.2)
+	bshape.size = Vector3(2.4, 2.2, 0.6)
 	bcol.shape = bshape
 	bcol.position = Vector3(0, 1.1, 0)
 	back.add_child(bcol)
 	root.add_child(back)
 
-	# spawn just outside warehouse door facing in
-	_add_player(root, Vector3(0, 0.9, wh_z - 9.0))
+	_add_player(root, Vector3(0, 0.9, wh_z - 10.0))
 
 	_mark_owners(root, root)
 	var packed := PackedScene.new()
@@ -705,3 +774,200 @@ func _save_warehouse() -> Error:
 	if pack_err != OK:
 		return pack_err
 	return ResourceSaver.save(packed, "res://scenes/warehouse.tscn")
+
+
+func _save_library_street() -> Error:
+	var root := Node3D.new()
+	root.name = "LibraryStreet"
+
+	# slightly cleaner 1st-tier feel near walls
+	var world_env := WorldEnvironment.new()
+	var env := Environment.new()
+	env.background_mode = Environment.BG_COLOR
+	env.background_color = Color(0.22, 0.24, 0.26)
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_color = Color(0.4, 0.42, 0.45)
+	env.ambient_light_energy = 0.8
+	env.fog_enabled = true
+	env.fog_density = 0.015
+	world_env.environment = env
+	root.add_child(world_env)
+	var lamp := OmniLight3D.new()
+	lamp.position = Vector3(0, 3, 0)
+	lamp.light_energy = 1.0
+	lamp.omni_range = 16
+	root.add_child(lamp)
+
+	var stone := Color(0.4, 0.42, 0.44)
+	# short street to square
+	root.add_child(_static_box("StreetFloor", Vector3(8, 0.2, 24), Vector3(0, -0.1, 0), Color(0.3, 0.3, 0.32)))
+	root.add_child(_static_box("StreetCeil", Vector3(8, 0.2, 24), Vector3(0, 5.5, 0), Color(0.2, 0.22, 0.24)))
+	root.add_child(_static_box("WallL", Vector3(0.3, 5.5, 24), Vector3(-4, 2.75, 0), stone))
+	root.add_child(_static_box("WallR", Vector3(0.3, 5.5, 24), Vector3(4, 2.75, 0), stone))
+	# small square
+	root.add_child(_static_box("Square", Vector3(16, 0.2, 14), Vector3(0, -0.1, 16), Color(0.32, 0.33, 0.35)))
+	root.add_child(_static_box("SquareWallBack", Vector3(16, 6, 0.3), Vector3(0, 3, 23), stone))
+	root.add_child(_static_box("SquareWallL", Vector3(0.3, 6, 14), Vector3(-8, 3, 16), stone))
+	root.add_child(_static_box("SquareWallR", Vector3(0.3, 6, 14), Vector3(8, 3, 16), stone))
+	# soft barriers at unused exits
+	_barrier(root, "SqBlockL", Vector3(3, 3, 6), Vector3(-7, 1.5, 12))
+	_barrier(root, "SqBlockR", Vector3(3, 3, 6), Vector3(7, 1.5, 12))
+
+	var guard := _npc_stub(
+		"StreetDes",
+		Vector3(2.5, 0, 14),
+		false,
+		"[E] Прохожий",
+		PackedStringArray(["На 1 ярусе людей мало. Здесь живут уже не совсем как в Грибном дне."])
+	)
+	root.add_child(guard)
+
+	var door := _make_interactable(
+		"LibraryDoor",
+		Vector3(0, 0, 21.5),
+		"[E] Войти в библиотеку",
+		PackedStringArray([
+			"Отделение Конгрегационной библиотеки.",
+			"За дверью — запах протухшего мяса. Раф снова завтракает."
+		]),
+		"res://scenes/library.tscn"
+	)
+	var dmesh := _box_mesh(Vector3(2.5, 3.2, 0.35), Color(0.35, 0.28, 0.22))
+	dmesh.position = Vector3(0, 1.6, 0)
+	door.add_child(dmesh)
+	var dcol := CollisionShape3D.new()
+	dcol.name = "Collision"
+	var dshape := BoxShape3D.new()
+	dshape.size = Vector3(2.7, 3.2, 0.6)
+	dcol.shape = dshape
+	dcol.position = Vector3(0, 1.6, 0)
+	door.add_child(dcol)
+	root.add_child(door)
+
+	var back := _make_interactable(
+		"BackAlley",
+		Vector3(0, 0, -10),
+		"[E] Назад в Грибной район",
+		PackedStringArray(["Ты возвращаешься в сырые низы."]),
+		"res://scenes/alley.tscn"
+	)
+	var bmesh := _box_mesh(Vector3(2.0, 2.2, 0.35), Color(0.28, 0.26, 0.24))
+	bmesh.position = Vector3(0, 1.1, 0)
+	back.add_child(bmesh)
+	var bcol := CollisionShape3D.new()
+	bcol.name = "Collision"
+	var bshape := BoxShape3D.new()
+	bshape.size = Vector3(2.2, 2.2, 0.5)
+	bcol.shape = bshape
+	bcol.position = Vector3(0, 1.1, 0)
+	back.add_child(bcol)
+	root.add_child(back)
+
+	_add_player(root, Vector3(0, 0.9, -6))
+	_mark_owners(root, root)
+	var packed := PackedScene.new()
+	var err := packed.pack(root)
+	if err != OK:
+		return err
+	return ResourceSaver.save(packed, "res://scenes/library_street.tscn")
+
+
+func _save_library() -> Error:
+	var root := Node3D.new()
+	root.name = "Library"
+
+	var world_env := WorldEnvironment.new()
+	var env := Environment.new()
+	env.background_mode = Environment.BG_COLOR
+	env.background_color = Color(0.12, 0.11, 0.1)
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_color = Color(0.35, 0.32, 0.28)
+	env.ambient_light_energy = 0.7
+	world_env.environment = env
+	root.add_child(world_env)
+	var lamp := OmniLight3D.new()
+	lamp.position = Vector3(0, 3.2, 0)
+	lamp.light_color = Color(1.0, 0.85, 0.6)
+	lamp.light_energy = 1.1
+	lamp.omni_range = 14
+	root.add_child(lamp)
+
+	var wood := Color(0.36, 0.26, 0.16)
+	var plaster := Color(0.45, 0.42, 0.38)
+	# hall
+	root.add_child(_static_box("Floor", Vector3(18, 0.2, 22), Vector3(0, -0.1, 0), Color(0.28, 0.24, 0.2)))
+	root.add_child(_static_box("Ceil", Vector3(18, 0.2, 22), Vector3(0, 4.5, 0), Color(0.2, 0.18, 0.16)))
+	root.add_child(_static_box("WallB", Vector3(18, 4.5, 0.3), Vector3(0, 2.25, -11), plaster))
+	root.add_child(_static_box("WallF", Vector3(18, 4.5, 0.3), Vector3(0, 2.25, 11), plaster))
+	root.add_child(_static_box("WallL", Vector3(0.3, 4.5, 22), Vector3(-9, 2.25, 0), plaster))
+	root.add_child(_static_box("WallR", Vector3(0.3, 4.5, 22), Vector3(9, 2.25, 0), plaster))
+	# shelves rows
+	for z in [-6.0, -2.0, 2.0, 6.0]:
+		root.add_child(_static_box("ShelfL_%s" % str(z), Vector3(3, 3.2, 0.6), Vector3(-5.5, 1.6, z), wood))
+		root.add_child(_static_box("ShelfR_%s" % str(z), Vector3(3, 3.2, 0.6), Vector3(5.5, 1.6, z), wood))
+	# department 5 marker
+	var dep := _make_interactable(
+		"Dept5",
+		Vector3(0, 0, 7),
+		"[E] 5 отдел",
+		PackedStringArray([
+			"Самый большой отдел — налоговые отчёты и бюрократия тирх и деревень.",
+			"Интересных книг нет. Одна и та же работа по кругу."
+		])
+	)
+	var dep_m := _box_mesh(Vector3(4, 2.5, 1.2), wood)
+	dep_m.position = Vector3(0, 1.25, 0)
+	dep.add_child(dep_m)
+	var dep_c := CollisionShape3D.new()
+	dep_c.name = "Collision"
+	var dep_s := BoxShape3D.new()
+	dep_s.size = Vector3(4.2, 2.6, 1.4)
+	dep_c.shape = dep_s
+	dep_c.position = Vector3(0, 1.3, 0)
+	dep.add_child(dep_c)
+	root.add_child(dep)
+
+	var raf := _npc_stub(
+		"Raf",
+		Vector3(-2.5, 0, -7.5),
+		true,
+		"[E] Раф Лат Телий",
+		PackedStringArray([
+			"Запах протухшего мяса. Безумный Раф завтракает прямо среди книг.",
+			"«Лафей, это ты? Иди сюда!» — хрипло зовёт он высоким голосом.",
+			"Костлявыми пальцами он ест склизкие бобы и ими же переворачивает страницы.",
+			"(Диалоговые ветки библиотеки подключим позже — сейчас якорь локации.)"
+		])
+	)
+	root.add_child(raf)
+
+	# soft block unused side rooms
+	_barrier(root, "LibBlock1", Vector3(2, 3, 4), Vector3(-8, 1.5, 0))
+	_barrier(root, "LibBlock2", Vector3(2, 3, 4), Vector3(8, 1.5, 0))
+
+	var exit := _make_interactable(
+		"ExitLib",
+		Vector3(0, 0, -10.2),
+		"[E] Выйти на улицу",
+		PackedStringArray(["Ты оставляешь запах Рафа за дверью."]),
+		"res://scenes/library_street.tscn"
+	)
+	var em := _box_mesh(Vector3(2.2, 3.0, 0.3), Color(0.3, 0.25, 0.2))
+	em.position = Vector3(0, 1.5, 0)
+	exit.add_child(em)
+	var ec := CollisionShape3D.new()
+	ec.name = "Collision"
+	var es := BoxShape3D.new()
+	es.size = Vector3(2.4, 3.0, 0.5)
+	ec.shape = es
+	ec.position = Vector3(0, 1.5, 0)
+	exit.add_child(ec)
+	root.add_child(exit)
+
+	_add_player(root, Vector3(0, 0.9, -8.5))
+	_mark_owners(root, root)
+	var packed := PackedScene.new()
+	var err := packed.pack(root)
+	if err != OK:
+		return err
+	return ResourceSaver.save(packed, "res://scenes/library.tscn")
