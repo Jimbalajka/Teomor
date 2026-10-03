@@ -97,19 +97,15 @@ func _color_dist(a: Color, b: Color) -> float:
 
 
 func _pick_tex_for_color(color: Color) -> String:
-	# Purple family -> vsegrib
-	if _color_dist(color, C_PURPLE_GLOW) < 0.04 or _color_dist(color, C_PURPLE) < 0.045:
-		return TEX_FLESH
-	if color.r > 0.35 and color.b > color.g and color.r > color.g:
-		return TEX_FLESH
+	# Flesh/cap ONLY via explicit tex_name on mushroom meshes — never auto on walls.
 	# Wood / warm boards
 	if _color_dist(color, C_WOOD) < 0.03 or (color.r > 0.3 and color.g > 0.2 and color.b < 0.22 and color.r >= color.g):
 		return TEX_WOOD
 	# Parchment plaster
 	if _color_dist(color, C_PARCHMENT) < 0.05 or _color_dist(color, C_PARCHMENT_DARK) < 0.04 or _color_dist(color, C_DAMP) < 0.025:
 		return TEX_PLASTER
-	# Stone
-	if _color_dist(color, C_STONE) < 0.03:
+	# Stone (incl. purple-tinted walls — sick grade comes from lights/env)
+	if _color_dist(color, C_STONE) < 0.05:
 		return TEX_STONE
 	# Near-black / floor
 	if color.r + color.g + color.b < 0.35:
@@ -117,23 +113,29 @@ func _pick_tex_for_color(color: Color) -> String:
 	# Cool grey metal-ish
 	if abs(color.r - color.g) < 0.05 and abs(color.g - color.b) < 0.08 and color.r < 0.55:
 		return TEX_METAL
+	# Purple-ish props that aren't mushrooms → stained stone, not flesh albedo
+	if color.b > color.g and color.r >= color.g:
+		return TEX_STONE
 	return TEX_PLASTER
 
 
 func _style_mat(base: Color, ink_amt: float = 0.18, rough: float = 0.92, emit: Color = Color(0, 0, 0, 1), emit_e: float = 0.0, salt: int = 1, tex_name: String = "", uv_scale: float = 0.45) -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()
 	var file_name := tex_name if not tex_name.is_empty() else _pick_tex_for_color(base)
+	# Hard block: figurative organic maps stay off architecture
+	if tex_name.is_empty() and (file_name == TEX_FLESH or file_name == TEX_CAP):
+		file_name = TEX_STONE
 	var tex: Texture2D = _load_style_tex(file_name)
 	if tex == null:
 		tex = _noise_tex(base, ink_amt, 48, salt)
 		mat.albedo_color = Color(1, 1, 1)
 	else:
 		# Mild tint so props keep identity without killing baked grade
-		mat.albedo_color = base.lerp(Color(1, 1, 1), 0.72)
+		mat.albedo_color = base.lerp(Color(1, 1, 1), 0.78)
 	mat.albedo_texture = tex
-	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	mat.uv1_triplanar = true
-	mat.uv1_triplanar_sharpness = 6.0
+	mat.uv1_triplanar_sharpness = 4.0
 	mat.uv1_scale = Vector3(uv_scale, uv_scale, uv_scale)
 	mat.roughness = rough
 	mat.metallic = 0.0
@@ -153,7 +155,8 @@ func _box_mesh(size: Vector3, color: Color, tex_name: String = "") -> MeshInstan
 	var ink := 0.2
 	if color.r + color.g + color.b < 0.35:
 		ink = 0.35
-	var uv := clampf(1.1 / maxf(0.35, (size.x + size.y + size.z) * 0.22), 0.18, 1.4)
+	# Larger surfaces need MORE repeats (higher uv scale), not fewer
+	var uv := clampf((size.x + size.y + size.z) * 0.14, 0.55, 2.8)
 	mi.material_override = _style_mat(color, ink, 0.95, Color(0, 0, 0), 0.0, int(color.r * 97 + color.g * 53 + color.b * 31), tex_name, uv)
 	return mi
 
@@ -352,7 +355,7 @@ func _add_player(root: Node, pos: Vector3) -> void:
 	root.add_child(player)
 
 
-func _underground_env(bg: Color, ambient: Color, fog: Color = Color(0.2, 0.16, 0.14), dens: float = 0.035, amb_e: float = 0.55) -> WorldEnvironment:
+func _underground_env(bg: Color, ambient: Color, fog: Color = Color(0.2, 0.16, 0.14), dens: float = 0.035, amb_e: float = 0.55, exposure: float = 0.95, sick: float = 1.0) -> WorldEnvironment:
 	var world_env := WorldEnvironment.new()
 	world_env.name = "WorldEnvironment"
 	var env := Environment.new()
@@ -365,12 +368,26 @@ func _underground_env(bg: Color, ambient: Color, fog: Color = Color(0.2, 0.16, 0
 	env.fog_light_color = fog
 	env.fog_density = dens
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	env.tonemap_exposure = 0.85
+	env.tonemap_exposure = exposure
+	# Sick-vision filter: dirty film look, not a cover for bad geo
 	env.adjustment_enabled = true
-	env.adjustment_saturation = 0.72
-	env.adjustment_contrast = 1.12
+	env.adjustment_brightness = lerpf(1.0, 1.06, sick)
+	env.adjustment_saturation = lerpf(0.85, 0.58, sick)
+	env.adjustment_contrast = lerpf(1.05, 1.22, sick)
+	env.glow_enabled = sick > 0.5
+	if env.glow_enabled:
+		env.glow_intensity = 0.22 * sick
+		env.glow_strength = 0.8
+		env.glow_bloom = 0.05
+		env.glow_hdr_threshold = 0.85
 	world_env.environment = env
 	return world_env
+
+
+func _add_rotated_box(root: Node, name: String, size: Vector3, pos: Vector3, rot_deg: Vector3, color: Color, tex_name: String = "") -> StaticBody3D:
+	var body := _static_box(name, size, pos, color, tex_name)
+	body.rotation_degrees = rot_deg
+	return body
 
 
 func _save_attic() -> Error:
@@ -379,41 +396,64 @@ func _save_attic() -> Error:
 
 	# Dominant: dirty parchment yellow (sick warm dust)
 	root.add_child(_underground_env(
-		Color(0.1, 0.07, 0.05),
-		Color(0.45, 0.36, 0.22),
-		Color(0.35, 0.26, 0.14),
-		0.045,
-		0.5
+		Color(0.12, 0.08, 0.05),
+		Color(0.5, 0.4, 0.24),
+		Color(0.38, 0.28, 0.16),
+		0.028,
+		0.7,
+		1.05,
+		0.85
 	))
 
 	var lamp := OmniLight3D.new()
 	lamp.name = "AtticLamp"
-	lamp.position = Vector3(0, 2.2, 0)
-	lamp.light_color = Color(0.85, 0.65, 0.35)
-	lamp.light_energy = 0.55
-	lamp.omni_range = 5.5
-	lamp.omni_attenuation = 1.4
+	lamp.position = Vector3(0.2, 2.0, 0.1)
+	lamp.light_color = Color(0.9, 0.7, 0.4)
+	lamp.light_energy = 1.05
+	lamp.omni_range = 6.5
+	lamp.omni_attenuation = 1.15
+	lamp.shadow_enabled = true
 	root.add_child(lamp)
 	var lamp2 := OmniLight3D.new()
 	lamp2.name = "AtticCorner"
 	lamp2.position = Vector3(-2.0, 1.4, -1.5)
 	lamp2.light_color = Color(0.55, 0.22, 0.45)
-	lamp2.light_energy = 0.25
-	lamp2.omni_range = 3.5
+	lamp2.light_energy = 0.4
+	lamp2.omni_range = 3.8
 	root.add_child(lamp2)
+	var lamp3 := OmniLight3D.new()
+	lamp3.name = "AtticHatchLight"
+	lamp3.position = Vector3(2.0, 2.3, 1.2)
+	lamp3.light_color = Color(0.75, 0.55, 0.3)
+	lamp3.light_energy = 0.45
+	lamp3.omni_range = 3.0
+	root.add_child(lamp3)
 
 	var wood := C_WOOD
 	var plaster := C_PARCHMENT
-	var dark := C_INK.lightened(0.08)
 	var damp := C_DAMP
 
-	# Small cramped attic ~6x2.6x5
+	# Cramped attic — break the pure box: low side walls + pitched roof slabs
 	root.add_child(_static_box("Floor", Vector3(6, 0.2, 5), Vector3(0, -0.1, 0), wood, TEX_WOOD))
-	root.add_child(_static_box("Ceiling", Vector3(6, 0.2, 5), Vector3(0, 2.6, 0), dark, TEX_INK))
-	root.add_child(_static_box("WallBack", Vector3(6, 2.6, 0.2), Vector3(0, 1.3, -2.5), plaster, TEX_PLASTER))
-	root.add_child(_static_box("WallFront", Vector3(6, 2.6, 0.2), Vector3(0, 1.3, 2.5), plaster, TEX_PLASTER))
-	root.add_child(_static_box("WallLeft", Vector3(0.2, 2.6, 5), Vector3(-3.0, 1.3, 0), damp, TEX_PLASTER))
-	root.add_child(_static_box("WallRight", Vector3(0.2, 2.6, 5), Vector3(3.0, 1.3, 0), plaster, TEX_PLASTER))
+	root.add_child(_static_box("WallBack", Vector3(6, 2.1, 0.2), Vector3(0, 1.05, -2.5), plaster, TEX_PLASTER))
+	root.add_child(_static_box("WallFront", Vector3(6, 2.1, 0.2), Vector3(0, 1.05, 2.5), plaster, TEX_PLASTER))
+	root.add_child(_static_box("WallLeft", Vector3(0.2, 1.7, 5), Vector3(-3.0, 0.85, 0), damp, TEX_PLASTER))
+	root.add_child(_static_box("WallRight", Vector3(0.2, 1.7, 5), Vector3(3.0, 0.85, 0), plaster, TEX_PLASTER))
+	# Pitched roof (visual volume)
+	_add_rotated_box(root, "RoofL", Vector3(6.2, 0.12, 3.2), Vector3(0, 2.35, -0.9), Vector3(28, 0, 0), C_WOOD.darkened(0.08), TEX_WOOD)
+	_add_rotated_box(root, "RoofR", Vector3(6.2, 0.12, 3.2), Vector3(0, 2.35, 0.9), Vector3(-28, 0, 0), C_WOOD.darkened(0.1), TEX_WOOD)
+	# Ridge + ceiling beams
+	root.add_child(_static_box("Ridge", Vector3(6.1, 0.14, 0.22), Vector3(0, 2.95, 0), wood, TEX_WOOD))
+	for i in range(4):
+		var z := -1.8 + float(i) * 1.2
+		root.add_child(_static_box("Beam_%d" % i, Vector3(5.6, 0.16, 0.18), Vector3(0, 2.15, z), wood, TEX_WOOD))
+	# Corner posts / clutter that kill the cube read
+	root.add_child(_static_box("PostL", Vector3(0.18, 2.0, 0.18), Vector3(-2.7, 1.0, -2.1), wood, TEX_WOOD))
+	root.add_child(_static_box("PostR", Vector3(0.18, 2.0, 0.18), Vector3(2.7, 1.0, -2.1), wood, TEX_WOOD))
+	root.add_child(_static_box("JoistBrace", Vector3(0.14, 0.9, 1.6), Vector3(-2.75, 1.7, 0.2), wood, TEX_WOOD))
+	root.add_child(_static_box("Trunk", Vector3(1.1, 0.55, 0.7), Vector3(2.1, 0.28, -1.5), Color(0.34, 0.24, 0.15), TEX_WOOD))
+	root.add_child(_static_box("BoardStack", Vector3(1.4, 0.25, 0.55), Vector3(-0.4, 0.15, 1.9), wood, TEX_WOOD))
+	root.add_child(_static_box("ClothHang", Vector3(1.2, 0.7, 0.08), Vector3(1.0, 1.55, -2.35), Color(0.42, 0.36, 0.28), TEX_PLASTER))
 
 	# Bed stub
 	root.add_child(_static_box("Bed", Vector3(2.0, 0.35, 1.0), Vector3(-1.6, 0.2, -1.6), Color(0.35, 0.3, 0.28), TEX_WOOD))
@@ -446,7 +486,7 @@ func _save_attic() -> Error:
 	root.add_child(mirror)
 
 	# Ceiling hatch + vertical ladder visual (activate only, no climb)
-	root.add_child(_static_box("HatchFrame", Vector3(1.0, 0.08, 1.0), Vector3(2.0, 2.5, 1.2), Color(0.2, 0.18, 0.15)))
+	root.add_child(_static_box("HatchFrame", Vector3(1.0, 0.08, 1.0), Vector3(2.0, 2.7, 1.2), Color(0.2, 0.18, 0.15), TEX_WOOD))
 	var ladder := _make_interactable(
 		"RoofLadder",
 		Vector3(2.0, 0.0, 1.2),
@@ -592,42 +632,52 @@ func _save_alley() -> Error:
 	var root := Node3D.new()
 	root.name = "Alley"
 
-	# Dominant: dirty purple (sick vision / evermushroom)
+	# Dominant: dirty purple — readable, not crushed black
 	root.add_child(_underground_env(
-		Color(0.06, 0.04, 0.07),
+		Color(0.1, 0.06, 0.1),
+		Color(0.42, 0.24, 0.38),
 		Color(0.32, 0.16, 0.3),
-		Color(0.28, 0.12, 0.26),
-		0.04,
-		0.48
+		0.018,
+		0.85,
+		1.12,
+		1.0
 	))
 
 	var fill := OmniLight3D.new()
 	fill.name = "Fill"
 	fill.position = Vector3(0, 2.8, 0)
-	fill.light_color = Color(0.55, 0.28, 0.5)
-	fill.light_energy = 0.45
-	fill.omni_range = 14.0
-	fill.omni_attenuation = 1.3
+	fill.light_color = Color(0.7, 0.42, 0.62)
+	fill.light_energy = 1.15
+	fill.omni_range = 16.0
+	fill.omni_attenuation = 1.05
+	fill.shadow_enabled = true
 	root.add_child(fill)
 	var fill2 := OmniLight3D.new()
 	fill2.name = "FillWide"
 	fill2.position = Vector3(4, 2.5, 0)
-	fill2.light_color = Color(0.45, 0.32, 0.22)
-	fill2.light_energy = 0.28
-	fill2.omni_range = 11.0
+	fill2.light_color = Color(0.55, 0.4, 0.28)
+	fill2.light_energy = 0.7
+	fill2.omni_range = 12.0
 	root.add_child(fill2)
+	var fill3 := OmniLight3D.new()
+	fill3.name = "EntranceKey"
+	fill3.position = Vector3(-1.0, 2.2, 0.0)
+	fill3.light_color = Color(0.55, 0.35, 0.25)
+	fill3.light_energy = 0.55
+	fill3.omni_range = 7.0
+	root.add_child(fill3)
 	var mush_glow := OmniLight3D.new()
 	mush_glow.name = "MushroomGlow"
 	mush_glow.position = Vector3(0.2, 1.4, 8.0)
 	mush_glow.light_color = C_PURPLE_GLOW
-	mush_glow.light_energy = 0.55
-	mush_glow.omni_range = 5.0
+	mush_glow.light_energy = 0.85
+	mush_glow.omni_range = 5.5
 	root.add_child(mush_glow)
 
-	var stone := C_STONE
-	var stone2 := C_STONE.lightened(0.04)
-	var floor_c := C_INK.lightened(0.12)
-	var ceil_c := C_INK.lightened(0.05)
+	var stone := C_STONE.lightened(0.06)
+	var stone2 := C_STONE.lightened(0.1)
+	var floor_c := C_STONE.darkened(0.08)
+	var ceil_c := C_INK.lightened(0.1)
 	var height := 4.5
 
 	# Wide street along X (perpendicular). Width in Z ≈ 2.6; length ≈ 16.
@@ -654,9 +704,9 @@ func _save_alley() -> Error:
 	_slab(root, "NarWallR", Vector3(0.2, height, nar_z1 - nar_z0), Vector3(nar_x1, height * 0.5, (nar_z0 + nar_z1) * 0.5), stone, TEX_STONE)
 	_slab(root, "NarDeadEnd", Vector3(1.5, height, 0.2), Vector3(0, height * 0.5, nar_z1), stone)
 
-	root.add_child(_static_box("Barrel1", Vector3(0.45, 0.7, 0.45), Vector3(-0.15, 0.35, nar_z1 - 0.9), Color(0.4, 0.28, 0.18)))
-	root.add_child(_static_box("Barrel2", Vector3(0.4, 0.6, 0.4), Vector3(0.2, 0.3, nar_z1 - 1.5), Color(0.38, 0.26, 0.16)))
-	root.add_child(_static_box("Barrel3", Vector3(0.35, 0.55, 0.35), Vector3(-0.2, 0.28, nar_z1 - 2.0), Color(0.36, 0.25, 0.15)))
+	root.add_child(_static_box("Barrel1", Vector3(0.45, 0.7, 0.45), Vector3(-0.15, 0.35, nar_z1 - 0.9), Color(0.35, 0.32, 0.3), TEX_METAL))
+	root.add_child(_static_box("Barrel2", Vector3(0.4, 0.6, 0.4), Vector3(0.2, 0.3, nar_z1 - 1.5), Color(0.32, 0.3, 0.28), TEX_METAL))
+	root.add_child(_static_box("Barrel3", Vector3(0.35, 0.55, 0.35), Vector3(-0.2, 0.28, nar_z1 - 2.0), Color(0.3, 0.28, 0.26), TEX_METAL))
 
 	root.add_child(_mushroom("Mush1", Vector3(nar_x0 + 0.12, 1.2, 4.0), 1.0))
 	root.add_child(_mushroom("Mush2", Vector3(nar_x1 - 0.12, 1.8, 8.0), 1.2))
@@ -1404,32 +1454,45 @@ func _save_shop() -> Error:
 	var root := Node3D.new()
 	root.name = "Shop"
 
-	var world_env := WorldEnvironment.new()
-	var env := Environment.new()
-	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color(0.12, 0.1, 0.12)
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.42, 0.35, 0.4)
-	env.ambient_light_energy = 0.8
-	world_env.environment = env
-	root.add_child(world_env)
+	# Warm-odd shop; sick filter mild — walls are plaster/wood, not flesh albedo
+	root.add_child(_underground_env(
+		Color(0.14, 0.1, 0.11),
+		Color(0.48, 0.38, 0.34),
+		Color(0.28, 0.18, 0.22),
+		0.012,
+		0.9,
+		1.08,
+		0.7
+	))
 	var lamp := OmniLight3D.new()
 	lamp.position = Vector3(0, 3.2, 0)
-	lamp.light_color = Color(1.0, 0.75, 0.55)
-	lamp.light_energy = 1.1
-	lamp.omni_range = 10
+	lamp.light_color = Color(1.0, 0.78, 0.55)
+	lamp.light_energy = 1.45
+	lamp.omni_range = 11
+	lamp.shadow_enabled = true
 	root.add_child(lamp)
+	var lamp2 := OmniLight3D.new()
+	lamp2.position = Vector3(-2.5, 2.4, -2.0)
+	lamp2.light_color = Color(0.55, 0.3, 0.5)
+	lamp2.light_energy = 0.45
+	lamp2.omni_range = 5.0
+	root.add_child(lamp2)
 
 	var wood := Color(0.38, 0.26, 0.18)
-	var plaster := Color(0.4, 0.34, 0.38)
-	root.add_child(_static_box("Floor", Vector3(10, 0.2, 8), Vector3(0, -0.1, 0), Color(0.25, 0.2, 0.22)))
-	root.add_child(_static_box("Ceil", Vector3(10, 0.2, 8), Vector3(0, 3.6, 0), Color(0.18, 0.15, 0.18)))
-	root.add_child(_static_box("WallB", Vector3(10, 3.6, 0.25), Vector3(0, 1.8, -4), plaster))
-	root.add_child(_static_box("WallF", Vector3(10, 3.6, 0.25), Vector3(0, 1.8, 4), plaster))
-	root.add_child(_static_box("WallL", Vector3(0.25, 3.6, 8), Vector3(-5, 1.8, 0), plaster))
-	root.add_child(_static_box("WallR", Vector3(0.25, 3.6, 8), Vector3(5, 1.8, 0), plaster))
-	root.add_child(_static_box("Counter", Vector3(6.5, 1.0, 1.0), Vector3(0, 0.5, -1.2), wood))
-	root.add_child(_static_box("ShelfBack", Vector3(7.0, 2.2, 0.4), Vector3(0, 2.0, -3.5), wood))
+	var plaster := C_PARCHMENT.darkened(0.08)
+	root.add_child(_static_box("Floor", Vector3(10, 0.2, 8), Vector3(0, -0.1, 0), Color(0.28, 0.22, 0.18), TEX_WOOD))
+	root.add_child(_static_box("Ceil", Vector3(10, 0.2, 8), Vector3(0, 3.6, 0), Color(0.22, 0.18, 0.16), TEX_PLASTER))
+	root.add_child(_static_box("WallB", Vector3(10, 3.6, 0.25), Vector3(0, 1.8, -4), plaster, TEX_PLASTER))
+	root.add_child(_static_box("WallF", Vector3(10, 3.6, 0.25), Vector3(0, 1.8, 4), plaster, TEX_PLASTER))
+	root.add_child(_static_box("WallL", Vector3(0.25, 3.6, 8), Vector3(-5, 1.8, 0), plaster, TEX_PLASTER))
+	root.add_child(_static_box("WallR", Vector3(0.25, 3.6, 8), Vector3(5, 1.8, 0), plaster, TEX_PLASTER))
+	root.add_child(_static_box("Counter", Vector3(6.5, 1.0, 1.0), Vector3(0, 0.5, -1.2), wood, TEX_WOOD))
+	root.add_child(_static_box("ShelfBack", Vector3(7.0, 2.2, 0.4), Vector3(0, 2.0, -3.5), wood, TEX_WOOD))
+	root.add_child(_static_box("ShelfSide", Vector3(0.4, 2.0, 3.5), Vector3(-4.4, 1.9, 0.2), wood, TEX_WOOD))
+	# Mushrooms as props only
+	root.add_child(_mushroom("ShopMush1", Vector3(-4.3, 1.1, -2.8), 1.1))
+	root.add_child(_mushroom("ShopMush2", Vector3(4.2, 0.9, -3.0), 0.9))
+	_growth_blob(root, "ShopGrowth", Vector3(-4.6, 0.4, 1.5), 0.22, true)
 
 	_poi(root, "ShopKeeperNote", Vector3(0.0, 0.0, -2.2), Vector3(0.5, 0.15, 0.4), Color(0.55, 0.45, 0.3),
 		"[E] Записка на прилавке",
