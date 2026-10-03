@@ -1,0 +1,123 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://scripts/interactable.gd" id="1_xgvgl"]
+[ext_resource type="Script" path="res://scripts/player_fps.gd" id="2_nebb4"]
+
+[sub_resource type="Environment" id="Environment_hrp7o"]
+background_mode = 1
+background_color = Color(0.45, 0.55, 0.65, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.7, 0.75, 0.8, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tyd7y"]
+albedo_color = Color(0.3, 0.4, 0.25, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_n874s"]
+size = Vector3(20, 0.2, 20)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_yi1wf"]
+size = Vector3(20, 0.2, 20)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_f62j2"]
+albedo_color = Color(0.35, 0.3, 0.22, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gufhr"]
+size = Vector3(1.5, 1.2, 0.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_712qe"]
+size = Vector3(1.5, 1.2, 0.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0arua"]
+albedo_color = Color(0.4, 0.3, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hvoys"]
+size = Vector3(1.2, 2, 0.35)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vh6hs"]
+size = Vector3(1.2, 2, 0.35)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_oxwgq"]
+radius = 0.3
+height = 1.6
+
+[node name="OutsideStub" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_hrp7o")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.939693, -0.262003, 0.219846, 0, 0.642788, 0.766044, -0.34202, -0.719846, 0.604023, 0, 0, 0)
+
+[node name="Ground" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Ground"]
+material_override = SubResource("StandardMaterial3D_tyd7y")
+mesh = SubResource("BoxMesh_n874s")
+
+[node name="Collision" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("BoxShape3D_yi1wf")
+
+[node name="YardSign" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, -3)
+
+[node name="Mesh" type="MeshInstance3D" parent="YardSign"]
+material_override = SubResource("StandardMaterial3D_f62j2")
+mesh = SubResource("BoxMesh_gufhr")
+
+[node name="Collision" type="CollisionShape3D" parent="YardSign"]
+shape = SubResource("BoxShape3D_712qe")
+
+[node name="Label" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -2.8)
+text = "Заглушка двора"
+font_size = 48
+
+[node name="BackToAttic" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.5)
+script = ExtResource("1_xgvgl")
+prompt_text = "[E] Вернуться на чердак"
+dialogue_lines = PackedStringArray("Ты лезешь обратно на чердак.")
+change_scene_to = "res://scenes/attic.tscn"
+
+[node name="Mesh" type="MeshInstance3D" parent="BackToAttic"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+material_override = SubResource("StandardMaterial3D_0arua")
+mesh = SubResource("BoxMesh_hvoys")
+
+[node name="Collision" type="CollisionShape3D" parent="BackToAttic"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("BoxShape3D_vh6hs")
+
+[node name="Player" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+script = ExtResource("2_nebb4")
+speed = 4.0
+mouse_sensitivity = 0.0025
+interact_distance = 2.8
+
+[node name="Collision" type="CollisionShape3D" parent="Player"]
+shape = SubResource("CapsuleShape3D_oxwgq")
+
+[node name="Camera3D" type="Camera3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+current = true
+
+[node name="InteractRay" type="RayCast3D" parent="Player/Camera3D"]
+target_position = Vector3(0, 0, -2.8)
+
+[node name="PromptLayer" type="CanvasLayer" parent="Player"]
+
+[node name="Prompt" type="Label" parent="Player/PromptLayer"]
+visible = false
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.62
+anchor_right = 0.5
+anchor_bottom = 0.62
+offset_left = -220.0
+offset_top = -18.0
+offset_right = 220.0
+offset_bottom = 18.0
+text = "[E]"
+horizontal_alignment = 1

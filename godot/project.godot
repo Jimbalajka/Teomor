@@ -1,0 +1,28 @@
+; Engine configuration file.
+config_version=5
+
+[application]
+
+config/name="Teomor"
+config/description="Теомор — Godot vertical slice"
+run/main_scene="res://scenes/attic.tscn"
+config/features=PackedStringArray("4.3", "Forward Plus")
+config/icon="res://icon.svg"
+
+[autoload]
+
+Dialogue="*res://scripts/dialogue_ui.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+
+[physics]
+
+3d/default_gravity=9.8
+
+[rendering]
+
+anti_aliasing/quality/msaa_3d=1
