@@ -23,15 +23,63 @@ func _init() -> void:
 	quit()
 
 
+## Style anchor palette (dirty, never clean)
+const C_PARCHMENT := Color(0.62, 0.5, 0.28)
+const C_PARCHMENT_DARK := Color(0.36, 0.28, 0.16)
+const C_INK := Color(0.05, 0.04, 0.05)
+const C_PURPLE := Color(0.42, 0.16, 0.38)
+const C_PURPLE_GLOW := Color(0.55, 0.18, 0.48)
+const C_WOOD := Color(0.4, 0.28, 0.16)
+const C_STONE := Color(0.28, 0.24, 0.22)
+const C_DAMP := Color(0.3, 0.26, 0.22)
+
+
+func _hash01(x: int, y: int, salt: int = 0) -> float:
+	var n := x * 374761393 + y * 668265263 + salt * 1274126177
+	n = (n ^ (n >> 13)) * 1274126177
+	n = n ^ (n >> 16)
+	return float(n & 0xFFFF) / 65535.0
+
+
+func _noise_tex(base: Color, ink_amt: float = 0.18, size: int = 48, salt: int = 1) -> ImageTexture:
+	var img := Image.create(size, size, false, Image.FORMAT_RGB8)
+	for y in size:
+		for x in size:
+			var n := _hash01(x, y, salt)
+			var n2 := _hash01(x + 17, y + 9, salt + 3)
+			var c := base.lerp(C_INK, ink_amt * n)
+			c = c.darkened(0.12 * n2)
+			if n > 0.92:
+				c = c.lerp(C_INK, 0.55)
+			img.set_pixel(x, y, c)
+	var tex := ImageTexture.create_from_image(img)
+	return tex
+
+
+func _style_mat(base: Color, ink_amt: float = 0.18, rough: float = 0.92, emit: Color = Color(0, 0, 0, 1), emit_e: float = 0.0, salt: int = 1) -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(1, 1, 1)
+	mat.albedo_texture = _noise_tex(base, ink_amt, 48, salt)
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	mat.roughness = rough
+	mat.metallic = 0.0
+	if emit_e > 0.0:
+		mat.emission_enabled = true
+		mat.emission = emit
+		mat.emission_energy_multiplier = emit_e
+	return mat
+
+
 func _box_mesh(size: Vector3, color: Color) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	mi.name = "Mesh"
 	var mesh := BoxMesh.new()
 	mesh.size = size
 	mi.mesh = mesh
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = color
-	mi.material_override = mat
+	var ink := 0.2
+	if color.r + color.g + color.b < 0.35:
+		ink = 0.35
+	mi.material_override = _style_mat(color, ink, 0.95, Color(0, 0, 0), 0.0, int(color.r * 97 + color.g * 53 + color.b * 31))
 	return mi
 
 
@@ -53,37 +101,77 @@ func _mushroom(name: String, pos: Vector3, scale: float = 1.0) -> StaticBody3D:
 	var body := StaticBody3D.new()
 	body.name = name
 	body.position = pos
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.55, 0.35, 0.4)
+	var stem_mat := _style_mat(C_PURPLE.darkened(0.25), 0.25, 0.9, Color(0, 0, 0), 0.0, 11)
 	var stem := MeshInstance3D.new()
 	stem.name = "Stem"
 	var stem_mesh := CylinderMesh.new()
 	stem_mesh.top_radius = 0.05 * scale
-	stem_mesh.bottom_radius = 0.07 * scale
-	stem_mesh.height = 0.25 * scale
+	stem_mesh.bottom_radius = 0.08 * scale
+	stem_mesh.height = 0.28 * scale
 	stem.mesh = stem_mesh
-	stem.position = Vector3(0, 0.12 * scale, 0)
-	stem.material_override = mat
+	stem.position = Vector3(0, 0.14 * scale, 0)
+	stem.material_override = stem_mat
 	body.add_child(stem)
 	var cap := MeshInstance3D.new()
 	cap.name = "Cap"
 	var cap_mesh := SphereMesh.new()
-	cap_mesh.radius = 0.14 * scale
-	cap_mesh.height = 0.16 * scale
+	cap_mesh.radius = 0.16 * scale
+	cap_mesh.height = 0.18 * scale
 	cap.mesh = cap_mesh
-	cap.position = Vector3(0, 0.28 * scale, 0)
-	var cap_mat := StandardMaterial3D.new()
-	cap_mat.albedo_color = Color(0.7, 0.45, 0.5)
-	cap.material_override = cap_mat
+	cap.position = Vector3(0, 0.32 * scale, 0)
+	cap.material_override = _style_mat(C_PURPLE_GLOW, 0.12, 0.85, C_PURPLE_GLOW, 0.35, 17)
 	body.add_child(cap)
+	# tiny spores around base
+	for i in range(3):
+		var spore := MeshInstance3D.new()
+		spore.name = "Spore_%d" % i
+		var sm := SphereMesh.new()
+		sm.radius = 0.035 * scale * (1.0 + float(i) * 0.15)
+		sm.height = sm.radius * 2.0
+		spore.mesh = sm
+		var ang := float(i) * 2.1
+		spore.position = Vector3(cos(ang) * 0.12 * scale, 0.03 * scale, sin(ang) * 0.12 * scale)
+		spore.material_override = _style_mat(C_PURPLE, 0.2, 0.9, C_PURPLE, 0.15, 20 + i)
+		body.add_child(spore)
 	var col := CollisionShape3D.new()
 	col.name = "Collision"
 	var shape := SphereShape3D.new()
-	shape.radius = 0.16 * scale
+	shape.radius = 0.18 * scale
 	col.shape = shape
-	col.position = Vector3(0, 0.22 * scale, 0)
+	col.position = Vector3(0, 0.24 * scale, 0)
 	body.add_child(col)
 	return body
+
+
+func _growth_blob(root: Node, name: String, pos: Vector3, radius: float, glow: bool = false) -> void:
+	var mi := MeshInstance3D.new()
+	mi.name = name
+	mi.position = pos
+	var mesh := SphereMesh.new()
+	mesh.radius = radius
+	mesh.height = radius * 1.7
+	mi.mesh = mesh
+	if glow:
+		mi.material_override = _style_mat(C_PURPLE_GLOW, 0.15, 0.88, C_PURPLE_GLOW, 0.45, 41)
+	else:
+		mi.material_override = _style_mat(C_PURPLE.darkened(0.1), 0.28, 0.95, Color(0, 0, 0), 0.0, 43)
+	root.add_child(mi)
+	# satellite spores
+	for i in range(4):
+		var s := MeshInstance3D.new()
+		s.name = "%s_s%d" % [name, i]
+		var sm := SphereMesh.new()
+		sm.radius = radius * (0.22 + 0.08 * float(i % 3))
+		sm.height = sm.radius * 2.0
+		s.mesh = sm
+		var a := float(i) * 1.7
+		s.position = pos + Vector3(cos(a) * radius * 0.9, -radius * 0.2 + float(i) * 0.03, sin(a) * radius * 0.9)
+		s.material_override = _style_mat(C_PURPLE, 0.22, 0.9, C_PURPLE if glow else Color(0, 0, 0), 0.2 if glow else 0.0, 50 + i)
+		root.add_child(s)
+
+
+func _ink_streak(root: Node, name: String, pos: Vector3, size: Vector3) -> void:
+	root.add_child(_static_box(name, size, pos, C_INK))
 
 
 func _mark_owners(node: Node, owner: Node) -> void:
@@ -189,7 +277,7 @@ func _add_player(root: Node, pos: Vector3) -> void:
 	root.add_child(player)
 
 
-func _underground_env(bg: Color, ambient: Color) -> WorldEnvironment:
+func _underground_env(bg: Color, ambient: Color, fog: Color = Color(0.2, 0.16, 0.14), dens: float = 0.035, amb_e: float = 0.55) -> WorldEnvironment:
 	var world_env := WorldEnvironment.new()
 	world_env.name = "WorldEnvironment"
 	var env := Environment.new()
@@ -197,10 +285,15 @@ func _underground_env(bg: Color, ambient: Color) -> WorldEnvironment:
 	env.background_color = bg
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = ambient
-	env.ambient_light_energy = 0.7
+	env.ambient_light_energy = amb_e
 	env.fog_enabled = true
-	env.fog_light_color = Color(0.25, 0.28, 0.26)
-	env.fog_density = 0.02
+	env.fog_light_color = fog
+	env.fog_density = dens
+	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	env.tonemap_exposure = 0.85
+	env.adjustment_enabled = true
+	env.adjustment_saturation = 0.72
+	env.adjustment_contrast = 1.12
 	world_env.environment = env
 	return world_env
 
@@ -209,20 +302,35 @@ func _save_attic() -> Error:
 	var root := Node3D.new()
 	root.name = "Attic"
 
-	root.add_child(_underground_env(Color(0.07, 0.07, 0.08), Color(0.3, 0.28, 0.26)))
+	# Dominant: dirty parchment yellow (sick warm dust)
+	root.add_child(_underground_env(
+		Color(0.1, 0.07, 0.05),
+		Color(0.45, 0.36, 0.22),
+		Color(0.35, 0.26, 0.14),
+		0.045,
+		0.5
+	))
 
 	var lamp := OmniLight3D.new()
 	lamp.name = "AtticLamp"
 	lamp.position = Vector3(0, 2.2, 0)
-	lamp.light_color = Color(1.0, 0.88, 0.7)
-	lamp.light_energy = 1.0
-	lamp.omni_range = 7.0
+	lamp.light_color = Color(0.85, 0.65, 0.35)
+	lamp.light_energy = 0.55
+	lamp.omni_range = 5.5
+	lamp.omni_attenuation = 1.4
 	root.add_child(lamp)
+	var lamp2 := OmniLight3D.new()
+	lamp2.name = "AtticCorner"
+	lamp2.position = Vector3(-2.0, 1.4, -1.5)
+	lamp2.light_color = Color(0.55, 0.22, 0.45)
+	lamp2.light_energy = 0.25
+	lamp2.omni_range = 3.5
+	root.add_child(lamp2)
 
-	var wood := Color(0.42, 0.32, 0.22)
-	var plaster := Color(0.48, 0.46, 0.42)
-	var dark := Color(0.22, 0.2, 0.18)
-	var damp := Color(0.35, 0.38, 0.34)
+	var wood := C_WOOD
+	var plaster := C_PARCHMENT
+	var dark := C_INK.lightened(0.08)
+	var damp := C_DAMP
 
 	# Small cramped attic ~6x2.6x5
 	root.add_child(_static_box("Floor", Vector3(6, 0.2, 5), Vector3(0, -0.1, 0), wood))
@@ -323,6 +431,12 @@ func _save_attic() -> Error:
 			"Запах плесени уже кажется родным."
 		]))
 
+	# Form break: spore deposits / ink streaks
+	_growth_blob(root, "Growth_AtticBig", Vector3(-2.6, 0.35, 1.6), 0.28, true)
+	_growth_blob(root, "Growth_AtticWall", Vector3(2.85, 1.1, 0.2), 0.18, false)
+	_ink_streak(root, "InkSeam1", Vector3(0.0, 1.3, -2.45), Vector3(2.2, 0.08, 0.06))
+	_ink_streak(root, "InkSeam2", Vector3(-2.95, 0.8, 0.4), Vector3(0.06, 1.1, 0.08))
+
 	_add_player(root, Vector3(0, 0.9, 0.3))
 
 	_mark_owners(root, root)
@@ -403,27 +517,42 @@ func _save_alley() -> Error:
 	var root := Node3D.new()
 	root.name = "Alley"
 
-	root.add_child(_underground_env(Color(0.06, 0.07, 0.07), Color(0.28, 0.32, 0.3)))
+	# Dominant: dirty purple (sick vision / evermushroom)
+	root.add_child(_underground_env(
+		Color(0.06, 0.04, 0.07),
+		Color(0.32, 0.16, 0.3),
+		Color(0.28, 0.12, 0.26),
+		0.04,
+		0.48
+	))
 
 	var fill := OmniLight3D.new()
 	fill.name = "Fill"
 	fill.position = Vector3(0, 2.8, 0)
-	fill.light_color = Color(0.75, 0.85, 0.8)
-	fill.light_energy = 1.0
-	fill.omni_range = 18.0
+	fill.light_color = Color(0.55, 0.28, 0.5)
+	fill.light_energy = 0.45
+	fill.omni_range = 14.0
+	fill.omni_attenuation = 1.3
 	root.add_child(fill)
 	var fill2 := OmniLight3D.new()
 	fill2.name = "FillWide"
 	fill2.position = Vector3(4, 2.5, 0)
-	fill2.light_color = Color(0.7, 0.8, 0.75)
-	fill2.light_energy = 0.8
-	fill2.omni_range = 14.0
+	fill2.light_color = Color(0.45, 0.32, 0.22)
+	fill2.light_energy = 0.28
+	fill2.omni_range = 11.0
 	root.add_child(fill2)
+	var mush_glow := OmniLight3D.new()
+	mush_glow.name = "MushroomGlow"
+	mush_glow.position = Vector3(0.2, 1.4, 8.0)
+	mush_glow.light_color = C_PURPLE_GLOW
+	mush_glow.light_energy = 0.55
+	mush_glow.omni_range = 5.0
+	root.add_child(mush_glow)
 
-	var stone := Color(0.32, 0.34, 0.33)
-	var stone2 := Color(0.3, 0.33, 0.32)
-	var floor_c := Color(0.22, 0.22, 0.2)
-	var ceil_c := Color(0.16, 0.17, 0.16)
+	var stone := C_STONE
+	var stone2 := C_STONE.lightened(0.04)
+	var floor_c := C_INK.lightened(0.12)
+	var ceil_c := C_INK.lightened(0.05)
 	var height := 4.5
 
 	# Wide street along X (perpendicular). Width in Z ≈ 2.6; length ≈ 16.
@@ -586,6 +715,13 @@ func _save_alley() -> Error:
 			"Споровая краска: «ВАСТЕРСА ЖРЁТ СВОИХ».",
 			"Рядом детский рисунок гриба с глазами."
 		]))
+
+	# Large fungal deposits + ink seams (form break)
+	_growth_blob(root, "Growth_AlleyMass", Vector3(-0.1, 0.45, 12.6), 0.42, true)
+	_growth_blob(root, "Growth_AlleyCorner", Vector3(-7.2, 0.5, -0.9), 0.32, true)
+	_growth_blob(root, "Growth_AlleyWall", Vector3(7.0, 1.3, 0.2), 0.22, false)
+	_ink_streak(root, "InkAlley1", Vector3(0.0, 2.0, 1.25), Vector3(3.5, 0.07, 0.05))
+	_ink_streak(root, "InkAlley2", Vector3(-0.6, 1.5, 7.0), Vector3(0.05, 1.4, 0.08))
 
 	# Лавка странностей — обязательная точка маршрута
 	var to_shop := _make_interactable(
