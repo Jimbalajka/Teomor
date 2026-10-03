@@ -11,8 +11,10 @@ func _init() -> void:
 	var e3 := _save_warehouse()
 	var e4 := _save_library_street()
 	var e5 := _save_library()
-	if e1 != OK or e2 != OK or e3 != OK or e4 != OK or e5 != OK:
-		push_error("BUILD_FAIL attic=%s alley=%s warehouse=%s libstreet=%s library=%s" % [e1, e2, e3, e4, e5])
+	var e6 := _save_shop()
+	var e7 := _save_central_library()
+	if e1 != OK or e2 != OK or e3 != OK or e4 != OK or e5 != OK or e6 != OK or e7 != OK:
+		push_error("BUILD_FAIL attic=%s alley=%s warehouse=%s libstreet=%s library=%s shop=%s central=%s" % [e1, e2, e3, e4, e5, e6, e7])
 		quit(1)
 		return
 	if FileAccess.file_exists("res://scenes/outside_stub.tscn"):
@@ -98,6 +100,46 @@ func _make_interactable(name: String, pos: Vector3, prompt: String, lines: Packe
 	body.set("prompt_text", prompt)
 	body.set("dialogue_lines", lines)
 	body.set("change_scene_to", scene_path)
+	return body
+
+
+func _poi(root: Node, name: String, pos: Vector3, size: Vector3, color: Color, prompt: String, lines: PackedStringArray, scene_path: String = "") -> StaticBody3D:
+	var body := _make_interactable(name, pos, prompt, lines, scene_path)
+	var mesh := _box_mesh(size, color)
+	mesh.position = Vector3(0, size.y * 0.5, 0)
+	body.add_child(mesh)
+	var col := CollisionShape3D.new()
+	col.name = "Collision"
+	var shape := BoxShape3D.new()
+	shape.size = size + Vector3(0.1, 0.1, 0.1)
+	col.shape = shape
+	col.position = Vector3(0, size.y * 0.5, 0)
+	body.add_child(col)
+	root.add_child(body)
+	return body
+
+
+func _shop_choice(root: Node, name: String, pos: Vector3, choice_id: String, prompt: String, lines: PackedStringArray, color: Color) -> StaticBody3D:
+	var body := StaticBody3D.new()
+	body.name = name
+	body.position = pos
+	body.set_script(load("res://scripts/shop_item.gd"))
+	body.set("prompt_text", prompt)
+	body.set("dialogue_lines", lines)
+	body.set("choice_id", choice_id)
+	body.set("change_scene_to", "res://scenes/central_library.tscn")
+	var size := Vector3(1.2, 1.0, 1.2)
+	var mesh := _box_mesh(size, color)
+	mesh.position = Vector3(0, size.y * 0.5, 0)
+	body.add_child(mesh)
+	var col := CollisionShape3D.new()
+	col.name = "Collision"
+	var shape := BoxShape3D.new()
+	shape.size = size + Vector3(0.15, 0.15, 0.15)
+	col.shape = shape
+	col.position = Vector3(0, size.y * 0.5, 0)
+	body.add_child(col)
+	root.add_child(body)
 	return body
 
 
@@ -260,6 +302,26 @@ func _save_attic() -> Error:
 	root.add_child(_static_box("Crate", Vector3(0.7, 0.5, 0.7), Vector3(-2.2, 0.25, 1.4), Color(0.38, 0.28, 0.18)))
 	root.add_child(_mushroom("Mushroom_Attic1", Vector3(-2.7, 0.9, -0.4), 0.9))
 	root.add_child(_mushroom("Mushroom_Attic2", Vector3(2.7, 1.4, 0.3), 1.1))
+
+	# POI: дневник, щель с видом, мокрые тряпки
+	_poi(root, "Diary", Vector3(-1.2, 0.0, -1.5), Vector3(0.35, 0.08, 0.28), Color(0.55, 0.45, 0.3),
+		"[E] Листать дневник",
+		PackedStringArray([
+			"Потёртый блокнот. Буквы расползаются от сырости.",
+			"«Ещё один день. Если не сдохну — пойду на работу.»"
+		]))
+	_poi(root, "WallCrack", Vector3(-2.85, 0.0, 0.8), Vector3(0.12, 1.1, 0.45), Color(0.25, 0.3, 0.28),
+		"[E] Глянуть в щель",
+		PackedStringArray([
+			"В трещине стены — чужой двор и бледные грибы на кирпиче.",
+			"Где-то внизу кашляет дес. Воздух густой, как тряпка."
+		]))
+	_poi(root, "WetRags", Vector3(1.4, 0.0, 1.8), Vector3(0.7, 0.2, 0.5), Color(0.3, 0.35, 0.38),
+		"[E] Потрогать тряпки",
+		PackedStringArray([
+			"Мокрые тряпки никогда не сохнут. Чердак дышит влагой.",
+			"Запах плесени уже кажется родным."
+		]))
 
 	_add_player(root, Vector3(0, 0.9, 0.3))
 
@@ -504,6 +566,49 @@ func _save_alley() -> Error:
 	lcol.position = Vector3(0, 1.2, 0)
 	to_lib.add_child(lcol)
 	root.add_child(to_lib)
+
+	# POI: гамак, крысы, граффити
+	_poi(root, "Hammock", Vector3(-6.5, 0.0, -0.8), Vector3(1.4, 0.15, 0.6), Color(0.45, 0.35, 0.25),
+		"[E] Гамак курильщика",
+		PackedStringArray([
+			"Чей-то гамак натянут между трубами. Пепел на земле.",
+			"Хозяина нет — только сладкий дым и тихий кашель из темноты."
+		]))
+	_poi(root, "RatNest", Vector3(0.15, 0.0, 12.2), Vector3(0.7, 0.25, 0.7), Color(0.28, 0.24, 0.2),
+		"[E] Слушать крыс",
+		PackedStringArray([
+			"За бочками шуршит. Много лап.",
+			"Крысы Грибного района жирные и наглые — на тебя им плевать."
+		]))
+	_poi(root, "SporeGraffiti", Vector3(5.5, 0.0, 1.05), Vector3(0.12, 1.4, 1.6), Color(0.45, 0.55, 0.35),
+		"[E] Надпись на стене",
+		PackedStringArray([
+			"Споровая краска: «ВАСТЕРСА ЖРЁТ СВОИХ».",
+			"Рядом детский рисунок гриба с глазами."
+		]))
+
+	# Лавка странностей — обязательная точка маршрута
+	var to_shop := _make_interactable(
+		"GoShop",
+		Vector3(-7.3, 0.0, 0.0),
+		"[E] Лавка странностей",
+		PackedStringArray([
+			"За вывеской без названия — узкая дверь.",
+			"Пахнет маслом, пылью и чем-то сладким."
+		]),
+		"res://scenes/shop.tscn"
+	)
+	var shop_gate := _box_mesh(Vector3(0.25, 2.4, 1.3), Color(0.4, 0.28, 0.35))
+	shop_gate.position = Vector3(0, 1.2, 0)
+	to_shop.add_child(shop_gate)
+	var shopcol := CollisionShape3D.new()
+	shopcol.name = "Collision"
+	var shopshape := BoxShape3D.new()
+	shopshape.size = Vector3(0.5, 2.4, 1.5)
+	shopcol.shape = shopshape
+	shopcol.position = Vector3(0, 1.2, 0)
+	to_shop.add_child(shopcol)
+	root.add_child(to_shop)
 
 	_add_player(root, Vector3(0.15, 0.9, 2.8))
 
@@ -753,6 +858,26 @@ func _save_warehouse() -> Error:
 	vista.add_child(vcol)
 	root.add_child(vista)
 
+	# POI: трюм, кран, контрабанда
+	_poi(root, "ShipHold", Vector3(-16.0, 0.0, -14.0), Vector3(1.4, 1.2, 1.0), Color(0.22, 0.25, 0.28),
+		"[E] Заглянуть в трюм",
+		PackedStringArray([
+			"Люк приоткрыт. Внизу — темнота и запах гниющей рыбы.",
+			"Кто-то оставил там бочку без марки. Лучше не спрашивать."
+		]))
+	_poi(root, "CraneLever", Vector3(-20.5, 0.0, -8.0), Vector3(0.4, 1.6, 0.4), Color(0.5, 0.35, 0.2),
+		"[E] Рычаг крана",
+		PackedStringArray([
+			"Старый портовый кран. Рычаг тёплый — недавно дергали.",
+			"Стрела висит над водой. Сейчас тебе его не дадут."
+		]))
+	_poi(root, "ContrabandBarrel", Vector3(wh.x + 4.0, 0.0, wh.z - 5.0), Vector3(0.7, 1.0, 0.7), Color(0.25, 0.2, 0.18),
+		"[E] Бочка без марки",
+		PackedStringArray([
+			"Бочка без клейма. От неё тянет сладкой гнилью и маслом.",
+			"Тон Тон орёт, чтобы «не нюхать чужое». Значит, нюхать можно."
+		]))
+
 	var back := _make_interactable(
 		"BackToAlley",
 		Vector3(10.0, 0.0, 32.0),
@@ -852,6 +977,26 @@ func _save_library() -> Error:
 		])
 	)
 	root.add_child(raf)
+
+	# POI: полка-заглушка (без механики чтения), капель с канала, тихий угол
+	_poi(root, "OddShelf", Vector3(-9.0, 0.0, -8.0), Vector3(1.2, 2.2, 0.5), Color(0.4, 0.28, 0.18),
+		"[E] Понюхать полку",
+		PackedStringArray([
+			"Полка пахнет пылью и старым клеем.",
+			"(Карточки читать позже — пока только запах и тишина.)"
+		]))
+	_poi(root, "CanalDrip", Vector3(0.0, 0.0, 0.0), Vector3(0.8, 0.3, 0.8), Color(0.35, 0.4, 0.45),
+		"[E] Слушать капель",
+		PackedStringArray([
+			"Сверху, из канала, мерно капает.",
+			"Каждая капля бьёт по бумагам 5 отдела, как часы."
+		]))
+	_poi(root, "QuietCorner", Vector3(11.0, 0.0, -12.0), Vector3(1.0, 0.9, 1.2), Color(0.32, 0.3, 0.28),
+		"[E] Тихий угол",
+		PackedStringArray([
+			"Здесь почти не слышно Рафа. Только шорох страниц.",
+			"Хорошее место залипнуть — если бы не работа."
+		]))
 
 	# Fire beat → run outside to crowded street
 	var fire := _make_interactable(
@@ -988,6 +1133,35 @@ func _save_library_street() -> Error:
 	_barrier(root, "SideBlockR", Vector3(3, 3, 20), Vector3(16, 1.5, 0))
 	_barrier(root, "FarBlock", Vector3(18, 3, 2), Vector3(0, 1.5, 22))
 
+	# POI + вход в лавку странностей (после пожара тоже доступна)
+	_poi(root, "OddStall", Vector3(8.2, 0.0, 6.0), Vector3(1.6, 1.4, 1.0), Color(0.45, 0.3, 0.4),
+		"[E] Странный лоток",
+		PackedStringArray([
+			"На лотке — мутные склянки и костяные безделушки.",
+			"Продавец кивает в сторону двери: «Настоящая лавка — там.»"
+		]))
+	var to_shop_fire := _make_interactable(
+		"GoShopFromStreet",
+		Vector3(8.2, 0.0, 8.5),
+		"[E] В лавку странностей",
+		PackedStringArray([
+			"Пока все смотрят на пожар, дверь лавки приоткрыта.",
+			"Внутри тихо — как будто огонь их не касается."
+		]),
+		"res://scenes/shop.tscn"
+	)
+	var sg := _box_mesh(Vector3(1.6, 2.2, 0.35), Color(0.4, 0.28, 0.35))
+	sg.position = Vector3(0, 1.1, 0)
+	to_shop_fire.add_child(sg)
+	var sgc := CollisionShape3D.new()
+	sgc.name = "Collision"
+	var sgs := BoxShape3D.new()
+	sgs.size = Vector3(1.8, 2.2, 0.5)
+	sgc.shape = sgs
+	sgc.position = Vector3(0, 1.1, 0)
+	to_shop_fire.add_child(sgc)
+	root.add_child(to_shop_fire)
+
 	var back := _make_interactable(
 		"BackToAlleyFromFire",
 		Vector3(0, 0, 18),
@@ -1014,3 +1188,168 @@ func _save_library_street() -> Error:
 	if err != OK:
 		return err
 	return ResourceSaver.save(packed, "res://scenes/library_street.tscn")
+
+func _save_shop() -> Error:
+	var root := Node3D.new()
+	root.name = "Shop"
+
+	var world_env := WorldEnvironment.new()
+	var env := Environment.new()
+	env.background_mode = Environment.BG_COLOR
+	env.background_color = Color(0.12, 0.1, 0.12)
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_color = Color(0.42, 0.35, 0.4)
+	env.ambient_light_energy = 0.8
+	world_env.environment = env
+	root.add_child(world_env)
+	var lamp := OmniLight3D.new()
+	lamp.position = Vector3(0, 3.2, 0)
+	lamp.light_color = Color(1.0, 0.75, 0.55)
+	lamp.light_energy = 1.1
+	lamp.omni_range = 10
+	root.add_child(lamp)
+
+	var wood := Color(0.38, 0.26, 0.18)
+	var plaster := Color(0.4, 0.34, 0.38)
+	root.add_child(_static_box("Floor", Vector3(10, 0.2, 8), Vector3(0, -0.1, 0), Color(0.25, 0.2, 0.22)))
+	root.add_child(_static_box("Ceil", Vector3(10, 0.2, 8), Vector3(0, 3.6, 0), Color(0.18, 0.15, 0.18)))
+	root.add_child(_static_box("WallB", Vector3(10, 3.6, 0.25), Vector3(0, 1.8, -4), plaster))
+	root.add_child(_static_box("WallF", Vector3(10, 3.6, 0.25), Vector3(0, 1.8, 4), plaster))
+	root.add_child(_static_box("WallL", Vector3(0.25, 3.6, 8), Vector3(-5, 1.8, 0), plaster))
+	root.add_child(_static_box("WallR", Vector3(0.25, 3.6, 8), Vector3(5, 1.8, 0), plaster))
+	root.add_child(_static_box("Counter", Vector3(6.5, 1.0, 1.0), Vector3(0, 0.5, -1.2), wood))
+	root.add_child(_static_box("ShelfBack", Vector3(7.0, 2.2, 0.4), Vector3(0, 2.0, -3.5), wood))
+
+	_poi(root, "ShopKeeperNote", Vector3(0.0, 0.0, -2.2), Vector3(0.5, 0.15, 0.4), Color(0.55, 0.45, 0.3),
+		"[E] Записка на прилавке",
+		PackedStringArray([
+			"«Бери одно. Плата — история. Пропуск — в придачу.»",
+			"Почерк дрожит. Хозяина не видно — только шорох за полкой."
+		]))
+
+	_shop_choice(root, "BuyPotion", Vector3(-2.2, 0.0, -0.2), "potion",
+		"[E] Мутный эликсир",
+		PackedStringArray([
+			"Склянка тёплая. Жидкость медленно переливается сама.",
+			"Тебе суют бумажный пропуск: «В Центральную — пока не передумали.»",
+			"(3D лавки автор пришлёт позже. Сейчас — заглушка выбора.)"
+		]), Color(0.35, 0.55, 0.4))
+	_shop_choice(root, "BuyTrinket", Vector3(0.0, 0.0, -0.2), "trinket",
+		"[E] Костяная безделушка",
+		PackedStringArray([
+			"Тяжёлая штуковина. На ощупь — как чужой сустав.",
+			"Вместе с ней — пропуск в Центральную библиотеку.",
+			"(Зарплатные исходы и торг — позже, чтобы не тормозить плейтест.)"
+		]), Color(0.7, 0.65, 0.5))
+	_shop_choice(root, "BuyFood", Vector3(2.2, 0.0, -0.2), "food",
+		"[E] Сладкий свёрток",
+		PackedStringArray([
+			"Пахнет карамелью и плесенью одновременно.",
+			"Продавец шепчет: «Это и есть плата. А вот пропуск.»",
+			"Дорога к Центральной библиотеке открыта — на заглушку."
+		]), Color(0.55, 0.35, 0.28))
+
+	var back := _make_interactable(
+		"ShopExit",
+		Vector3(0.0, 0.0, 3.3),
+		"[E] Выйти в переулки",
+		PackedStringArray(["Колокольчик над дверью не звенит — только глухой щелчок."]),
+		"res://scenes/alley.tscn"
+	)
+	var bm := _box_mesh(Vector3(1.6, 2.2, 0.3), Color(0.3, 0.25, 0.28))
+	bm.position = Vector3(0, 1.1, 0)
+	back.add_child(bm)
+	var bc := CollisionShape3D.new()
+	bc.name = "Collision"
+	var bs := BoxShape3D.new()
+	bs.size = Vector3(1.8, 2.2, 0.5)
+	bc.shape = bs
+	bc.position = Vector3(0, 1.1, 0)
+	back.add_child(bc)
+	root.add_child(back)
+
+	_add_player(root, Vector3(0, 0.9, 2.0))
+	_mark_owners(root, root)
+	var packed := PackedScene.new()
+	var err := packed.pack(root)
+	if err != OK:
+		return err
+	return ResourceSaver.save(packed, "res://scenes/shop.tscn")
+
+
+func _save_central_library() -> Error:
+	# Заглушка: Центральная библиотека ≠ Конгрегационная (Раф)
+	var root := Node3D.new()
+	root.name = "CentralLibrary"
+
+	var world_env := WorldEnvironment.new()
+	var env := Environment.new()
+	env.background_mode = Environment.BG_COLOR
+	env.background_color = Color(0.16, 0.17, 0.2)
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_color = Color(0.45, 0.48, 0.55)
+	env.ambient_light_energy = 0.85
+	world_env.environment = env
+	root.add_child(world_env)
+	var lamp := OmniLight3D.new()
+	lamp.position = Vector3(0, 8, 0)
+	lamp.light_color = Color(0.85, 0.9, 1.0)
+	lamp.light_energy = 1.3
+	lamp.omni_range = 40
+	root.add_child(lamp)
+
+	var stone := Color(0.45, 0.48, 0.52)
+	var wood := Color(0.32, 0.28, 0.24)
+	# гораздо больше Конгрегационной
+	root.add_child(_static_box("Floor", Vector3(48, 0.2, 60), Vector3(0, -0.1, 0), Color(0.3, 0.32, 0.36)))
+	root.add_child(_static_box("Ceil", Vector3(48, 0.3, 60), Vector3(0, 14, 0), Color(0.22, 0.24, 0.28)))
+	root.add_child(_static_box("WallB", Vector3(48, 14, 0.4), Vector3(0, 7, -30), stone))
+	root.add_child(_static_box("WallF", Vector3(48, 14, 0.4), Vector3(0, 7, 30), stone))
+	root.add_child(_static_box("WallL", Vector3(0.4, 14, 60), Vector3(-24, 7, 0), stone))
+	root.add_child(_static_box("WallR", Vector3(0.4, 14, 60), Vector3(24, 7, 0), stone))
+	for z in range(-24, 25, 8):
+		root.add_child(_static_box("AisleL_%d" % z, Vector3(6, 8, 1.2), Vector3(-14, 4, z), wood))
+		root.add_child(_static_box("AisleR_%d" % z, Vector3(6, 8, 1.2), Vector3(14, 4, z), wood))
+	root.add_child(_static_box("Mezz", Vector3(40, 0.3, 20), Vector3(0, 7.5, -5), Color(0.35, 0.33, 0.3)))
+
+	_poi(root, "CentralDesk", Vector3(0.0, 0.0, -20.0), Vector3(4.0, 1.2, 1.5), Color(0.4, 0.32, 0.25),
+		"[E] Стол регистратора",
+		PackedStringArray([
+			"Центральная библиотека. Здесь тихо иначе — холодно и огромно.",
+			"Это не Конгрегационная и не Раф. Другой масштаб, другие правила.",
+			"(Дальше — заглушка. Сюжетный текст автора позже.)"
+		]))
+	_poi(root, "PassCheck", Vector3(0.0, 0.0, -16.0), Vector3(1.0, 1.6, 0.4), Color(0.55, 0.5, 0.35),
+		"[E] Показать пропуск",
+		PackedStringArray([
+			"Охранник кивает на бумажку из лавки.",
+			"«Проходи. Только полок не трогай без запроса.»"
+		]))
+
+	var back := _make_interactable(
+		"LeaveCentral",
+		Vector3(0.0, 0.0, 26.0),
+		"[E] Уйти в город",
+		PackedStringArray(["Двери Центральной закрываются без скрипа — слишком дорогие петли."]),
+		"res://scenes/alley.tscn"
+	)
+	var bm2 := _box_mesh(Vector3(2.4, 2.6, 0.4), Color(0.3, 0.32, 0.36))
+	bm2.position = Vector3(0, 1.3, 0)
+	back.add_child(bm2)
+	var bc2 := CollisionShape3D.new()
+	bc2.name = "Collision"
+	var bs2 := BoxShape3D.new()
+	bs2.size = Vector3(2.6, 2.6, 0.6)
+	bc2.shape = bs2
+	bc2.position = Vector3(0, 1.3, 0)
+	back.add_child(bc2)
+	root.add_child(back)
+
+	_add_player(root, Vector3(0, 0.9, -12))
+	_mark_owners(root, root)
+	var packed := PackedScene.new()
+	var err := packed.pack(root)
+	if err != OK:
+		return err
+	return ResourceSaver.save(packed, "res://scenes/central_library.tscn")
+

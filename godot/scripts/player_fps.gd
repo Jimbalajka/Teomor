@@ -14,7 +14,8 @@ var _current_target: Node = null
 
 
 func _ready() -> void:
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	if not _input_blocked():
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	ray.target_position = Vector3(0, 0, -interact_distance)
 	prompt.visible = false
 
@@ -28,8 +29,19 @@ func _dialogue_open() -> bool:
 	return dlg != null and dlg.has_method("is_open") and bool(dlg.call("is_open"))
 
 
+func _game_state() -> Node:
+	return get_node_or_null("/root/GameState")
+
+
+func _input_blocked() -> bool:
+	var gs := _game_state()
+	if gs != null and bool(gs.get("input_locked")):
+		return true
+	return _dialogue_open()
+
+
 func _unhandled_input(event: InputEvent) -> void:
-	if _dialogue_open():
+	if _input_blocked():
 		return
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		_look_yaw -= event.relative.x * mouse_sensitivity
@@ -47,7 +59,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if _dialogue_open():
+	if _input_blocked():
 		velocity = Vector3.ZERO
 		move_and_slide()
 		_update_prompt(null)
