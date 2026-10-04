@@ -525,7 +525,7 @@ func _add_player(root: Node, pos: Vector3) -> void:
 	hint.offset_bottom = -10
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	hint.add_theme_font_size_override("font_size", 14)
-	hint.text = "WASD · Shift · Ctrl · Пробел · E · I инв · K навыки · Esc"
+	hint.text = "WASD · Shift · Ctrl · Пробел · E · ЛКМ/F · I · K · Esc"
 	prompt_layer.add_child(hint)
 	root.add_child(player)
 
@@ -2038,9 +2038,9 @@ func _save_playtest() -> Error:
 		{"n": "PadInv", "p": Vector3(0.0, 0.0, -3.0), "c": C_WOOD.lightened(0.1), "t": "[E] Станция: Инвентарь / глоссарий", "l": PackedStringArray(["Станция InventoryStation + клавиша I.", "12 слотов, квестовые вещи, глоссарий терминов."])},
 		{"n": "PadLock", "p": Vector3(2.5, 0.0, -3.0), "c": Color(0.35, 0.32, 0.28), "t": "[E] Станция: Взлом (слоты)", "l": PackedStringArray(["Станция LockStation: 3 барабана, одна заморозка.", "Цель — числа подряд; Моторика даёт доп. попытки."])},
 		{"n": "PadSkills", "p": Vector3(5.0, 0.0, -3.0), "c": C_PURPLE_GLOW.darkened(0.2), "t": "[E] Станция: Навыки", "l": PackedStringArray(["Станция SkillsStation + клавиша K.", "Мощь / Разум / Моторика / Стержень — очки и проверка d20."])},
-		{"n": "PadCombat", "p": Vector3(-4.0, 0.0, 2.5), "c": Color(0.45, 0.18, 0.16), "t": "[E] Станция: Бой", "l": PackedStringArray(["Тут манекен + оружие + FX ударов.", "Бой подключим отдельным OK."])},
+		{"n": "PadCombat", "p": Vector3(-4.0, 0.0, 2.5), "c": Color(0.45, 0.18, 0.16), "t": "[E] Станция: Бой", "l": PackedStringArray(["Манекен справа-спереди: ЛКМ/F удар.", "Топор на стойке. Урон = оружие + Мощь."])},
 		{"n": "PadMove", "p": Vector3(0.0, 0.0, 2.5), "c": Color(0.2, 0.35, 0.4), "t": "[E] Станция: Движение", "l": PackedStringArray(["Фаза 1: WASD, Shift бег, Ctrl присед, Пробел прыжок.", "Платформы справа и низкий лаз в центре."])},
-		{"n": "PadFX", "p": Vector3(4.0, 0.0, 2.5), "c": Color(0.55, 0.45, 0.2), "t": "[E] Станция: FX", "l": PackedStringArray(["Pixel effects gigapack — сюда тестовые вспышки.", "Пока заглушка."])},
+		{"n": "PadFX", "p": Vector3(4.0, 0.0, 2.5), "c": Color(0.55, 0.45, 0.2), "t": "[E] Станция: FX", "l": PackedStringArray(["Станция FxStation — цикл hit/boom/smoke.", "Кадры из gigapack free, урезанный набор в assets/fx."])},
 	]
 	for s in stations:
 		_poi(root, str(s["n"]), s["p"], Vector3(1.2, 0.15, 1.2), s["c"], str(s["t"]), s["l"])
@@ -2185,9 +2185,90 @@ func _save_playtest() -> Error:
 			"Подсказка управления всегда внизу экрана."
 		]))
 
-	# Dummy combat block
-	root.add_child(_static_box("Mannequin", Vector3(0.55, 1.7, 0.35), Vector3(-4.0, 0.85, 3.6), Color(0.55, 0.5, 0.45), TEX_PLASTER))
+	# Phase 7 combat + FX
+	var mannequin := StaticBody3D.new()
+	mannequin.name = "Mannequin"
+	mannequin.position = Vector3(-4.0, 0.0, 3.6)
+	mannequin.set_script(load("res://scripts/combat_target.gd"))
+	mannequin.set("max_hp", 30)
+	mannequin.set("target_name", "Манекен")
+	mannequin.set("reset_on_death", true)
+	var man_mesh := _box_mesh(Vector3(0.55, 1.7, 0.35), Color(0.55, 0.5, 0.45), TEX_PLASTER)
+	man_mesh.position = Vector3(0, 0.85, 0)
+	mannequin.add_child(man_mesh)
+	var man_col := CollisionShape3D.new()
+	man_col.name = "Collision"
+	var man_shape := BoxShape3D.new()
+	man_shape.size = Vector3(0.65, 1.8, 0.45)
+	man_col.shape = man_shape
+	man_col.position = Vector3(0, 0.9, 0)
+	mannequin.add_child(man_col)
+	root.add_child(mannequin)
+
 	_add_mesh_prop(root, "WeaponRack", MESH_KENNEY + "detail-crate.glb", Vector3(-5.2, 0.0, 3.4), 0.0, 1.0, Vector3(0.7, 0.5, 0.6))
+	var weapon := StaticBody3D.new()
+	weapon.name = "WeaponPickup"
+	weapon.position = Vector3(-5.0, 0.0, 3.0)
+	weapon.set_script(load("res://scripts/weapon_pickup.gd"))
+	weapon.set("prompt_text", "[E] Взять топор")
+	weapon.set("weapon_id", "axe")
+	weapon.set("weapon_name", "Топор")
+	weapon.set("weapon_damage", 4)
+	var wmesh := _box_mesh(Vector3(0.12, 0.7, 0.12), Color(0.4, 0.28, 0.16), TEX_WOOD)
+	wmesh.position = Vector3(0, 0.45, 0)
+	weapon.add_child(wmesh)
+	var whead := _box_mesh(Vector3(0.35, 0.12, 0.18), Color(0.45, 0.42, 0.4), TEX_METAL)
+	whead.position = Vector3(0.05, 0.75, 0)
+	weapon.add_child(whead)
+	var wcol := CollisionShape3D.new()
+	wcol.name = "Collision"
+	var wshape := BoxShape3D.new()
+	wshape.size = Vector3(0.5, 1.0, 0.4)
+	wcol.shape = wshape
+	wcol.position = Vector3(0, 0.5, 0)
+	weapon.add_child(wcol)
+	root.add_child(weapon)
+
+	var fxpad := StaticBody3D.new()
+	fxpad.name = "FxStation"
+	fxpad.position = Vector3(4.0, 0.0, 2.5)
+	fxpad.set_script(load("res://scripts/fx_station.gd"))
+	fxpad.set("prompt_text", "[E] Тест FX")
+	var fxmesh := _box_mesh(Vector3(1.2, 0.15, 1.2), Color(0.55, 0.45, 0.2))
+	fxmesh.position = Vector3(0, 0.08, 0)
+	fxpad.add_child(fxmesh)
+	var fxpost := _box_mesh(Vector3(0.12, 1.4, 0.12), Color(0.6, 0.4, 0.15))
+	fxpost.position = Vector3(0, 0.8, -0.4)
+	fxpad.add_child(fxpost)
+	var fxcol := CollisionShape3D.new()
+	fxcol.name = "Collision"
+	var fxshape := BoxShape3D.new()
+	fxshape.size = Vector3(1.3, 1.5, 1.3)
+	fxcol.shape = fxshape
+	fxcol.position = Vector3(0, 0.7, 0)
+	fxpad.add_child(fxcol)
+	root.add_child(fxpad)
+
+	var cpad := StaticBody3D.new()
+	cpad.name = "CombatStation"
+	cpad.position = Vector3(-4.0, 0.0, 2.5)
+	cpad.set_script(load("res://scripts/interactable.gd"))
+	cpad.set("prompt_text", "[E] Станция: Бой")
+	cpad.set("dialogue_lines", PackedStringArray([
+		"Плейтест-бой: возьми топор, бей манекен ЛКМ или F.",
+		"Урон = урон оружия + модификатор Мощи. FX — на станции справа."
+	]))
+	var cmesh := _box_mesh(Vector3(1.2, 0.15, 1.2), Color(0.45, 0.18, 0.16))
+	cmesh.position = Vector3(0, 0.08, 0)
+	cpad.add_child(cmesh)
+	var ccol := CollisionShape3D.new()
+	ccol.name = "Collision"
+	var cshape := BoxShape3D.new()
+	cshape.size = Vector3(1.3, 1.0, 1.3)
+	ccol.shape = cshape
+	ccol.position = Vector3(0, 0.5, 0)
+	cpad.add_child(ccol)
+	root.add_child(cpad)
 
 	# Back to attic
 	var back := _make_interactable(

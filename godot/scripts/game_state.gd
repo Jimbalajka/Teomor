@@ -26,6 +26,11 @@ var skill_points: int = 2
 
 ## Phase 6 lockpick
 var locks_open: Dictionary = {}  # lock_id -> true
+
+## Phase 7 combat (playtest stub)
+var weapon_id: String = ""
+var weapon_name: String = "Кулаки"
+var weapon_damage: int = 2
 var skills: Dictionary = {
 	"might": 10,
 	"mind": 10,
@@ -454,4 +459,20 @@ func lockpick_max_attempts() -> int:
 	var bonus := maxi(0, skill_modifier("motor"))
 	bonus = mini(bonus, 2)
 	return 3 + bonus
+
+
+func equip_weapon(wid: String, wname: String, dmg: int) -> void:
+	weapon_id = wid
+	weapon_name = wname if not wname.is_empty() else wid
+	weapon_damage = maxi(1, dmg)
+	add_note("weapon_equip", "Взял в руки: %s." % weapon_name)
+
+
+func attack_damage() -> int:
+	var bonus := maxi(0, skill_modifier("might"))
+	return maxi(1, weapon_damage + bonus)
+
+
+func combat_status_line() -> String:
+	return "Оружие: %s (+%d) · удар %d" % [weapon_name, weapon_damage, attack_damage()]
 

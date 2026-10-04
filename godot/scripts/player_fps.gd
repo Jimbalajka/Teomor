@@ -23,6 +23,9 @@ var _look_pitch: float = 0.0
 var _current_target: Node = null
 var _crouching: bool = false
 var _wish_crouch: bool = false
+var _attack_cd: float = 0.0
+var _weapon_view: MeshInstance3D = null
+var _combat_hint: Label = null
 
 
 func _ready() -> void:
@@ -32,9 +35,12 @@ func _ready() -> void:
 	prompt.visible = false
 	if controls_hint:
 		controls_hint.visible = true
-		controls_hint.text = "WASD ход · Shift бег · Ctrl присед · Пробел прыжок · E · I инвентарь · K навыки · Esc мышь"
+		controls_hint.text = "WASD · Shift · Ctrl · Пробел · E · ЛКМ/F удар · I инв · K навыки · Esc"
 	_apply_stance(false, true)
 	floor_snap_length = 0.15
+	add_to_group("player")
+	_ensure_combat_ui()
+	refresh_weapon_view()
 
 
 func _dialogue() -> Node:
@@ -71,10 +77,14 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		else:
+			_try_attack()
 	if event.is_action_pressed("ui_accept") or (event is InputEventKey and event.pressed and event.keycode == KEY_E):
 		_try_interact()
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_SPACE:
 		_try_jump()
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F:
+		_try_attack()
 
 
 func _try_jump() -> void:
@@ -89,6 +99,8 @@ func _try_jump() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if _attack_cd > 0.0:
+		_attack_cd = maxf(0.0, _attack_cd - delta)
 	if _input_blocked():
 		velocity = Vector3.ZERO
 		move_and_slide()
@@ -196,6 +208,134 @@ func _resolve_interactable(node: Node) -> Node:
 	return null
 
 
+
+
+func _try_interact() -> void:
+	if _current_target and _current_target.has_method("interact"):
+		_current_target.call("interact")
+
+
+func _ensure_combat_ui() -> void:
+	var layer := get_node_or_null("PromptLayer")
+	if layer == null:
+		return
+	if layer.get_node_or_null("Crosshair") == null:
+		var cross := Label.new()
+		cross.name = "Crosshair"
+		cross.text = "+"
+		cross.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		cross.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		cross.anchor_left = 0.5
+		cross.anchor_right = 0.5
+		cross.anchor_top = 0.5
+		cross.anchor_bottom = 0.5
+		cross.offset_left = -10
+		cross.offset_right = 10
+		cross.offset_top = -12
+		cross.offset_bottom = 12
+		layer.add_child(cross)
+	_combat_hint = layer.get_node_or_null("CombatHint")
+	if _combat_hint == null:
+		_combat_hint = Label.new()
+		_combat_hint.name = "CombatHint"
+		_combat_hint.visible = false
+		_combat_hint.anchor_left = 0.5
+		_combat_hint.anchor_right = 0.5
+		_combat_hint.anchor_top = 0.7
+		_combat_hint.anchor_bottom = 0.7
+		_combat_hint.offset_left = -220
+		_combat_hint.offset_right = 220
+		_combat_hint.offset_top = -10
+		_combat_hint.offset_bottom = 20
+		_combat_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		layer.add_child(_combat_hint)
+
+
+func refresh_weapon_view() -> void:
+	if camera == null:
+		return
+	if _weapon_view == null:
+		_weapon_view = MeshInstance3D.new()
+		_weapon_view.name = "WeaponView"
+		camera.add_child(_weapon_view)
+		_weapon_view.position = Vector3(0.28, -0.22, -0.45)
+		_weapon_view.rotation_degrees = Vector3(15, 0, -20)
+	var box := BoxMesh.new()
+	var gs := _game_state()
+	var wid := str(gs.get("weapon_id")) if gs else ""
+	if wid.is_empty():
+		box.size = Vector3(0.06, 0.06, 0.35)  # fists/club stub
+	else:
+		box.size = Vector3(0.08, 0.12, 0.55)
+	_weapon_view.mesh = box
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.45, 0.32, 0.18) if not wid.is_empty() else Color(0.35, 0.3, 0.28)
+	_weapon_view.material_override = mat
+
+
+func _try_attack() -> void:
+	if _input_blocked():
+		return
+	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+		return
+	if _attack_cd > 0.0:
+		return
+	_attack_cd = 0.45
+	# лёгкий тычок viewmodel
+	if _weapon_view:
+		var tw := create_tween()
+		var base := _weapon_view.position
+		tw.tween_property(_weapon_view, "position", base + Vector3(0, 0, -0.18), 0.06)
+		tw.tween_property(_weapon_view, "position", base, 0.12)
+	ray.force_raycast_update()
+	if not ray.is_colliding():
+		_show_combat_hint("Мимо")
+		return
+	var collider := ray.get_collider() as Node
+	var target := _resolve_combat_target(collider)
+	if target == null:
+		_show_combat_hint("Не цель")
+		return
+	var gs := _game_state()
+	var dmg := 2
+	if gs and gs.has_method("attack_damage"):
+		dmg = int(gs.call("attack_damage"))
+	var hit_pos := ray.get_collision_point()
+	var result: Dictionary = target.call("take_hit", dmg, hit_pos)
+	if bool(result.get("ok", false)):
+		var msg := "-%d  HP %s" % [int(result.get("damage", dmg)), str(result.get("hp", "?"))]
+		if bool(result.get("dead", false)):
+			msg += " · повержен"
+		_show_combat_hint(msg)
+	else:
+		_show_combat_hint("Уже лежит")
+
+
+func _resolve_combat_target(node: Node) -> Node:
+	var n := node
+	while n:
+		if n.has_method("take_hit"):
+			return n
+		n = n.get_parent()
+	return null
+
+
+func _show_combat_hint(text: String) -> void:
+	if _combat_hint == null:
+		_ensure_combat_ui()
+	if _combat_hint == null:
+		return
+	_combat_hint.text = text
+	_combat_hint.visible = true
+	var tw := create_tween()
+	tw.tween_interval(0.8)
+	tw.tween_callback(func():
+		if _combat_hint:
+			_combat_hint.visible = false
+	)
+
+
+# also show combat target HP via interact prompt path
 func _update_prompt(target: Node) -> void:
 	_current_target = target
 	if target and target.has_method("get_prompt"):
@@ -205,9 +345,12 @@ func _update_prompt(target: Node) -> void:
 		prompt.text = "[E] Взаимодействовать"
 		prompt.visible = true
 	else:
+		# если луч на боевой цели без interactable — всё равно подсказка
+		ray.force_raycast_update()
+		if ray.is_colliding():
+			var ct := _resolve_combat_target(ray.get_collider() as Node)
+			if ct and ct.has_method("get_prompt"):
+				prompt.text = str(ct.call("get_prompt"))
+				prompt.visible = true
+				return
 		prompt.visible = false
-
-
-func _try_interact() -> void:
-	if _current_target and _current_target.has_method("interact"):
-		_current_target.call("interact")
