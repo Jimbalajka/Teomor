@@ -13,8 +13,9 @@ func _init() -> void:
 	var e5 := _save_library()
 	var e6 := _save_shop()
 	var e7 := _save_central_library()
-	if e1 != OK or e2 != OK or e3 != OK or e4 != OK or e5 != OK or e6 != OK or e7 != OK:
-		push_error("BUILD_FAIL attic=%s alley=%s warehouse=%s libstreet=%s library=%s shop=%s central=%s" % [e1, e2, e3, e4, e5, e6, e7])
+	var e8 := _save_playtest()
+	if e1 != OK or e2 != OK or e3 != OK or e4 != OK or e5 != OK or e6 != OK or e7 != OK or e8 != OK:
+		push_error("BUILD_FAIL attic=%s alley=%s warehouse=%s libstreet=%s library=%s shop=%s central=%s playtest=%s" % [e1, e2, e3, e4, e5, e6, e7, e8])
 		quit(1)
 		return
 	if FileAccess.file_exists("res://scenes/outside_stub.tscn"):
@@ -743,6 +744,29 @@ func _save_attic() -> Error:
 	lcol.position = Vector3(0, 1.2, 0)
 	ladder.add_child(lcol)
 	root.add_child(ladder)
+
+	# Playtest lab (mechanics sandbox; story route still uses ladder → alley)
+	var to_pt := _make_interactable(
+		"GoPlaytest",
+		Vector3(-2.6, 0.0, 2.05),
+		"[E] В плейтест-комнату",
+		PackedStringArray([
+			"Занавеска в сторону — серый короб для проверки механик.",
+			"Сюжетный спуск по лестнице на место."
+		]),
+		"res://scenes/playtest.tscn"
+	)
+	var pt_door := _box_mesh(Vector3(0.12, 1.9, 0.9), Color(0.22, 0.28, 0.35))
+	pt_door.position = Vector3(0, 0.95, 0)
+	to_pt.add_child(pt_door)
+	var ptcol := CollisionShape3D.new()
+	ptcol.name = "Collision"
+	var ptshape := BoxShape3D.new()
+	ptshape.size = Vector3(0.4, 2.0, 1.0)
+	ptcol.shape = ptshape
+	ptcol.position = Vector3(0, 1.0, 0)
+	to_pt.add_child(ptcol)
+	root.add_child(to_pt)
 
 	# damp props
 	root.add_child(_static_box("Crate", Vector3(0.7, 0.5, 0.7), Vector3(-2.2, 0.25, 1.4), Color(0.38, 0.28, 0.18), TEX_WOOD))
@@ -1888,4 +1912,79 @@ func _save_central_library() -> Error:
 	if err != OK:
 		return err
 	return ResourceSaver.save(packed, "res://scenes/central_library.tscn")
+
+
+
+func _save_playtest() -> Error:
+	var root := Node3D.new()
+	root.name = "Playtest"
+	root.add_child(_underground_env(
+		Color(0.06, 0.06, 0.08),
+		Color(0.22, 0.22, 0.28),
+		Color(0.18, 0.18, 0.22),
+		0.01,
+		0.55,
+		1.0,
+		0.9
+	))
+	_add_omni(root, "Fill", Vector3(0, 3.5, 0), Color(0.75, 0.72, 0.7), 0.55, 18.0, 1.0, false)
+
+	var floor_c := C_STONE.lightened(0.08)
+	var wall_c := C_STONE.lightened(0.02)
+	var accent := C_PURPLE.lightened(0.1)
+	# Arena box ~14x10
+	_slab(root, "Floor", Vector3(14, 0.2, 10), Vector3(0, -0.1, 0), floor_c, TEX_FLOOR)
+	_slab(root, "Ceil", Vector3(14, 0.2, 10), Vector3(0, 4.2, 0), C_INK.lightened(0.12), TEX_INK)
+	_slab(root, "WallN", Vector3(14, 4.2, 0.25), Vector3(0, 2.1, -5.0), wall_c, TEX_STONE)
+	_slab(root, "WallS", Vector3(14, 4.2, 0.25), Vector3(0, 2.1, 5.0), wall_c, TEX_STONE)
+	_slab(root, "WallW", Vector3(0.25, 4.2, 10), Vector3(-7.0, 2.1, 0), wall_c, TEX_STONE)
+	_slab(root, "WallE", Vector3(0.25, 4.2, 10), Vector3(7.0, 2.1, 0), wall_c, TEX_STONE)
+
+	# Labeled stations (stubs for upcoming systems)
+	var stations := [
+		{"n": "PadMirror", "p": Vector3(-5.0, 0.0, -3.0), "c": accent, "t": "[E] Станция: Зеркало", "l": PackedStringArray(["Сюда повесим выбор внешности / имя.", "Пока заглушка."])},
+		{"n": "PadDiary", "p": Vector3(-2.5, 0.0, -3.0), "c": C_PARCHMENT, "t": "[E] Станция: Дневник", "l": PackedStringArray(["Записи дня, флаги slice.", "Пока заглушка."])},
+		{"n": "PadInv", "p": Vector3(0.0, 0.0, -3.0), "c": C_WOOD.lightened(0.1), "t": "[E] Станция: Инвентарь / глоссарий", "l": PackedStringArray(["Как в HTML: вещи + термины.", "Пока заглушка."])},
+		{"n": "PadLock", "p": Vector3(2.5, 0.0, -3.0), "c": Color(0.35, 0.32, 0.28), "t": "[E] Станция: Взлом (слоты)", "l": PackedStringArray(["3 спина; цель — 2/3/4/5 подряд.", "1 замораживается; ловкость +1 попытка."])},
+		{"n": "PadSkills", "p": Vector3(5.0, 0.0, -3.0), "c": C_PURPLE_GLOW.darkened(0.2), "t": "[E] Станция: Навыки", "l": PackedStringArray(["Мощь / Разум / Моторика / Стержень.", "Пока только подписи."])},
+		{"n": "PadCombat", "p": Vector3(-4.0, 0.0, 2.5), "c": Color(0.45, 0.18, 0.16), "t": "[E] Станция: Бой", "l": PackedStringArray(["Тут манекен + оружие + FX ударов.", "Бой подключим отдельным OK."])},
+		{"n": "PadMove", "p": Vector3(0.0, 0.0, 2.5), "c": Color(0.2, 0.35, 0.4), "t": "[E] Станция: Движение", "l": PackedStringArray(["Прыжок / спринт / присед — чеклист.", "Сейчас базовый FPS-контроллер."])},
+		{"n": "PadFX", "p": Vector3(4.0, 0.0, 2.5), "c": Color(0.55, 0.45, 0.2), "t": "[E] Станция: FX", "l": PackedStringArray(["Pixel effects gigapack — сюда тестовые вспышки.", "Пока заглушка."])},
+	]
+	for s in stations:
+		_poi(root, str(s["n"]), s["p"], Vector3(1.2, 0.15, 1.2), s["c"], str(s["t"]), s["l"])
+		# tall marker post
+		root.add_child(_static_box(str(s["n"]) + "_Post", Vector3(0.12, 1.6, 0.12), s["p"] + Vector3(0, 0.9, -0.55), s["c"]))
+
+	# Dummy combat block
+	root.add_child(_static_box("Mannequin", Vector3(0.55, 1.7, 0.35), Vector3(-4.0, 0.85, 3.6), Color(0.55, 0.5, 0.45), TEX_PLASTER))
+	_add_mesh_prop(root, "WeaponRack", MESH_KENNEY + "detail-crate.glb", Vector3(-5.2, 0.0, 3.4), 0.0, 1.0, Vector3(0.7, 0.5, 0.6))
+
+	# Back to attic
+	var back := _make_interactable(
+		"BackAttic",
+		Vector3(0.0, 0.0, 4.4),
+		"[E] Вернуться на чердак",
+		PackedStringArray(["Хватит песочницы — обратно в каплю." ]),
+		"res://scenes/attic.tscn"
+	)
+	var back_m := _box_mesh(Vector3(1.2, 2.0, 0.2), Color(0.25, 0.3, 0.38))
+	back_m.position = Vector3(0, 1.0, 0)
+	back.add_child(back_m)
+	var bcol := CollisionShape3D.new()
+	bcol.name = "Collision"
+	var bshape := BoxShape3D.new()
+	bshape.size = Vector3(1.4, 2.1, 0.5)
+	bcol.shape = bshape
+	bcol.position = Vector3(0, 1.05, 0)
+	back.add_child(bcol)
+	root.add_child(back)
+
+	_add_player(root, Vector3(0.0, 0.9, 0.0))
+	_mark_owners(root, root)
+	var packed := PackedScene.new()
+	var pack_err := packed.pack(root)
+	if pack_err != OK:
+		return pack_err
+	return ResourceSaver.save(packed, "res://scenes/playtest.tscn")
 
