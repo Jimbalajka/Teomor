@@ -57,7 +57,7 @@ func _ui_blocked_by_other() -> bool:
 	var dlg := get_node_or_null("/root/Dialogue")
 	if dlg and dlg.has_method("is_open") and bool(dlg.call("is_open")):
 		return true
-	for path in ["/root/Diary", "/root/NameEntry", "/root/Inventory"]:
+	for path in ["/root/Diary", "/root/NameEntry", "/root/Inventory", "/root/Lockpick"]:
 		var n := get_node_or_null(path)
 		if n and n.has_method("is_open") and bool(n.call("is_open")):
 			return true

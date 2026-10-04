@@ -1173,6 +1173,32 @@ func _save_alley() -> Error:
 	root.add_child(to_lib)
 
 	# POI: гамак, крысы, граффити
+	# Phase 6: locked chest in alley
+	var alley_lock := StaticBody3D.new()
+	alley_lock.name = "AlleyLockChest"
+	alley_lock.position = Vector3(5.2, 0.0, wide_z0 + 0.55)
+	alley_lock.set_script(load("res://scripts/lock_interactable.gd"))
+	alley_lock.set("prompt_text", "[E] Взломать сундук")
+	alley_lock.set("open_prompt", "[E] Пустой сундук")
+	alley_lock.set("lock_id", "alley_chest")
+	alley_lock.set("lock_title", "Сундук в Грибном")
+	alley_lock.set("practice", false)
+	alley_lock.set("success_lines", PackedStringArray([
+		"Замок хрипнул. Внутри — жетон НБ и сырой свёрток.",
+		"Небогато, но живые десы так и живут."
+	]))
+	var al_mesh := _box_mesh(Vector3(0.7, 0.45, 0.5), Color(0.32, 0.24, 0.16), TEX_WOOD)
+	al_mesh.position = Vector3(0, 0.25, 0)
+	alley_lock.add_child(al_mesh)
+	var al_col := CollisionShape3D.new()
+	al_col.name = "Collision"
+	var al_shape := BoxShape3D.new()
+	al_shape.size = Vector3(0.85, 0.7, 0.65)
+	al_col.shape = al_shape
+	al_col.position = Vector3(0, 0.3, 0)
+	alley_lock.add_child(al_col)
+	root.add_child(alley_lock)
+
 	_poi(root, "Hammock", Vector3(-6.5, 0.0, -0.8), Vector3(1.4, 0.15, 0.6), Color(0.45, 0.35, 0.25),
 		"[E] Гамак курильщика",
 		PackedStringArray([
@@ -2010,7 +2036,7 @@ func _save_playtest() -> Error:
 		{"n": "PadMirror", "p": Vector3(-5.0, 0.0, -3.0), "c": accent, "t": "[E] Станция: Зеркало", "l": PackedStringArray(["Интерактивное зеркало слева — станция MirrorStation.", "Имя + силуэт: худой / обычный / тяжёлый."])},
 		{"n": "PadDiary", "p": Vector3(-2.5, 0.0, -3.0), "c": C_PARCHMENT, "t": "[E] Станция: Дневник", "l": PackedStringArray(["Интерактивный дневник — станция DiaryStation рядом.", "Заметки + маршрут (квест дня / флаги slice)."])},
 		{"n": "PadInv", "p": Vector3(0.0, 0.0, -3.0), "c": C_WOOD.lightened(0.1), "t": "[E] Станция: Инвентарь / глоссарий", "l": PackedStringArray(["Станция InventoryStation + клавиша I.", "12 слотов, квестовые вещи, глоссарий терминов."])},
-		{"n": "PadLock", "p": Vector3(2.5, 0.0, -3.0), "c": Color(0.35, 0.32, 0.28), "t": "[E] Станция: Взлом (слоты)", "l": PackedStringArray(["3 спина; цель — 2/3/4/5 подряд.", "1 замораживается; ловкость +1 попытка."])},
+		{"n": "PadLock", "p": Vector3(2.5, 0.0, -3.0), "c": Color(0.35, 0.32, 0.28), "t": "[E] Станция: Взлом (слоты)", "l": PackedStringArray(["Станция LockStation: 3 барабана, одна заморозка.", "Цель — числа подряд; Моторика даёт доп. попытки."])},
 		{"n": "PadSkills", "p": Vector3(5.0, 0.0, -3.0), "c": C_PURPLE_GLOW.darkened(0.2), "t": "[E] Станция: Навыки", "l": PackedStringArray(["Станция SkillsStation + клавиша K.", "Мощь / Разум / Моторика / Стержень — очки и проверка d20."])},
 		{"n": "PadCombat", "p": Vector3(-4.0, 0.0, 2.5), "c": Color(0.45, 0.18, 0.16), "t": "[E] Станция: Бой", "l": PackedStringArray(["Тут манекен + оружие + FX ударов.", "Бой подключим отдельным OK."])},
 		{"n": "PadMove", "p": Vector3(0.0, 0.0, 2.5), "c": Color(0.2, 0.35, 0.4), "t": "[E] Станция: Движение", "l": PackedStringArray(["Фаза 1: WASD, Shift бег, Ctrl присед, Пробел прыжок.", "Платформы справа и низкий лаз в центре."])},
@@ -2041,6 +2067,34 @@ func _save_playtest() -> Error:
 	mcol.position = Vector3(0, 0.8, 0)
 	mpad.add_child(mcol)
 	root.add_child(mpad)
+
+	# Phase 6 lockpick station
+	var lpad := StaticBody3D.new()
+	lpad.name = "LockStation"
+	lpad.position = Vector3(2.5, 0.0, -3.0)
+	lpad.set_script(load("res://scripts/lock_interactable.gd"))
+	lpad.set("prompt_text", "[E] Станция: Взлом")
+	lpad.set("lock_id", "playtest_lock")
+	lpad.set("lock_title", "Плейтест-замок")
+	lpad.set("practice", true)
+	lpad.set("success_lines", PackedStringArray([
+		"Барабаны встали подряд. Для плейтеста замок можно крутить снова.",
+		"Моторика выше нуля даёт дополнительные попытки."
+	]))
+	var lpad_mesh := _box_mesh(Vector3(1.2, 0.15, 1.2), Color(0.35, 0.32, 0.28))
+	lpad_mesh.position = Vector3(0, 0.08, 0)
+	lpad.add_child(lpad_mesh)
+	var lbox := _box_mesh(Vector3(0.45, 0.55, 0.35), Color(0.25, 0.22, 0.2), TEX_METAL)
+	lbox.position = Vector3(0, 0.4, 0)
+	lpad.add_child(lbox)
+	var lpad_col := CollisionShape3D.new()
+	lpad_col.name = "Collision"
+	var lpad_shape := BoxShape3D.new()
+	lpad_shape.size = Vector3(1.3, 1.1, 1.3)
+	lpad_col.shape = lpad_shape
+	lpad_col.position = Vector3(0, 0.55, 0)
+	lpad.add_child(lpad_col)
+	root.add_child(lpad)
 
 	# Phase 5 skills station
 	var spad := StaticBody3D.new()

@@ -35,6 +35,9 @@ func open_inventory() -> void:
 	var skills := get_node_or_null("/root/Skills")
 	if skills and skills.has_method("is_open") and bool(skills.call("is_open")):
 		return
+	var lockpick := get_node_or_null("/root/Lockpick")
+	if lockpick and lockpick.has_method("is_open") and bool(lockpick.call("is_open")):
+		return
 	_tab = "items"
 	_refresh()
 	_panel.visible = true
@@ -254,6 +257,9 @@ func _ui_blocked_by_other() -> bool:
 		return true
 	var skills := get_node_or_null("/root/Skills")
 	if skills and skills.has_method("is_open") and bool(skills.call("is_open")):
+		return true
+	var lockpick := get_node_or_null("/root/Lockpick")
+	if lockpick and lockpick.has_method("is_open") and bool(lockpick.call("is_open")):
 		return true
 	return false
 

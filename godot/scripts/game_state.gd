@@ -23,6 +23,9 @@ var glossary: Dictionary = {}  # id -> {name, description}
 ## Phase 5 skills (столбы; полное древо — отдельный OK)
 var madness: int = 0
 var skill_points: int = 2
+
+## Phase 6 lockpick
+var locks_open: Dictionary = {}  # lock_id -> true
 var skills: Dictionary = {
 	"might": 10,
 	"mind": 10,
@@ -425,4 +428,30 @@ func format_skill_check(result: Dictionary) -> String:
 		int(result.get("dc", 0)),
 		verdict,
 	]
+
+
+func is_lock_open(lock_id: String) -> bool:
+	if lock_id.is_empty():
+		return false
+	return bool(locks_open.get(lock_id, false))
+
+
+func set_lock_open(lock_id: String, value: bool = true) -> void:
+	if lock_id.is_empty():
+		return
+	var first := value and not bool(locks_open.get(lock_id, false))
+	locks_open[lock_id] = value
+	if value:
+		add_note("lock_" + lock_id, "Замок «%s» поддался. Щёлкнуло тихо, как сырой сустав." % lock_id)
+		if first and lock_id == "alley_chest":
+			add_item({"id": "nb_token_alley", "name": "Жетон НБ", "description": "Из сундука в Грибном. Счётный жетон Биржи.", "consumable": false})
+			add_item({"id": "damp_wrap", "name": "Сырой свёрток", "description": "Тряпка с чем-то твёрдым внутри. Пока не разворачивал.", "consumable": false})
+			money_nb += 2
+
+
+func lockpick_max_attempts() -> int:
+	# база 3; положительная Моторика даёт доп. попытки (макс +2)
+	var bonus := maxi(0, skill_modifier("motor"))
+	bonus = mini(bonus, 2)
+	return 3 + bonus
 
