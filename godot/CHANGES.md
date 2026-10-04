@@ -2,6 +2,15 @@
 
 Лог решений и изменений. Новые записи — сверху.
 
+## 2026-10-04 — tools + читаемые материалы
+
+**Автор:** пиксели слишком крупные/одноцветные; должны читаться доски/камень/и т.п. (ориентир Dread Delusion).
+
+**Сделано:**
+- project tools: `scripts/tools/fetch_open_materials.py`, `check_textures.py`, `docs/TOOLS.md`, `.cursor/rules/teomor-style.mdc`
+- bake: `grade_keep_structure` + local contrast; CC0 WoodSiding/PavingStones/Plaster003/MetalPlates+Rust
+- UV tiling в `build_scenes.gd` выше (меньше "плоских квадратов")
+
 ## 2026-10-03 вечер — текстуры + фидбек + handoff
 
 **Сделано:**

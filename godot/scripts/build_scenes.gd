@@ -119,7 +119,7 @@ func _pick_tex_for_color(color: Color) -> String:
 	return TEX_PLASTER
 
 
-func _style_mat(base: Color, ink_amt: float = 0.18, rough: float = 0.92, emit: Color = Color(0, 0, 0, 1), emit_e: float = 0.0, salt: int = 1, tex_name: String = "", uv_scale: float = 0.45) -> StandardMaterial3D:
+func _style_mat(base: Color, ink_amt: float = 0.18, rough: float = 0.92, emit: Color = Color(0, 0, 0, 1), emit_e: float = 0.0, salt: int = 1, tex_name: String = "", uv_scale: float = 1.1) -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()
 	var file_name := tex_name if not tex_name.is_empty() else _pick_tex_for_color(base)
 	# Hard block: figurative organic maps stay off architecture
@@ -135,7 +135,7 @@ func _style_mat(base: Color, ink_amt: float = 0.18, rough: float = 0.92, emit: C
 	mat.albedo_texture = tex
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	mat.uv1_triplanar = true
-	mat.uv1_triplanar_sharpness = 4.0
+	mat.uv1_triplanar_sharpness = 8.0
 	mat.uv1_scale = Vector3(uv_scale, uv_scale, uv_scale)
 	mat.roughness = rough
 	mat.metallic = 0.0
@@ -155,8 +155,8 @@ func _box_mesh(size: Vector3, color: Color, tex_name: String = "") -> MeshInstan
 	var ink := 0.2
 	if color.r + color.g + color.b < 0.35:
 		ink = 0.35
-	# Larger surfaces need MORE repeats (higher uv scale), not fewer
-	var uv := clampf((size.x + size.y + size.z) * 0.14, 0.55, 2.8)
+	# Finer tiling so boards/stone read (avoid huge flat texels)
+	var uv := clampf((size.x + size.y + size.z) * 0.22, 0.95, 4.2)
 	mi.material_override = _style_mat(color, ink, 0.95, Color(0, 0, 0), 0.0, int(color.r * 97 + color.g * 53 + color.b * 31), tex_name, uv)
 	return mi
 

@@ -1,6 +1,6 @@
 # Якорь стиля — Теомор Godot
 
-**Статус:** v1.2 (2026-10-03). Палитра + baked albedo + **sick-vision filter**; чердак ломает коробку (скат/балки); переулок светлее; гриб-albedo только на мешах грибов.  
+**Статус:** v1.3 (2026-10-04). Палитра + baked albedo с **читаемой структурой материалов** (доски/камень/штукатурка из ambientCG CC0) + sick-vision; UV tiling мельче; гриб-albedo только на мешах грибов.  
 Остальные локации подтягивать позже.
 
 ## Правило кадра (из Блича TYBW + рефы автора)
@@ -24,10 +24,11 @@
 Тускло, короткая дистанция, сильнее туман. Контраст выше насыщенности (adjustment sat↓ / contrast↑). Не яркий PBR-инди.
 
 ## Техника якоря
-- Albedo: `assets/textures/style/tex_*_512.png` (рефы автора + CC0), fallback — noise
-- **Nearest** + triplanar UV; без чистого PBR
+- Albedo: `assets/textures/style/tex_*_512.png` (рефы автора + ambientCG CC0), fallback — noise
+- Bake **сохраняет структуру** материала (не сплющивает в 2 цвета); проверка: `scripts/tools/check_textures.py`
+- Triplanar UV с достаточным tiling (доски/камень читаются); filter linear+mips; без чистого PBR-блеска
 - Emission только на пурпурных шляпках/наростах (слабо)
-- Сборка сцен: `scripts/build_scenes.gd`; пересборка текстур: `scripts/bake_style_textures.py`
+- Сборка: `scripts/build_scenes.gd`; fetch/bake: см. [`TOOLS.md`](TOOLS.md)
 - Источники/лицензии: [`TEXTURES.md`](TEXTURES.md)
 
 ## Рефы в репо

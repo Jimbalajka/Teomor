@@ -47,6 +47,8 @@
 | `godot/AGENT.md` | роль, процесс, стопы |
 | `godot/CONTEXT.md` | scope, стек, milestone, канон |
 | `godot/CHANGES.md` | лог решений и изменений |
+| `godot/docs/TOOLS.md` | bake/fetch/check текстур (project-scoped) |
+| `godot/docs/SESSION.md` | handoff текущего визуального пасса |
 | `godot/docs/SESSION.md` | свежий handoff «где остановились» |
 | `godot/docs/STYLE_ANCHOR.md` | якорь визуала |
 

@@ -1,0 +1,15 @@
+---
+description: Teomor Godot style/texture pass rules (project-only)
+globs: godot/**/*
+alwaysApply: true
+---
+
+# Теомор — стиль
+
+- Цель ощущения: Dread Delusion / грязное инди, не чистый PBR и не огромные одноцветные пиксели.
+- Материалы должны **читаться**: дерево=доски/волокно, камень=трещины/плиты, штукатурка=пятна/зерно.
+- Палитра: пергамент / пурпур / чернила; один доминирующий цвет кадра.
+- Геометрия важнее новых PNG. Не тащить Teomor-sis / бой / полировку склада без OK.
+- Открытые источники: ambientCG CC0 через `scripts/tools/fetch_open_materials.py`.
+- После правок текстур: bake → `check_textures.py` → `build_scenes.gd`.
+- Project-scoped tools only (`godot/scripts/tools`, `godot/docs/TOOLS.md`). Не ставить глобальные MCP ради этого.
