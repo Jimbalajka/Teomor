@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Fetch open CC0 material albedos into assets/textures/_src/.
+"""Fetch open CC0 material packs (albedo/normal/rough/AO) into _src/.
 
-Sources: ambientCG (CC0). No account.
+Source: ambientCG (CC0). No account.
 
 Usage:
   python3 scripts/tools/fetch_open_materials.py
@@ -18,64 +18,97 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "assets" / "textures" / "_src"
 
-# Prefer materials with readable mid-frequency structure (boards / stone / plaster).
 PACKS = {
-    # wood boards / planks (ambientCG CC0)
-    "wood_planks": "https://ambientcg.com/get?file=WoodFloor044_1K-JPG.zip",
     "wood_boards": "https://ambientcg.com/get?file=WoodSiding001_1K-JPG.zip",
-    "wood": "https://ambientcg.com/get?file=WoodFloor051_1K-JPG.zip",
-    # stone / pavement with cracks
+    "wood_planks": "https://ambientcg.com/get?file=WoodFloor044_1K-JPG.zip",
+    "plaster": "https://ambientcg.com/get?file=Plaster003_1K-JPG.zip",
     "stone_pavement": "https://ambientcg.com/get?file=PavingStones070_1K-JPG.zip",
     "stone_rocks": "https://ambientcg.com/get?file=Rocks022_1K-JPG.zip",
-    # wall plaster / concrete variation
-    "plaster": "https://ambientcg.com/get?file=Plaster003_1K-JPG.zip",
-    "concrete": "https://ambientcg.com/get?file=Concrete034_1K-JPG.zip",
-    # metal / rust (readable plates, not flat brushed)
     "metal": "https://ambientcg.com/get?file=MetalPlates006_1K-JPG.zip",
     "metal_rust": "https://ambientcg.com/get?file=Rust001_1K-JPG.zip",
-    "metal_smooth": "https://ambientcg.com/get?file=Metal032_1K-JPG.zip",
+    "concrete": "https://ambientcg.com/get?file=Concrete034_1K-JPG.zip",
 }
 
+MAP_KEYS = (
+    ("color", ("color", "diff", "albedo")),
+    ("normal", ("normalgl", "normal_gl", "normal")),
+    ("rough", ("rough",)),
+    ("ao", ("ambientocclusion", "ao", "occlusion")),
+)
 
-def fetch(key: str, url: str) -> Path | None:
+
+def _pick_name(names: list[str], needles: tuple[str, ...]) -> str | None:
+    ranked: list[tuple[int, str]] = []
+    for n in names:
+        ln = n.lower().replace("\\", "/")
+        base = ln.rsplit("/", 1)[-1]
+        if not base.endswith((".jpg", ".jpeg", ".png")):
+            continue
+        for i, needle in enumerate(needles):
+            if needle in base.replace("_", "").replace("-", "") or needle in base:
+                # prefer NormalGL over NormalDX
+                score = i
+                if "normaldx" in base.replace("_", ""):
+                    score += 10
+                ranked.append((score, n))
+                break
+    if not ranked:
+        return None
+    ranked.sort()
+    return ranked[0][1]
+
+
+def fetch(key: str, url: str) -> bool:
     SRC.mkdir(parents=True, exist_ok=True)
     color_path = SRC / f"{key}_color.jpg"
-    if color_path.exists() and color_path.stat().st_size > 10_000:
-        print("HAVE", color_path)
-        return color_path
-    print("GET", url)
-    req = urllib.request.Request(url, headers={"User-Agent": "TeomorOpenMaterials/1.1"})
-    try:
-        with urllib.request.urlopen(req, timeout=180) as resp:
-            data = resp.read()
-    except Exception as e:
-        print("FAIL", key, e)
-        return None
-    (SRC / f"{key}.zip").write_bytes(data)
+    need_download = not color_path.exists() or color_path.stat().st_size < 10_000
+    # also re-extract if maps missing
+    for suffix, _ in MAP_KEYS:
+        if not (SRC / f"{key}_{suffix}.jpg").exists():
+            need_download = True
+    zip_path = SRC / f"{key}.zip"
+    data = None
+    if need_download:
+        if zip_path.exists() and zip_path.stat().st_size > 50_000:
+            data = zip_path.read_bytes()
+            print("USE_ZIP", zip_path)
+        else:
+            print("GET", url)
+            req = urllib.request.Request(url, headers={"User-Agent": "TeomorOpenMaterials/2.0"})
+            try:
+                with urllib.request.urlopen(req, timeout=180) as resp:
+                    data = resp.read()
+            except Exception as e:
+                print("FAIL", key, e)
+                return False
+            zip_path.write_bytes(data)
+    else:
+        print("HAVE", key)
+        return True
+
+    assert data is not None
     with zipfile.ZipFile(io.BytesIO(data)) as zf:
-        names = [n for n in zf.namelist() if n.lower().endswith((".jpg", ".jpeg", ".png"))]
-        pick = None
-        for n in names:
-            ln = n.lower()
-            if "color" in ln or "diff" in ln or "albedo" in ln:
-                pick = n
-                break
-        if pick is None and names:
-            pick = names[0]
-        if pick is None:
-            return None
-        im = Image.open(io.BytesIO(zf.read(pick))).convert("RGB")
-        im.save(color_path, quality=93)
-        print("WROTE", color_path, im.size)
-        return color_path
+        names = zf.namelist()
+        ok_any = False
+        for suffix, needles in MAP_KEYS:
+            pick = _pick_name(names, needles)
+            if pick is None:
+                print("MISS_MAP", key, suffix)
+                continue
+            im = Image.open(io.BytesIO(zf.read(pick))).convert("RGB")
+            out = SRC / f"{key}_{suffix}.jpg"
+            im.save(out, quality=93)
+            print("WROTE", out.name, im.size)
+            ok_any = True
+        return ok_any
 
 
 def main() -> int:
     ok = 0
     for key, url in PACKS.items():
-        if fetch(key, url) is not None:
+        if fetch(key, url):
             ok += 1
-    print(f"DONE fetched_or_cached={ok}/{len(PACKS)} dir={SRC}")
+    print(f"DONE packs_ok={ok}/{len(PACKS)} dir={SRC}")
     return 0 if ok else 1
 
 

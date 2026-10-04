@@ -20,7 +20,7 @@ Vertical slice главы 1 **играется greybox+**: маршрут ест
 | Слой | Статус |
 |------|--------|
 | Палитра пергамент / пурпур / чернила + доминанта кадра | ок как направление |
-| Baked albedo из рефов + ambientCG CC0 | **v1.3** структура материалов читается сильнее; tools в `docs/TOOLS.md` |
+| Baked albedo+normal+rough (depth) | **v1.4** AO/bevel в albedo, anti-mosaic UV jitter; tools в `docs/TOOLS.md` |
 | Авто-flesh на стенах | **пофикшено** (баг `_pick_tex_for_color`) |
 | Скат/балки чердака, светлее переулок, sick-vision filter | в `60d065f` |
 | Оценка автора | «не текстурки, а натянутые PNG»; лавка была с гриб-стенкой; переулок был слишком тёмный |

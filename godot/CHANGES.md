@@ -2,6 +2,16 @@
 
 Лог решений и изменений. Новые записи — сверху.
 
+## 2026-10-04 — depth maps + anti-mosaic (DD-pass)
+
+**Автор:** плоско/дешево, мозаика тайлов; в DD текстуры на боксах имеют глубину и аккуратность.
+
+**Сделано:**
+- fetch ambientCG Color+Normal+Rough+AO
+- bake AO/bevel в albedo + `*_n_512` / `*_r_512`
+- `build_scenes.gd`: normal/rough + per-mesh UV offset/jitter
+- docs TEXTURES/STYLE/TOOLS
+
 ## 2026-10-04 — tools + читаемые материалы
 
 **Автор:** пиксели слишком крупные/одноцветные; должны читаться доски/камень/и т.п. (ориентир Dread Delusion).

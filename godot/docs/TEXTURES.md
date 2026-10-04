@@ -1,33 +1,29 @@
-# Текстуры стиля (attic / alley)
+# Текстуры стиля (attic / alley) — v1.4 depth
 
 ## Файлы
 `godot/assets/textures/style/`
 
-| Файл | Зона | Состав |
-|------|------|--------|
-| `tex_attic_plaster_512.png` | чердак стены | ambientCG **Plaster003** + тёплый wash + ink |
-| `tex_attic_wood_512.png` | пол/балки/мебель | **WoodSiding001** + WoodFloor044/051 → пергамент/дерево |
-| `tex_ink_grime_512.png` | швы/потолки | `стиль 1.1/` (ч/б индустриал) |
-| `tex_alley_stone_512.png` | стены переулка | **PavingStones070** / Rocks022 + пурпур `цвет/Эмб1` |
-| `tex_alley_floor_512.png` | пол переулка | камень + ink + bleed плоти |
-| `tex_vsegrib_flesh_512.png` | наросты/ножки | `Грибы/` + `Эмб1` |
-| `tex_vsegrib_cap_512.png` | шляпки | `Грибы/` graded to purple glow |
-| `tex_metal_barrel_512.png` | металл | **MetalPlates006** + **Rust001** + purple blot |
+На каждый материал:
+- `*_512.png` — albedo **с запечённой глубиной** (AO + soft bevel из normal)
+- `*_n_512.png` — normal
+- `*_r_512.png` — roughness
 
-Сырьё CC0: `assets/textures/_src/` (gitignore, перекачивается скриптом).
+| Стем | Зона | CC0 / рефы |
+|------|------|------------|
+| `tex_attic_plaster` | стены чердака | Plaster003 |
+| `tex_attic_wood` | пол/балки | WoodSiding001 + WoodFloor044 |
+| `tex_alley_stone` | стены переулка | PavingStones070 + Rocks022 + пурпур `Эмб1` |
+| `tex_alley_floor` | пол переулка | pavement/concrete + ink |
+| `tex_metal_barrel` | металл | MetalPlates006 + Rust001 |
+| `tex_ink_grime` | швы | `стиль 1.1/` |
+| `tex_vsegrib_*` | грибы | `Грибы/` + синтетический normal |
 
-## Цель читаемости
-Не огромные одноцветные пиксели. Должны читаться **доски / камень / штукатурка**.  
-Bake держит структуру CC0 (`grade_keep_structure` + local contrast), палитра — wash, не замена.
+Сырьё: `assets/textures/_src/` (gitignore).
 
-Проверка:
-```bash
-python3 scripts/tools/check_textures.py
-```
+## Зачем так
+Фидбек автора / DD: не плоский «наклеенный PNG», а глубина + единый стиль; без мозаичного тайлинга.
 
-## Лицензии
-- **ambientCG** — [CC0](https://ambientcg.com/list?type=Material&sort=Popular)
-- Авторские папки `цвет/`, `Грибы/`, `стиль 1.1/`, `Стиль ост/`, `Стиль мои рисунки*` — собственность автора Теомора
+В Godot: normal+rough + **per-mesh UV offset/jitter** (`build_scenes.gd`).
 
 ## Пересборка
 См. [`TOOLS.md`](TOOLS.md).
@@ -40,4 +36,4 @@ python3 scripts/tools/check_textures.py
 godot4 --path . --headless -s res://scripts/build_scenes.gd
 ```
 
-Промпты на случай будущей нейрогенки: [`AI_ASSETS.md`](AI_ASSETS.md).
+Лицензии: ambientCG **CC0**; авторские рефы — собственность автора.

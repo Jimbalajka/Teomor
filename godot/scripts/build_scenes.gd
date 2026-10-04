@@ -119,7 +119,14 @@ func _pick_tex_for_color(color: Color) -> String:
 	return TEX_PLASTER
 
 
-func _style_mat(base: Color, ink_amt: float = 0.18, rough: float = 0.92, emit: Color = Color(0, 0, 0, 1), emit_e: float = 0.0, salt: int = 1, tex_name: String = "", uv_scale: float = 1.1) -> StandardMaterial3D:
+func _companion_name(albedo_name: String, kind: String) -> String:
+	# tex_attic_wood_512.png -> tex_attic_wood_n_512.png / _r_512.png
+	if albedo_name.ends_with("_512.png"):
+		return albedo_name.replace("_512.png", "_%s_512.png" % kind)
+	return ""
+
+
+func _style_mat(base: Color, ink_amt: float = 0.18, rough: float = 0.92, emit: Color = Color(0, 0, 0, 1), emit_e: float = 0.0, salt: int = 1, tex_name: String = "", uv_scale: float = 1.1, uv_offset: Vector3 = Vector3.ZERO) -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()
 	var file_name := tex_name if not tex_name.is_empty() else _pick_tex_for_color(base)
 	# Hard block: figurative organic maps stay off architecture
@@ -130,14 +137,27 @@ func _style_mat(base: Color, ink_amt: float = 0.18, rough: float = 0.92, emit: C
 		tex = _noise_tex(base, ink_amt, 48, salt)
 		mat.albedo_color = Color(1, 1, 1)
 	else:
-		# Mild tint so props keep identity without killing baked grade
-		mat.albedo_color = base.lerp(Color(1, 1, 1), 0.78)
+		# Mild tint; baked AO/bevel already in albedo
+		mat.albedo_color = base.lerp(Color(1, 1, 1), 0.82)
 	mat.albedo_texture = tex
+	var ntex: Texture2D = _load_style_tex(_companion_name(file_name, "n"))
+	if ntex != null:
+		mat.normal_enabled = true
+		mat.normal_texture = ntex
+		mat.normal_scale = 1.15
+	var rtex: Texture2D = _load_style_tex(_companion_name(file_name, "r"))
+	if rtex != null:
+		mat.roughness_texture = rtex
+		mat.roughness = 1.0
+	else:
+		mat.roughness = rough
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	mat.uv1_triplanar = true
 	mat.uv1_triplanar_sharpness = 8.0
-	mat.uv1_scale = Vector3(uv_scale, uv_scale, uv_scale)
-	mat.roughness = rough
+	# Per-mesh scale/offset jitter kills wall-to-wall mosaic locking
+	var jitter := 0.85 + 0.35 * _hash01(salt, 3, 19)
+	mat.uv1_scale = Vector3(uv_scale * jitter, uv_scale * jitter, uv_scale * jitter)
+	mat.uv1_offset = uv_offset
 	mat.metallic = 0.0
 	if emit_e > 0.0:
 		mat.emission_enabled = true
@@ -146,7 +166,7 @@ func _style_mat(base: Color, ink_amt: float = 0.18, rough: float = 0.92, emit: C
 	return mat
 
 
-func _box_mesh(size: Vector3, color: Color, tex_name: String = "") -> MeshInstance3D:
+func _box_mesh(size: Vector3, color: Color, tex_name: String = "", salt_extra: int = 0) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	mi.name = "Mesh"
 	var mesh := BoxMesh.new()
@@ -155,9 +175,11 @@ func _box_mesh(size: Vector3, color: Color, tex_name: String = "") -> MeshInstan
 	var ink := 0.2
 	if color.r + color.g + color.b < 0.35:
 		ink = 0.35
-	# Finer tiling so boards/stone read (avoid huge flat texels)
-	var uv := clampf((size.x + size.y + size.z) * 0.22, 0.95, 4.2)
-	mi.material_override = _style_mat(color, ink, 0.95, Color(0, 0, 0), 0.0, int(color.r * 97 + color.g * 53 + color.b * 31), tex_name, uv)
+	# Moderate tiling: readable material, less wallpaper mosaic
+	var uv := clampf((size.x + size.y + size.z) * 0.16, 0.7, 2.8)
+	var salt := int(color.r * 97 + color.g * 53 + color.b * 31) + salt_extra + int(size.x * 13 + size.y * 29 + size.z * 47)
+	var off := Vector3(_hash01(salt, 1, 5), _hash01(salt, 2, 7), _hash01(salt, 3, 11))
+	mi.material_override = _style_mat(color, ink, 0.9, Color(0, 0, 0), 0.0, salt, tex_name, uv, off)
 	return mi
 
 
@@ -165,7 +187,8 @@ func _static_box(name: String, size: Vector3, pos: Vector3, color: Color, tex_na
 	var body := StaticBody3D.new()
 	body.name = name
 	body.position = pos
-	body.add_child(_box_mesh(size, color, tex_name))
+	var salt_extra := int(abs(pos.x * 17.0) + abs(pos.y * 29.0) + abs(pos.z * 43.0) + name.length() * 13)
+	body.add_child(_box_mesh(size, color, tex_name, salt_extra))
 	var col := CollisionShape3D.new()
 	col.name = "Collision"
 	var shape := BoxShape3D.new()

@@ -14,13 +14,13 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[2]
 STYLE = ROOT / "assets" / "textures" / "style"
 
-# Heuristic gates for "material reads" (not photo-real).
+# Albedo-only gates (normals carry extra depth now).
 MIN_BLOCK = {
-    "tex_attic_wood_512.png": 0.075,
+    "tex_attic_wood_512.png": 0.055,
     "tex_alley_stone_512.png": 0.08,
     "tex_attic_plaster_512.png": 0.06,
     "tex_alley_floor_512.png": 0.06,
-    "tex_metal_barrel_512.png": 0.05,
+    "tex_metal_barrel_512.png": 0.045,
     "tex_ink_grime_512.png": 0.06,
     "tex_vsegrib_flesh_512.png": 0.07,
     "tex_vsegrib_cap_512.png": 0.07,
@@ -48,22 +48,39 @@ def main() -> int:
         return 1
     bad = 0
     print(f"DIR {STYLE}")
-    for path in sorted(STYLE.glob("*.png")):
-        if path.name.endswith("_emit_512.png"):
+    for path in sorted(STYLE.glob("*_512.png")):
+        name = path.name
+        if name.endswith("_emit_512.png") or "_n_512.png" in name or "_r_512.png" in name:
+            continue
+        if "_n_" in name or "_r_" in name:
             continue
         s = stats(path)
-        need = MIN_BLOCK.get(path.name)
+        need = MIN_BLOCK.get(name)
         flag = ""
         if need is not None and s["block"] < need:
             flag = f"  LOW_DETAIL need>={need:.2f}"
             bad += 1
         m = s["mean"]
         print(
-            f"{path.name:32s} mean=[{m[0]:.3f} {m[1]:.3f} {m[2]:.3f}] "
+            f"{name:32s} mean=[{m[0]:.3f} {m[1]:.3f} {m[2]:.3f}] "
             f"gstd={s['gstd']:.3f} block={s['block']:.3f}{flag}"
         )
+    # Companion maps presence
+    stems = [
+        "tex_attic_plaster",
+        "tex_attic_wood",
+        "tex_alley_stone",
+        "tex_alley_floor",
+        "tex_metal_barrel",
+    ]
+    for stem in stems:
+        for kind in ("n", "r"):
+            p = STYLE / f"{stem}_{kind}_512.png"
+            if not p.exists():
+                print(f"MISSING_MAP {p.name}")
+                bad += 1
     if bad:
-        print(f"FAIL detail_checks={bad}")
+        print(f"FAIL checks={bad}")
         return 2
     print("OK")
     return 0
