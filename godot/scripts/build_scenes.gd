@@ -794,12 +794,23 @@ func _save_attic() -> Error:
 	root.add_child(_mushroom("Mushroom_Attic2", Vector3(2.7, 1.4, 0.3), 1.1))
 
 	# POI: дневник, щель с видом, мокрые тряпки
-	_poi(root, "Diary", Vector3(-1.2, 0.0, -1.5), Vector3(0.35, 0.08, 0.28), Color(0.55, 0.45, 0.3),
-		"[E] Листать дневник",
-		PackedStringArray([
-			"Потёртый блокнот. Буквы расползаются от сырости.",
-			"«Ещё один день. Если не сдохну — пойду на работу.»"
-		]))
+	# Diary — phase 3: notes + route flags
+	var diary := StaticBody3D.new()
+	diary.name = "Diary"
+	diary.position = Vector3(-1.2, 0.0, -1.5)
+	diary.set_script(load("res://scripts/diary_interactable.gd"))
+	diary.set("prompt_text", "[E] Листать дневник")
+	var diary_mesh := _box_mesh(Vector3(0.35, 0.08, 0.28), Color(0.55, 0.45, 0.3), TEX_WOOD)
+	diary_mesh.position = Vector3(0, 0.04, 0)
+	diary.add_child(diary_mesh)
+	var dcol := CollisionShape3D.new()
+	dcol.name = "Collision"
+	var dshape := BoxShape3D.new()
+	dshape.size = Vector3(0.5, 0.35, 0.45)
+	dcol.shape = dshape
+	dcol.position = Vector3(0, 0.12, 0)
+	diary.add_child(dcol)
+	root.add_child(diary)
 	_poi(root, "WallCrack", Vector3(-2.85, 0.0, 0.8), Vector3(0.12, 1.1, 0.45), Color(0.25, 0.3, 0.28),
 		"[E] Глянуть в щель",
 		PackedStringArray([
@@ -1957,7 +1968,7 @@ func _save_playtest() -> Error:
 	# Labeled stations (stubs for upcoming systems)
 	var stations := [
 		{"n": "PadMirror", "p": Vector3(-5.0, 0.0, -3.0), "c": accent, "t": "[E] Станция: Зеркало", "l": PackedStringArray(["Интерактивное зеркало слева — станция MirrorStation.", "Имя + силуэт: худой / обычный / тяжёлый."])},
-		{"n": "PadDiary", "p": Vector3(-2.5, 0.0, -3.0), "c": C_PARCHMENT, "t": "[E] Станция: Дневник", "l": PackedStringArray(["Записи дня, флаги slice.", "Пока заглушка."])},
+		{"n": "PadDiary", "p": Vector3(-2.5, 0.0, -3.0), "c": C_PARCHMENT, "t": "[E] Станция: Дневник", "l": PackedStringArray(["Интерактивный дневник — станция DiaryStation рядом.", "Заметки + маршрут (квест дня / флаги slice)."])},
 		{"n": "PadInv", "p": Vector3(0.0, 0.0, -3.0), "c": C_WOOD.lightened(0.1), "t": "[E] Станция: Инвентарь / глоссарий", "l": PackedStringArray(["Как в HTML: вещи + термины.", "Пока заглушка."])},
 		{"n": "PadLock", "p": Vector3(2.5, 0.0, -3.0), "c": Color(0.35, 0.32, 0.28), "t": "[E] Станция: Взлом (слоты)", "l": PackedStringArray(["3 спина; цель — 2/3/4/5 подряд.", "1 замораживается; ловкость +1 попытка."])},
 		{"n": "PadSkills", "p": Vector3(5.0, 0.0, -3.0), "c": C_PURPLE_GLOW.darkened(0.2), "t": "[E] Станция: Навыки", "l": PackedStringArray(["Мощь / Разум / Моторика / Стержень.", "Пока только подписи."])},
@@ -1990,6 +2001,27 @@ func _save_playtest() -> Error:
 	mcol.position = Vector3(0, 0.8, 0)
 	mpad.add_child(mcol)
 	root.add_child(mpad)
+
+	# Phase 3 diary station
+	var dpad := StaticBody3D.new()
+	dpad.name = "DiaryStation"
+	dpad.position = Vector3(-2.5, 0.0, -3.0)
+	dpad.set_script(load("res://scripts/diary_interactable.gd"))
+	dpad.set("prompt_text", "[E] Станция: Дневник")
+	var dpad_mesh := _box_mesh(Vector3(1.2, 0.15, 1.2), C_PARCHMENT)
+	dpad_mesh.position = Vector3(0, 0.08, 0)
+	dpad.add_child(dpad_mesh)
+	var dbook := _box_mesh(Vector3(0.45, 0.08, 0.35), Color(0.45, 0.32, 0.18), TEX_WOOD)
+	dbook.position = Vector3(0, 0.2, 0)
+	dpad.add_child(dbook)
+	var dpad_col := CollisionShape3D.new()
+	dpad_col.name = "Collision"
+	var dpad_shape := BoxShape3D.new()
+	dpad_shape.size = Vector3(1.3, 1.0, 1.3)
+	dpad_col.shape = dpad_shape
+	dpad_col.position = Vector3(0, 0.5, 0)
+	dpad.add_child(dpad_col)
+	root.add_child(dpad)
 
 	# Movement course (phase 1)
 	root.add_child(_static_box("JumpBlock1", Vector3(1.4, 0.45, 1.4), Vector3(2.2, 0.22, 1.0), C_STONE.lightened(0.12), TEX_STONE))

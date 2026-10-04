@@ -38,4 +38,7 @@ func _wait_dialogue_closed(dlg: Node) -> void:
 
 func _go() -> void:
 	if change_scene_to != "":
+		var gs := get_node_or_null("/root/GameState")
+		if gs and gs.has_method("mark_scene"):
+			gs.call("mark_scene", change_scene_to)
 		get_tree().change_scene_to_file(change_scene_to)
