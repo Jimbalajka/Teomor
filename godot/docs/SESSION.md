@@ -41,7 +41,8 @@ Vertical slice главы 1 **играется greybox+**: маршрут ест
 | `assets/textures/style/` | albedo 512 |
 | `docs/STYLE_ANCHOR.md` | якорь стиля v1.2 |
 | `docs/TEXTURES.md` | источники текстур / лицензии |
-| `docs/AI_ASSETS.md` | промпты на случай будущей нейрогенки |
+| `docs/AI_ASSETS.md` | промпты |
+| `docs/COLAB_START.md` + `docs/colab/teomor_seamless.ipynb` | Colab с нуля |
 | `docs/LOCATIONS.md` | бриф локаций |
 | `docs/CHAPTER1_CANVAS.md` + `chapter1-day1.canvas` | SoT маршрута гл.1 |
 | Рефы автора (корень репо) | `цвет/`, `Грибы/`, `стиль 1.1/`, `Стиль ост/`, `Стиль мои рисунки*` |

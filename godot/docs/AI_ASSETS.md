@@ -30,6 +30,9 @@
 
 ---
 
+## Colab с нуля
+Пошагово открыть/GPU/готовый ноутбук: [`COLAB_START.md`](COLAB_START.md) → `colab/teomor_seamless.ipynb`.
+
 ## Инструмент
 
 | Задача | Лучший выбор |
