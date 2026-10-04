@@ -27,3 +27,22 @@
 - Ноутбук с GitHub 404 → значит ещё не подтянул push; используй способ 2.
 
 Промпты слотов: [`AI_ASSETS.md`](AI_ASSETS.md).
+
+### Ошибка ячейки 3: `cannot import name '_Ink' from 'PIL.typing'`
+
+Colab обновил Python/Pillow — ломается diffusers.
+
+1. **Среда выполнения → Перезапустить сеанс**
+2. Снова **GPU**
+3. Обнови ноутбук с GitHub (обнови страницу / открой ссылку заново) — ячейка 2 с **пинном** `pillow==10.4.0`
+4. ▶ с ячейки 1 снова
+
+Или прямо сейчас вставь **новую** ячейку и ▶:
+
+```python
+%pip -q uninstall -y pillow
+%pip -q install "pillow==10.4.0" "diffusers==0.30.3" "transformers==4.44.2" "accelerate==0.34.2" "safetensors" "huggingface_hub==0.25.2"
+```
+
+Потом **Перезапустить сеанс** → GPU → снова ячейка загрузки модели.
+
