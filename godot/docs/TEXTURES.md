@@ -32,3 +32,6 @@ godot4 --path . --headless -s res://scripts/build_scenes.gd
 ```
 
 Лицензии: паки из Текстурки — от автора (Poly Haven–подобные 1k); старые ambientCG CC0 в style/ как запас.
+
+## Hand-paint
+Бесшовка в Krita: [`KRITA_SEAMLESS.md`](KRITA_SEAMLESS.md).

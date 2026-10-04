@@ -41,6 +41,7 @@ Vertical slice главы 1 **играется greybox+**: маршрут ест
 | `assets/textures/style/` | albedo 512 |
 | `docs/STYLE_ANCHOR.md` | якорь стиля v1.2 |
 | `docs/TEXTURES.md` | источники текстур / лицензии |
+| `docs/KRITA_SEAMLESS.md` | hand-paint бесшовка в Krita |
 | `docs/AI_ASSETS.md` | промпты |
 | `docs/COLAB_START.md` + `docs/colab/teomor_seamless.ipynb` | Colab с нуля |
 | `docs/LOCATIONS.md` | бриф локаций |
