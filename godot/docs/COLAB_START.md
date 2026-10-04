@@ -1,48 +1,34 @@
 # Colab с нуля — Теомор
 
-## Уже открыл пустой Colab? Дальше так
+## Открыть готовый ноутбук
 
-### Способ 1 — открыть готовый ноутбук с GitHub (удобнее)
+https://colab.research.google.com/github/Jimbalajka/Teomor/blob/main/godot/docs/colab/teomor_seamless.ipynb
 
-1. Открой ссылку (после `git pull` / пуша агента):
-   - https://colab.research.google.com/github/Jimbalajka/Teomor/blob/main/godot/docs/colab/teomor_seamless.ipynb
-2. Если просит — войти в Google.
-3. **Среда выполнения → Сменить среду выполнения → GPU → OK**
-4. Жми ▶ на ячейках **сверху вниз** (1 → 2 → 3 → …).
-5. Ячейка 2 качает библиотеки (несколько минут).
-6. Ячейка 3 качает модель (ещё несколько минут, один раз за сессию).
-7. Ячейки 5–6 рисуют текстуру. Слева **Files** → скачай `teomor_tile_seamless.png`.
+1. **Среда выполнения → Сменить → GPU**
+2. ▶ ячейки сверху вниз
+3. Скачать `teomor_tile_seamless.png` слева в Files
 
-### Способ 2 — загрузить файл вручную
+## Если уже сломал сессию (ошибки `_Ink` / `ImageDraw` / `tokenizers`)
 
-1. У себя: `git pull` в репо Теомор.
-2. В Colab: **Файл → Загрузить блокнот** → выбери
-   `godot/docs/colab/teomor_seamless.ipynb`
-3. Дальше как в способе 1 с пункта 3.
-
-### Если ошибка
-
-- `GPU выключен` → снова включи GPU и ▶ ячейку 1.
-- Красная ошибка про память → **Среда выполнения → Перезапустить сеанс**, GPU, сначала ячейки 1–3.
-- Ноутбук с GitHub 404 → значит ещё не подтянул push; используй способ 2.
-
-Промпты слотов: [`AI_ASSETS.md`](AI_ASSETS.md).
-
-### Ошибка ячейки 3: `cannot import name '_Ink' from 'PIL.typing'`
-
-Colab обновил Python/Pillow — ломается diffusers.
+Причина: Colab на **Python 3.13** + ручной `pip uninstall pillow`.
 
 1. **Среда выполнения → Перезапустить сеанс**
 2. Снова **GPU**
-3. Обнови ноутбук с GitHub (обнови страницу / открой ссылку заново) — ячейка 2 с **пинном** `pillow==10.4.0`
-4. ▶ с ячейки 1 снова
+3. Открой ноутбук по ссылке выше **заново** (не старую вкладку)
+4. ▶1 → ▶2 → ▶3
 
-Или прямо сейчас вставь **новую** ячейку и ▶:
+**Нельзя:** `pip uninstall pillow` — после этого `ImageDraw` умирает.
+
+### Аварийная ячейка (вставь первой после рестарта)
 
 ```python
-%pip -q uninstall -y pillow
-%pip -q install "pillow==10.4.0" "diffusers==0.30.3" "transformers==4.44.2" "accelerate==0.34.2" "safetensors" "huggingface_hub==0.25.2"
+%pip -q install -U pip setuptools wheel
+%pip -q install --only-binary=:all: "tokenizers>=0.20.3"
+%pip -q install -U "pillow>=11.0.0" "diffusers>=0.32.0" "transformers>=4.46.0" "accelerate" "safetensors" "huggingface_hub"
 ```
 
-Потом **Перезапустить сеанс** → GPU → снова ячейка загрузки модели.
+Потом ▶ загрузку модели из ноутбука.
 
+Если `tokenizers` снова ругается на building wheel — пришли скрин; тогда уйдём на Kaggle (там Python 3.10) или web-генератор.
+
+Промпты слотов: [AI_ASSETS.md](AI_ASSETS.md).
