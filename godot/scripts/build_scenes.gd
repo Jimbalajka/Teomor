@@ -41,6 +41,9 @@ const TEX_DIR_STYLE := "res://assets/textures/style/"
 const TEX_PLASTER := "concrete_512.png"
 const TEX_WOOD := "wood_weathered_512.png"
 const TEX_STONE := "brick_broken_512.png"
+# Author hand-paint for alley walls (albedo only for now)
+const TEX_STONE_WIDE := "stone_broken_512.png"
+const TEX_STONE_PATTERN := "stone_broken2_512.png"
 const TEX_FLOOR := "floor_mix_512.png"
 const TEX_BASE := "tile_worn_512.png"
 const TEX_METAL := "metal_rusty_512.png"
@@ -148,8 +151,8 @@ func _companion_name(albedo_name: String, kind: String) -> String:
 func _world_uv(tex_name: String, size: Vector3) -> float:
 	var file_name := tex_name if not tex_name.is_empty() else ""
 	var base := 0.45
-	if file_name == TEX_STONE:
-		base = 0.32  # large readable brick
+	if file_name == TEX_STONE or file_name == TEX_STONE_WIDE or file_name == TEX_STONE_PATTERN:
+		base = 0.30  # large readable masonry
 	elif file_name == TEX_BASE:
 		base = 0.42
 	elif file_name == TEX_FLOOR:
@@ -827,11 +830,11 @@ func _save_alley() -> Error:
 	var wide_x1 := 8.0
 	_slab(root, "WideFloor", Vector3(wide_x1 - wide_x0, 0.2, wide_z1 - wide_z0), Vector3(0, -0.1, 0), floor_c, TEX_FLOOR)
 	_slab(root, "WideCeil", Vector3(wide_x1 - wide_x0, 0.2, wide_z1 - wide_z0), Vector3(0, height, 0), ceil_c, TEX_INK)
-	_slab(root, "WideWallSouth", Vector3(wide_x1 - wide_x0, height, 0.2), Vector3(0, height * 0.5, wide_z0), stone2, TEX_STONE)
+	_slab(root, "WideWallSouth", Vector3(wide_x1 - wide_x0, height, 0.2), Vector3(0, height * 0.5, wide_z0), stone2, TEX_STONE_WIDE)
 	# north wall with gap for narrow alley mouth
-	_slab(root, "WideWallNorthL", Vector3(7.35, height, 0.2), Vector3(-4.325, height * 0.5, wide_z1), stone2, TEX_STONE)
-	_slab(root, "WideWallNorthR", Vector3(7.35, height, 0.2), Vector3(4.325, height * 0.5, wide_z1), stone2, TEX_STONE)
-	_slab(root, "WideWallWest", Vector3(0.2, height, wide_z1 - wide_z0), Vector3(wide_x0, height * 0.5, 0), stone, TEX_STONE)
+	_slab(root, "WideWallNorthL", Vector3(7.35, height, 0.2), Vector3(-4.325, height * 0.5, wide_z1), stone2, TEX_STONE_PATTERN)
+	_slab(root, "WideWallNorthR", Vector3(7.35, height, 0.2), Vector3(4.325, height * 0.5, wide_z1), stone2, TEX_STONE_PATTERN)
+	_slab(root, "WideWallWest", Vector3(0.2, height, wide_z1 - wide_z0), Vector3(wide_x0, height * 0.5, 0), stone, TEX_STONE_WIDE)
 
 	# Narrow dead-end alley along +Z, ~2x longer
 	var nar_x0 := -0.65
@@ -840,9 +843,9 @@ func _save_alley() -> Error:
 	var nar_z1 := 13.5
 	_slab(root, "NarFloor", Vector3(nar_x1 - nar_x0, 0.2, nar_z1 - nar_z0), Vector3(0, -0.1, (nar_z0 + nar_z1) * 0.5), floor_c, TEX_FLOOR)
 	_slab(root, "NarCeil", Vector3(nar_x1 - nar_x0, 0.2, nar_z1 - nar_z0), Vector3(0, height, (nar_z0 + nar_z1) * 0.5), ceil_c, TEX_INK)
-	_slab(root, "NarWallL", Vector3(0.2, height, nar_z1 - nar_z0), Vector3(nar_x0, height * 0.5, (nar_z0 + nar_z1) * 0.5), stone, TEX_STONE)
-	_slab(root, "NarWallR", Vector3(0.2, height, nar_z1 - nar_z0), Vector3(nar_x1, height * 0.5, (nar_z0 + nar_z1) * 0.5), stone, TEX_STONE)
-	_slab(root, "NarDeadEnd", Vector3(1.5, height, 0.2), Vector3(0, height * 0.5, nar_z1), stone)
+	_slab(root, "NarWallL", Vector3(0.2, height, nar_z1 - nar_z0), Vector3(nar_x0, height * 0.5, (nar_z0 + nar_z1) * 0.5), stone, TEX_STONE_WIDE)
+	_slab(root, "NarWallR", Vector3(0.2, height, nar_z1 - nar_z0), Vector3(nar_x1, height * 0.5, (nar_z0 + nar_z1) * 0.5), stone, TEX_STONE_PATTERN)
+	_slab(root, "NarDeadEnd", Vector3(1.5, height, 0.2), Vector3(0, height * 0.5, nar_z1), stone, TEX_STONE_WIDE)
 
 	root.add_child(_static_box("Barrel1", Vector3(0.45, 0.7, 0.45), Vector3(-0.15, 0.35, nar_z1 - 0.9), Color(0.35, 0.32, 0.3), TEX_METAL))
 	root.add_child(_static_box("Barrel2", Vector3(0.4, 0.6, 0.4), Vector3(0.2, 0.3, nar_z1 - 1.5), Color(0.32, 0.3, 0.28), TEX_METAL))
@@ -858,16 +861,16 @@ func _save_alley() -> Error:
 
 	# Cornices / ledges break flat wall slabs
 	var ledge_y := 2.55
-	_slab(root, "WideLedgeS", Vector3(wide_x1 - wide_x0, 0.12, 0.28), Vector3(0, ledge_y, wide_z0 + 0.12), stone2.darkened(0.05), TEX_STONE)
-	_slab(root, "WideLedgeNL", Vector3(7.35, 0.12, 0.28), Vector3(-4.325, ledge_y, wide_z1 - 0.12), stone2.darkened(0.05), TEX_STONE)
-	_slab(root, "WideLedgeNR", Vector3(7.35, 0.12, 0.28), Vector3(4.325, ledge_y, wide_z1 - 0.12), stone2.darkened(0.05), TEX_STONE)
-	_slab(root, "NarLedgeL", Vector3(0.22, 0.1, nar_z1 - nar_z0), Vector3(nar_x0 + 0.08, ledge_y, (nar_z0 + nar_z1) * 0.5), stone.darkened(0.04), TEX_STONE)
-	_slab(root, "NarLedgeR", Vector3(0.22, 0.1, nar_z1 - nar_z0), Vector3(nar_x1 - 0.08, ledge_y, (nar_z0 + nar_z1) * 0.5), stone.darkened(0.04), TEX_STONE)
+	_slab(root, "WideLedgeS", Vector3(wide_x1 - wide_x0, 0.12, 0.28), Vector3(0, ledge_y, wide_z0 + 0.12), stone2.darkened(0.05), TEX_STONE_WIDE)
+	_slab(root, "WideLedgeNL", Vector3(7.35, 0.12, 0.28), Vector3(-4.325, ledge_y, wide_z1 - 0.12), stone2.darkened(0.05), TEX_STONE_PATTERN)
+	_slab(root, "WideLedgeNR", Vector3(7.35, 0.12, 0.28), Vector3(4.325, ledge_y, wide_z1 - 0.12), stone2.darkened(0.05), TEX_STONE_PATTERN)
+	_slab(root, "NarLedgeL", Vector3(0.22, 0.1, nar_z1 - nar_z0), Vector3(nar_x0 + 0.08, ledge_y, (nar_z0 + nar_z1) * 0.5), stone.darkened(0.04), TEX_STONE_WIDE)
+	_slab(root, "NarLedgeR", Vector3(0.22, 0.1, nar_z1 - nar_z0), Vector3(nar_x1 - 0.08, ledge_y, (nar_z0 + nar_z1) * 0.5), stone.darkened(0.04), TEX_STONE_PATTERN)
 	# Buttresses / pier rhythm on wide street
 	for i in range(4):
 		var bx := -6.0 + float(i) * 4.0
-		root.add_child(_static_box("PierS_%d" % i, Vector3(0.45, height * 0.72, 0.35), Vector3(bx, height * 0.36, wide_z0 + 0.2), stone2, TEX_STONE))
-		root.add_child(_static_box("PierN_%d" % i, Vector3(0.45, height * 0.72, 0.35), Vector3(bx, height * 0.36, wide_z1 - 0.2), stone2, TEX_STONE))
+		root.add_child(_static_box("PierS_%d" % i, Vector3(0.45, height * 0.72, 0.35), Vector3(bx, height * 0.36, wide_z0 + 0.2), stone2, TEX_STONE_WIDE))
+		root.add_child(_static_box("PierN_%d" % i, Vector3(0.45, height * 0.72, 0.35), Vector3(bx, height * 0.36, wide_z1 - 0.2), stone2, TEX_STONE_PATTERN))
 	# Window niches (recessed dark)
 	root.add_child(_static_box("NicheW1", Vector3(0.08, 1.1, 0.7), Vector3(wide_x0 + 0.12, 2.0, 0.0), C_INK.lightened(0.06), TEX_INK))
 	root.add_child(_static_box("NicheS1", Vector3(0.9, 1.0, 0.08), Vector3(-2.0, 2.05, wide_z0 + 0.12), C_INK.lightened(0.05), TEX_INK))
@@ -877,8 +880,8 @@ func _save_alley() -> Error:
 	root.add_child(_static_box("PipeVert", Vector3(0.09, 2.2, 0.09), Vector3(nar_x0 + 0.2, 2.0, 9.5), Color(0.28, 0.26, 0.24), TEX_METAL))
 	root.add_child(_static_box("CrateA", Vector3(0.7, 0.55, 0.55), Vector3(-5.2, 0.3, wide_z0 + 0.55), Color(0.36, 0.26, 0.16), TEX_WOOD))
 	root.add_child(_static_box("CrateB", Vector3(0.55, 0.45, 0.5), Vector3(-4.6, 0.25, wide_z0 + 0.7), Color(0.34, 0.24, 0.15), TEX_WOOD))
-	root.add_child(_static_box("Rubble1", Vector3(0.8, 0.22, 0.5), Vector3(5.0, 0.12, wide_z1 - 0.55), stone, TEX_STONE))
-	root.add_child(_static_box("Rubble2", Vector3(0.45, 0.18, 0.6), Vector3(0.15, 0.1, 5.5), stone2, TEX_STONE))
+	root.add_child(_static_box("Rubble1", Vector3(0.8, 0.22, 0.5), Vector3(5.0, 0.12, wide_z1 - 0.55), stone, TEX_STONE_WIDE))
+	root.add_child(_static_box("Rubble2", Vector3(0.45, 0.18, 0.6), Vector3(0.15, 0.1, 5.5), stone2, TEX_STONE_PATTERN))
 	root.add_child(_static_box("BeamNar1", Vector3(1.4, 0.14, 0.14), Vector3(0, 3.6, 5.0), Color(0.3, 0.22, 0.14), TEX_WOOD))
 	root.add_child(_static_box("BeamNar2", Vector3(1.4, 0.14, 0.14), Vector3(0, 3.6, 9.0), Color(0.3, 0.22, 0.14), TEX_WOOD))
 

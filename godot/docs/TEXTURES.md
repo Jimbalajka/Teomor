@@ -12,6 +12,8 @@ godot/assets/textures/author/ — рабочие 512 (albedo / normal / rough)
 | tile_worn | низ зданий (цоколь) | worn_tile_floor_1k |
 | floor_mix | пол переулка | бетон + керамика |
 | metal_rusty | бочки / карнизы / металл | rusty_metal_02_1k |
+| stone_broken | стены переулка (широкая кладка) | hand-paint author |
+| stone_broken2 | стены переулка (с паттерном) | hand-paint author |
 
 Грибы / ink-grime пока в assets/textures/style/ (tex_vsegrib_*, tex_ink_grime).
 
