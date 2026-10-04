@@ -51,6 +51,58 @@ const TEX_FLESH := "tex_vsegrib_flesh_512.png"
 const TEX_CAP := "tex_vsegrib_cap_512.png"
 const TEX_INK := "tex_ink_grime_512.png"
 
+
+const MESH_KENNEY := "res://assets/meshes/props/kenney/"
+const MESH_PROPSLITE := "res://assets/meshes/props/propslite/"
+const MESH_DUNGEON := "res://assets/meshes/props/dungeon_items/"
+const MESH_PROTO := "res://assets/meshes/modular/proto/"
+
+
+## Instance glb prop via GLTFDocument (works headless without .import).
+## FBX: open project in editor once, or prefer Kenney .glb paths.
+func _add_mesh_prop(root: Node, name: String, res_path: String, pos: Vector3, rot_y_deg: float = 0.0, uniform_scale: float = 1.0, col_size: Vector3 = Vector3.ZERO) -> Node3D:
+	var holder := Node3D.new()
+	holder.name = name
+	holder.position = pos
+	holder.rotation_degrees.y = rot_y_deg
+	holder.scale = Vector3.ONE * uniform_scale
+	var abs_path := ProjectSettings.globalize_path(res_path) if res_path.begins_with("res://") else res_path
+	var loaded := false
+	if res_path.ends_with(".glb") or res_path.ends_with(".gltf"):
+		if FileAccess.file_exists(abs_path):
+			var doc := GLTFDocument.new()
+			var state := GLTFState.new()
+			var err := doc.append_from_file(abs_path, state)
+			if err == OK:
+				var scn := doc.generate_scene(state)
+				if scn != null:
+					holder.add_child(scn)
+					loaded = true
+			else:
+				push_warning("GLTF_LOAD_FAIL %s err=%s" % [res_path, err])
+	elif ResourceLoader.exists(res_path):
+		var res = load(res_path)
+		if res is PackedScene:
+			holder.add_child((res as PackedScene).instantiate())
+			loaded = true
+	if not loaded:
+		push_warning("MESH_MISSING %s" % res_path)
+		holder.add_child(_box_mesh(Vector3(0.35, 0.35, 0.35), Color(0.45, 0.28, 0.18)))
+	if col_size != Vector3.ZERO:
+		var body := StaticBody3D.new()
+		body.name = "ColBody"
+		var col := CollisionShape3D.new()
+		var shape := BoxShape3D.new()
+		shape.size = col_size
+		col.shape = shape
+		col.position = Vector3(0, col_size.y * 0.5, 0)
+		body.add_child(col)
+		holder.add_child(body)
+	root.add_child(holder)
+	return holder
+
+
+
 var _tex_cache: Dictionary = {}
 
 
@@ -694,6 +746,12 @@ func _save_attic() -> Error:
 
 	# damp props
 	root.add_child(_static_box("Crate", Vector3(0.7, 0.5, 0.7), Vector3(-2.2, 0.25, 1.4), Color(0.38, 0.28, 0.18), TEX_WOOD))
+	# Curated itch/CC0 meshes (Kenney + PropsLite)
+	_add_mesh_prop(root, "MeshCrateRopes", MESH_KENNEY + "detail-crate-ropes.glb", Vector3(-2.35, 0.0, 1.55), 20.0, 1.0, Vector3(0.7, 0.55, 0.7))
+	_add_mesh_prop(root, "MeshBarrelAttic", MESH_KENNEY + "detail-barrel.glb", Vector3(1.9, 0.0, 1.7), -30.0, 1.0, Vector3(0.55, 0.7, 0.55))
+	_add_mesh_prop(root, "MeshSackProxy", MESH_KENNEY + "detail-crate-small.glb", Vector3(-0.2, 0.0, 1.85), 10.0, 1.0, Vector3(0.45, 0.4, 0.45))
+	_add_mesh_prop(root, "MeshShelfCrate", MESH_KENNEY + "detail-crate-small.glb", Vector3(-2.55, 1.08, 0.85), 12.0, 0.45, Vector3(0.35, 0.25, 0.3))
+	_add_mesh_prop(root, "MeshPlanks", MESH_KENNEY + "fence-wood.glb", Vector3(0.6, 0.0, -2.05), 90.0, 1.0, Vector3(1.2, 0.12, 0.35))
 	root.add_child(_mushroom("Mushroom_Attic1", Vector3(-2.7, 0.9, -0.4), 0.9))
 	root.add_child(_mushroom("Mushroom_Attic2", Vector3(2.7, 1.4, 0.3), 1.1))
 
@@ -850,6 +908,16 @@ func _save_alley() -> Error:
 	root.add_child(_static_box("Barrel1", Vector3(0.45, 0.7, 0.45), Vector3(-0.15, 0.35, nar_z1 - 0.9), Color(0.35, 0.32, 0.3), TEX_METAL))
 	root.add_child(_static_box("Barrel2", Vector3(0.4, 0.6, 0.4), Vector3(0.2, 0.3, nar_z1 - 1.5), Color(0.32, 0.3, 0.28), TEX_METAL))
 	root.add_child(_static_box("Barrel3", Vector3(0.35, 0.55, 0.35), Vector3(-0.2, 0.28, nar_z1 - 2.0), Color(0.3, 0.28, 0.26), TEX_METAL))
+	# Mesh props over primitive clutter
+	_add_mesh_prop(root, "MeshBarrelNar1", MESH_KENNEY + "detail-barrel.glb", Vector3(-0.15, 0.0, nar_z1 - 0.85), 15.0, 1.05, Vector3(0.5, 0.75, 0.5))
+	_add_mesh_prop(root, "MeshBarrelNar2", MESH_KENNEY + "barrels.glb", Vector3(0.25, 0.0, nar_z1 - 1.55), -25.0, 1.0, Vector3(0.45, 0.7, 0.45))
+	_add_mesh_prop(root, "MeshCrateRopesA", MESH_KENNEY + "detail-crate-ropes.glb", Vector3(-5.15, 0.0, wide_z0 + 0.55), 8.0, 1.0, Vector3(0.75, 0.6, 0.65))
+	_add_mesh_prop(root, "MeshCrateSmall", MESH_KENNEY + "detail-crate-small.glb", Vector3(-4.55, 0.0, wide_z0 + 0.75), -12.0, 1.0, Vector3(0.55, 0.45, 0.5))
+	_add_mesh_prop(root, "MeshOverhangS", MESH_KENNEY + "overhang.glb", Vector3(-2.0, 2.35, wide_z0 + 0.05), 0.0, 1.2, Vector3.ZERO)
+	_add_mesh_prop(root, "MeshOverhangS2", MESH_KENNEY + "overhang-fence.glb", Vector3(3.2, 2.35, wide_z0 + 0.05), 0.0, 1.1, Vector3.ZERO)
+	_add_mesh_prop(root, "MeshDoorShop", MESH_KENNEY + "wall-door.glb", Vector3(-7.15, 0.0, 0.0), 90.0, 1.3, Vector3(0.2, 2.2, 1.1))
+	_add_mesh_prop(root, "MeshGateLib", MESH_KENNEY + "wall-gate.glb", Vector3(7.15, 0.0, 0.7), -90.0, 1.0, Vector3(0.25, 2.3, 1.2))
+	_add_mesh_prop(root, "MeshClothesPulley", MESH_KENNEY + "pulley.glb", Vector3(0.0, 3.15, 0.0), 0.0, 0.8, Vector3.ZERO)
 
 	# Ceramic / tile base of building mass (author mapping)
 	var plinth_h := 0.85
