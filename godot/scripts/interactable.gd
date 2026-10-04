@@ -3,6 +3,7 @@ extends StaticBody3D
 @export var prompt_text: String = "[E] Взаимодействовать"
 @export var dialogue_lines: PackedStringArray = []
 @export var change_scene_to: String = ""
+@export var unlock_glossary: PackedStringArray = []
 
 
 func _ready() -> void:
@@ -19,7 +20,16 @@ func _dialogue() -> Node:
 	return get_node_or_null("/root/Dialogue")
 
 
+func _apply_glossary() -> void:
+	if unlock_glossary.is_empty():
+		return
+	var gs := get_node_or_null("/root/GameState")
+	if gs and gs.has_method("unlock_glossary_many"):
+		gs.call("unlock_glossary_many", unlock_glossary)
+
+
 func interact() -> void:
+	_apply_glossary()
 	var dlg := _dialogue()
 	if not dialogue_lines.is_empty() and dlg and dlg.has_method("start"):
 		dlg.call("start", dialogue_lines)

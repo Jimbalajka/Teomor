@@ -383,7 +383,7 @@ func _mark_owners(node: Node, owner: Node) -> void:
 		_mark_owners(child, owner)
 
 
-func _make_interactable(name: String, pos: Vector3, prompt: String, lines: PackedStringArray, scene_path: String = "") -> StaticBody3D:
+func _make_interactable(name: String, pos: Vector3, prompt: String, lines: PackedStringArray, scene_path: String = "", glossary_ids: PackedStringArray = PackedStringArray()) -> StaticBody3D:
 	var body := StaticBody3D.new()
 	body.name = name
 	body.position = pos
@@ -391,11 +391,13 @@ func _make_interactable(name: String, pos: Vector3, prompt: String, lines: Packe
 	body.set("prompt_text", prompt)
 	body.set("dialogue_lines", lines)
 	body.set("change_scene_to", scene_path)
+	if glossary_ids.size() > 0:
+		body.set("unlock_glossary", glossary_ids)
 	return body
 
 
-func _poi(root: Node, name: String, pos: Vector3, size: Vector3, color: Color, prompt: String, lines: PackedStringArray, scene_path: String = "") -> StaticBody3D:
-	var body := _make_interactable(name, pos, prompt, lines, scene_path)
+func _poi(root: Node, name: String, pos: Vector3, size: Vector3, color: Color, prompt: String, lines: PackedStringArray, scene_path: String = "", glossary_ids: PackedStringArray = PackedStringArray()) -> StaticBody3D:
+	var body := _make_interactable(name, pos, prompt, lines, scene_path, glossary_ids)
 	var mesh := _box_mesh(size, color)
 	mesh.position = Vector3(0, size.y * 0.5, 0)
 	body.add_child(mesh)
@@ -409,6 +411,35 @@ func _poi(root: Node, name: String, pos: Vector3, size: Vector3, color: Color, p
 	root.add_child(body)
 	return body
 
+
+
+
+func _add_pickup(root: Node, name: String, pos: Vector3, size: Vector3, color: Color, prompt: String, lines: PackedStringArray, item_id: String, item_name: String, item_description: String, consumable: bool = false, is_quest: bool = false, glossary_ids: PackedStringArray = PackedStringArray()) -> StaticBody3D:
+	var body := StaticBody3D.new()
+	body.name = name
+	body.position = pos
+	body.set_script(load("res://scripts/pickup_interactable.gd"))
+	body.set("prompt_text", prompt)
+	body.set("dialogue_lines", lines)
+	body.set("item_id", item_id)
+	body.set("item_name", item_name)
+	body.set("item_description", item_description)
+	body.set("consumable", consumable)
+	body.set("is_quest_item", is_quest)
+	if glossary_ids.size() > 0:
+		body.set("unlock_glossary", glossary_ids)
+	var mesh := _box_mesh(size, color)
+	mesh.position = Vector3(0, size.y * 0.5, 0)
+	body.add_child(mesh)
+	var col := CollisionShape3D.new()
+	col.name = "Collision"
+	var shape := BoxShape3D.new()
+	shape.size = size + Vector3(0.1, 0.1, 0.1)
+	col.shape = shape
+	col.position = Vector3(0, size.y * 0.5, 0)
+	body.add_child(col)
+	root.add_child(body)
+	return body
 
 func _shop_choice(root: Node, name: String, pos: Vector3, choice_id: String, prompt: String, lines: PackedStringArray, color: Color) -> StaticBody3D:
 	var body := StaticBody3D.new()
@@ -494,7 +525,7 @@ func _add_player(root: Node, pos: Vector3) -> void:
 	hint.offset_bottom = -10
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	hint.add_theme_font_size_override("font_size", 14)
-	hint.text = "WASD · Shift бег · Ctrl присед · Пробел прыжок · E · Esc"
+	hint.text = "WASD · Shift бег · Ctrl присед · Пробел · E · I инвентарь · Esc"
 	prompt_layer.add_child(hint)
 	root.add_child(player)
 
@@ -816,13 +847,22 @@ func _save_attic() -> Error:
 		PackedStringArray([
 			"В трещине стены — чужой двор и бледные грибы на кирпиче.",
 			"Где-то внизу кашляет дес. Воздух густой, как тряпка."
-		]))
-	_poi(root, "WetRags", Vector3(1.4, 0.0, 1.8), Vector3(0.7, 0.2, 0.5), Color(0.3, 0.35, 0.38),
-		"[E] Потрогать тряпки",
+		]), "", PackedStringArray(["vsegrib", "des"]))
+	_add_pickup(root, "WetRags", Vector3(1.4, 0.0, 1.8), Vector3(0.7, 0.2, 0.5), Color(0.3, 0.35, 0.38),
+		"[E] Взять сырую тряпку",
 		PackedStringArray([
 			"Мокрые тряпки никогда не сохнут. Чердак дышит влагой.",
-			"Запах плесени уже кажется родным."
-		]))
+			"Одну всё же суёшь за пояс — мало ли."
+		]),
+		"damp_rag", "Сырая тряпка", "Пахнет плесенью. Можно вытереть стекло или рану.", true, false,
+		PackedStringArray())
+	_add_pickup(root, "MoldBread", Vector3(-0.15, 0.0, 1.85), Vector3(0.25, 0.12, 0.25), Color(0.45, 0.4, 0.28),
+		"[E] Поднять чёрствый хлеб",
+		PackedStringArray([
+			"Краюха с зелёной кромкой. Есть можно — жалеть себя незачем."
+		]),
+		"mold_bread", "Чёрствый хлеб", "Завтрак бедняка Грибного. Расходник-заглушка.", true, false,
+		PackedStringArray())
 
 	# Form break: spore deposits / ink streaks
 	_growth_blob(root, "Growth_AtticBig", Vector3(-2.6, 0.35, 1.6), 0.28, true)
@@ -1138,7 +1178,7 @@ func _save_alley() -> Error:
 		PackedStringArray([
 			"Чей-то гамак натянут между трубами. Пепел на земле.",
 			"Хозяина нет — только сладкий дым и тихий кашель из темноты."
-		]))
+		]), "", PackedStringArray(["pokoy_trava"]))
 	_poi(root, "RatNest", Vector3(0.15, 0.0, 12.2), Vector3(0.7, 0.25, 0.7), Color(0.28, 0.24, 0.2),
 		"[E] Слушать крыс",
 		PackedStringArray([
@@ -1969,7 +2009,7 @@ func _save_playtest() -> Error:
 	var stations := [
 		{"n": "PadMirror", "p": Vector3(-5.0, 0.0, -3.0), "c": accent, "t": "[E] Станция: Зеркало", "l": PackedStringArray(["Интерактивное зеркало слева — станция MirrorStation.", "Имя + силуэт: худой / обычный / тяжёлый."])},
 		{"n": "PadDiary", "p": Vector3(-2.5, 0.0, -3.0), "c": C_PARCHMENT, "t": "[E] Станция: Дневник", "l": PackedStringArray(["Интерактивный дневник — станция DiaryStation рядом.", "Заметки + маршрут (квест дня / флаги slice)."])},
-		{"n": "PadInv", "p": Vector3(0.0, 0.0, -3.0), "c": C_WOOD.lightened(0.1), "t": "[E] Станция: Инвентарь / глоссарий", "l": PackedStringArray(["Как в HTML: вещи + термины.", "Пока заглушка."])},
+		{"n": "PadInv", "p": Vector3(0.0, 0.0, -3.0), "c": C_WOOD.lightened(0.1), "t": "[E] Станция: Инвентарь / глоссарий", "l": PackedStringArray(["Станция InventoryStation + клавиша I.", "12 слотов, квестовые вещи, глоссарий терминов."])},
 		{"n": "PadLock", "p": Vector3(2.5, 0.0, -3.0), "c": Color(0.35, 0.32, 0.28), "t": "[E] Станция: Взлом (слоты)", "l": PackedStringArray(["3 спина; цель — 2/3/4/5 подряд.", "1 замораживается; ловкость +1 попытка."])},
 		{"n": "PadSkills", "p": Vector3(5.0, 0.0, -3.0), "c": C_PURPLE_GLOW.darkened(0.2), "t": "[E] Станция: Навыки", "l": PackedStringArray(["Мощь / Разум / Моторика / Стержень.", "Пока только подписи."])},
 		{"n": "PadCombat", "p": Vector3(-4.0, 0.0, 2.5), "c": Color(0.45, 0.18, 0.16), "t": "[E] Станция: Бой", "l": PackedStringArray(["Тут манекен + оружие + FX ударов.", "Бой подключим отдельным OK."])},
@@ -2001,6 +2041,38 @@ func _save_playtest() -> Error:
 	mcol.position = Vector3(0, 0.8, 0)
 	mpad.add_child(mcol)
 	root.add_child(mpad)
+
+	# Phase 4 inventory station
+	var ipad := StaticBody3D.new()
+	ipad.name = "InventoryStation"
+	ipad.position = Vector3(0.0, 0.0, -3.0)
+	ipad.set_script(load("res://scripts/inventory_interactable.gd"))
+	ipad.set("prompt_text", "[E] Станция: Инвентарь / глоссарий")
+	var ipad_mesh := _box_mesh(Vector3(1.2, 0.15, 1.2), C_WOOD.lightened(0.1))
+	ipad_mesh.position = Vector3(0, 0.08, 0)
+	ipad.add_child(ipad_mesh)
+	var ibox := _box_mesh(Vector3(0.5, 0.35, 0.4), Color(0.4, 0.3, 0.2), TEX_WOOD)
+	ibox.position = Vector3(0, 0.35, 0)
+	ipad.add_child(ibox)
+	var ipad_col := CollisionShape3D.new()
+	ipad_col.name = "Collision"
+	var ipad_shape := BoxShape3D.new()
+	ipad_shape.size = Vector3(1.3, 1.1, 1.3)
+	ipad_col.shape = ipad_shape
+	ipad_col.position = Vector3(0, 0.55, 0)
+	ipad.add_child(ipad_col)
+	root.add_child(ipad)
+
+	_add_pickup(root, "TestPotion", Vector3(0.9, 0.0, -2.2), Vector3(0.25, 0.35, 0.25), Color(0.45, 0.2, 0.5),
+		"[E] Взять мутное зелье",
+		PackedStringArray(["Плейтест-предмет. В бою пригодится позже."]),
+		"test_potion", "Мутное зелье", "Заглушка расходника для фазы инвентаря.", true, false,
+		PackedStringArray(["sferidy"]))
+	_add_pickup(root, "TestCoin", Vector3(-0.9, 0.0, -2.2), Vector3(0.2, 0.08, 0.2), Color(0.7, 0.55, 0.2),
+		"[E] Поднять жетон НБ",
+		PackedStringArray(["Жетон наёмника. Пока просто блестит."]),
+		"nb_token", "Жетон НБ", "Счётный жетон Биржи. Деньги-заглушка.", false, false,
+		PackedStringArray(["birzha_naemn"]))
 
 	# Phase 3 diary station
 	var dpad := StaticBody3D.new()

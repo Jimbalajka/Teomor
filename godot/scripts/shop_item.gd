@@ -28,6 +28,10 @@ func interact() -> void:
 		gs.set("has_central_pass", true)
 		if gs.has_method("add_note"):
 			gs.call("add_note", "shop_choice", "В лавке взял: %s. Пропуск на Центральную — в кармане, пока заглушка." % choice_id)
+		if gs.has_method("add_quest_item"):
+			gs.call("add_quest_item", {"id": "central_pass", "name": "Пропуск в Центральную", "description": "Странная бумажка из лавки. На входе могут и не спросить."})
+		if gs.has_method("unlock_glossary"):
+			gs.call("unlock_glossary", "kongregacia")
 		if gs.has_method("set_quest_status"):
 			gs.call("set_quest_status", "quest_work", "Пропуск из лавки")
 	var dlg := get_node_or_null("/root/Dialogue")
