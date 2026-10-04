@@ -14,3 +14,5 @@
 Шейдер из SourceCode.zip: `assets/shaders/stylized_toon.gdshader` (toon; пока не навешан на всю сцену).
 
 Масштаб / огромный AABB: [`SCALE.md`](SCALE.md).
+
+Scale: не крути Root Scale руками — `scripts/bake_mesh_meters.gd` + закоммиченные `.import`. См. [`SCALE.md`](SCALE.md).

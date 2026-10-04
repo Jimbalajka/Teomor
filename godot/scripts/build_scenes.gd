@@ -2679,6 +2679,11 @@ func _save_asset_room() -> Error:
 	dummy.name = "DummyRef"
 	dummy.position = Vector3(-7.2, 0.0, -5.2)
 	root.add_child(dummy)
+	var proto_char := _instance_glb(MESH_PROTO + "Character_Character.glb", 1.0)
+	proto_char.name = "ProtoCharRef"
+	proto_char.position = Vector3(-4.4, 0.0, -5.2)
+	proto_char.rotation_degrees.x = -90.0
+	root.add_child(proto_char)
 	var hum_ref := _instance_glb(MESH_HUMANOID + "Humanoid.glb", 1.0)
 	hum_ref.name = "HumanoidRef"
 	hum_ref.position = Vector3(-5.8, 0.0, -5.2)
@@ -2709,6 +2714,11 @@ func _save_asset_room() -> Error:
 	_add_mesh_prop(root, "WallSample", MESH_KENNEY + "wall.glb", Vector3(8.0, 0.0, 5.5), 0.0, 1.0, Vector3(1.2, 2.4, 0.35))
 	_add_mesh_prop(root, "StairsWood", MESH_KENNEY + "stairs-wood.glb", Vector3(9.2, 0.0, 4.2), -90.0, 1.0, Vector3(1.2, 1.2, 1.5))
 	_add_mesh_prop(root, "WoodFloorTile", MESH_KENNEY + "wood-floor.glb", Vector3(7.0, 0.0, 4.0), 0.0, 1.0, Vector3.ZERO)
+	# Proto pack already meter-baked (cube=1m). Drag FBX also OK via committed .import.
+	_add_mesh_prop(root, "ProtoCube", MESH_PROTO + "Pieces_cube.glb", Vector3(5.2, 0.0, 3.6), 0.0, 1.0, Vector3(1, 1, 1), Color(0.85, 0.75, 0.55))
+	_add_mesh_prop(root, "ProtoDoor", MESH_PROTO + "Pieces_door.glb", Vector3(6.6, 0.0, 3.6), 0.0, 1.0, Vector3(1, 1, 0.2), Color(0.7, 0.8, 0.95))
+	_add_mesh_prop(root, "ProtoWall", MESH_PROTO + "Pieces_wall.glb", Vector3(8.2, 0.0, 3.2), 0.0, 1.0, Vector3(2, 2, 0.25), Color(0.75, 0.7, 0.65))
+	# Proto pack already meter-baked (cube=1m). Drag FBX also OK via committed .import.
 
 	# Legend board near spawn
 	_poi(root, "AssetLegend", Vector3(0.0, 0.0, 6.5), Vector3(2.2, 0.15, 0.9), C_PARCHMENT,
@@ -2716,7 +2726,7 @@ func _save_asset_room() -> Error:
 		PackedStringArray([
 			"Зоны: столы/стулья · кровати · интерьер · двери · окна · перегородки · грибы · растительность · модули.",
 			"Бочки/ящики/двери/окна — готовые Kenney (с цветовым tint). Мебель — плоский цвет без style-текстур.",
-			"Грибы — PS1 Mushroom Pack (GLB). Рост НПС = Humanoid/Dummy ~1.8 м. Трек текстур: docs/TEXTURE_TRACK.md"
+			"Грибы — PS1 Pack. Рост = Dummy/Humanoid ~1.8 м. Proto FBX уже с .import scale — Root Scale руками не крутить."
 		]))
 
 	# Exits

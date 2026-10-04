@@ -2,6 +2,11 @@
 *.translation
 export/
 *.import
+# Meter-correct sidecars so editor drag-drop does not need manual Root Scale.
+!assets/meshes/modular/proto/*.import
+!assets/meshes/props/character/*.import
+!assets/meshes/props/humanoid/*.import
+!assets/meshes/props/mushrooms/*.import
 
 # CC0 raw downloads (re-fetch via bake script)
 assets/textures/_src/

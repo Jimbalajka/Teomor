@@ -1,5 +1,12 @@
 # CHANGES — Теомор Godot
 
+## 2026-10-04 — scale без ручного Root Scale
+
+- `bake_mesh_meters.gd`: proto ×0.5 → 1 м GLB; Dummy/Humanoid метры.
+- Закоммичены `.import` с нужным `root_scale` (gitignore exception).
+- asset_room: ProtoCube/Door/Wall + Dummy/Humanoid/ProtoChar рядом.
+
+
 ## 2026-10-04 — PS1 грибы + Humanoid/Dummy
 
 - Intake: `PS1 Mushroom Asset Pack` → `props/mushrooms/` (FBX→GLB + PNG).
