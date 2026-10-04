@@ -702,17 +702,12 @@ func _save_attic() -> Error:
 	root.add_child(_static_box("Bed", Vector3(2.0, 0.35, 1.0), Vector3(-1.6, 0.2, -1.6), Color(0.35, 0.3, 0.28), TEX_WOOD))
 	root.add_child(_static_box("BedPillow", Vector3(0.5, 0.15, 0.4), Vector3(-2.2, 0.45, -1.6), _col_parchment_dirty(0.15), TEX_PLASTER))
 
-	# Mirror stub (no character select)
-	var mirror := _make_interactable(
-		"Mirror",
-		Vector3(2.2, 0.0, -1.8),
-		"[E] Посмотреть в зеркало",
-		PackedStringArray([
-			"В зеркале — ты. Каждый вздох выпускает пар и замыливает отражение.",
-			"Приходится протирать стекло рукавом.",
-			"(Выбор внешности позже — пока только взгляд.)"
-		])
-	)
+	# Mirror — phase 2: name + appearance
+	var mirror := StaticBody3D.new()
+	mirror.name = "Mirror"
+	mirror.position = Vector3(2.2, 0.0, -1.8)
+	mirror.set_script(load("res://scripts/mirror_interactable.gd"))
+	mirror.set("prompt_text", "[E] Посмотреть в зеркало")
 	var mirror_mesh := _box_mesh(Vector3(0.08, 1.2, 0.7), Color(0.55, 0.6, 0.65))
 	mirror_mesh.position = Vector3(0, 1.1, 0)
 	mirror.add_child(mirror_mesh)
@@ -1961,7 +1956,7 @@ func _save_playtest() -> Error:
 
 	# Labeled stations (stubs for upcoming systems)
 	var stations := [
-		{"n": "PadMirror", "p": Vector3(-5.0, 0.0, -3.0), "c": accent, "t": "[E] Станция: Зеркало", "l": PackedStringArray(["Сюда повесим выбор внешности / имя.", "Пока заглушка."])},
+		{"n": "PadMirror", "p": Vector3(-5.0, 0.0, -3.0), "c": accent, "t": "[E] Станция: Зеркало", "l": PackedStringArray(["Интерактивное зеркало слева — станция MirrorStation.", "Имя + силуэт: худой / обычный / тяжёлый."])},
 		{"n": "PadDiary", "p": Vector3(-2.5, 0.0, -3.0), "c": C_PARCHMENT, "t": "[E] Станция: Дневник", "l": PackedStringArray(["Записи дня, флаги slice.", "Пока заглушка."])},
 		{"n": "PadInv", "p": Vector3(0.0, 0.0, -3.0), "c": C_WOOD.lightened(0.1), "t": "[E] Станция: Инвентарь / глоссарий", "l": PackedStringArray(["Как в HTML: вещи + термины.", "Пока заглушка."])},
 		{"n": "PadLock", "p": Vector3(2.5, 0.0, -3.0), "c": Color(0.35, 0.32, 0.28), "t": "[E] Станция: Взлом (слоты)", "l": PackedStringArray(["3 спина; цель — 2/3/4/5 подряд.", "1 замораживается; ловкость +1 попытка."])},
@@ -1974,6 +1969,27 @@ func _save_playtest() -> Error:
 		_poi(root, str(s["n"]), s["p"], Vector3(1.2, 0.15, 1.2), s["c"], str(s["t"]), s["l"])
 		# tall marker post
 		root.add_child(_static_box(str(s["n"]) + "_Post", Vector3(0.12, 1.6, 0.12), s["p"] + Vector3(0, 0.9, -0.55), s["c"]))
+
+	# Phase 2 mirror station (interactive, not just dialogue stub)
+	var mpad := StaticBody3D.new()
+	mpad.name = "MirrorStation"
+	mpad.position = Vector3(-5.0, 0.0, -3.0)
+	mpad.set_script(load("res://scripts/mirror_interactable.gd"))
+	mpad.set("prompt_text", "[E] Станция: Зеркало")
+	var mpad_mesh := _box_mesh(Vector3(1.2, 0.15, 1.2), accent)
+	mpad_mesh.position = Vector3(0, 0.08, 0)
+	mpad.add_child(mpad_mesh)
+	var mframe := _box_mesh(Vector3(0.08, 1.4, 0.7), Color(0.55, 0.6, 0.65))
+	mframe.position = Vector3(0, 0.95, -0.4)
+	mpad.add_child(mframe)
+	var mcol := CollisionShape3D.new()
+	mcol.name = "Collision"
+	var mshape := BoxShape3D.new()
+	mshape.size = Vector3(1.3, 1.6, 1.3)
+	mcol.shape = mshape
+	mcol.position = Vector3(0, 0.8, 0)
+	mpad.add_child(mcol)
+	root.add_child(mpad)
 
 	# Movement course (phase 1)
 	root.add_child(_static_box("JumpBlock1", Vector3(1.4, 0.45, 1.4), Vector3(2.2, 0.22, 1.0), C_STONE.lightened(0.12), TEX_STONE))
