@@ -74,17 +74,21 @@ func _load_style_tex(file_name: String) -> Texture2D:
 	if _tex_cache.has(file_name):
 		return _tex_cache[file_name]
 	var path := TEX_DIR + file_name
+	# Prefer imported CompressedTexture2D so PackedScene keeps ExtResource (not megabyte embeds).
 	if ResourceLoader.exists(path):
 		var tex := load(path) as Texture2D
 		if tex != null:
 			_tex_cache[file_name] = tex
 			return tex
-	# Headless / pre-import fallback
+	# Headless / pre-import fallback — still bind path to avoid embedding raw pixels in .tscn
 	var img := Image.new()
-	var err := img.load(path)
+	var err := img.load(ProjectSettings.globalize_path(path) if path.begins_with("res://") else path)
+	if err != OK:
+		err = img.load(path)
 	if err != OK:
 		return null
 	var itex := ImageTexture.create_from_image(img)
+	itex.take_over_path(path)
 	_tex_cache[file_name] = itex
 	return itex
 
