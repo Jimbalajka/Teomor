@@ -266,7 +266,7 @@ func _mushroom(name: String, pos: Vector3, scale: float = 1.0) -> StaticBody3D:
 	cap_mesh.height = 0.18 * scale
 	cap.mesh = cap_mesh
 	cap.position = Vector3(0, 0.32 * scale, 0)
-	cap.material_override = _style_mat(C_PURPLE_GLOW, 0.12, 0.85, C_PURPLE_GLOW, 0.35, 17, TEX_CAP, 1.3)
+	cap.material_override = _style_mat(C_PURPLE_GLOW, 0.12, 0.85, C_PURPLE_GLOW, 0.55, 17, TEX_CAP, 1.3)
 	body.add_child(cap)
 	# tiny spores around base
 	for i in range(3):
@@ -278,7 +278,7 @@ func _mushroom(name: String, pos: Vector3, scale: float = 1.0) -> StaticBody3D:
 		spore.mesh = sm
 		var ang := float(i) * 2.1
 		spore.position = Vector3(cos(ang) * 0.12 * scale, 0.03 * scale, sin(ang) * 0.12 * scale)
-		spore.material_override = _style_mat(C_PURPLE, 0.2, 0.9, C_PURPLE, 0.15, 20 + i, TEX_FLESH, 1.6)
+		spore.material_override = _style_mat(C_PURPLE, 0.2, 0.9, C_PURPLE_GLOW, 0.35, 20 + i, TEX_FLESH, 1.6)
 		body.add_child(spore)
 	var col := CollisionShape3D.new()
 	col.name = "Collision"
@@ -459,46 +459,135 @@ func _add_rotated_box(root: Node, name: String, size: Vector3, pos: Vector3, rot
 	return body
 
 
+func _col_parchment_dirty(seed: float = 0.0) -> Color:
+	# dirty yellow-white with ink bite
+	var c := C_PARCHMENT.lerp(Color(0.72, 0.68, 0.55), 0.35)
+	c = c.darkened(0.08 + 0.1 * seed)
+	return c.lerp(C_INK, 0.12 + 0.08 * seed)
+
+
+func _col_cloth(seed: float = 0.0) -> Color:
+	var c := Color(0.62, 0.56, 0.42).lerp(C_PARCHMENT, 0.4)
+	return c.darkened(0.05 + 0.12 * seed).lerp(C_INK, 0.1)
+
+
+func _add_omni(root: Node, name: String, pos: Vector3, color: Color, energy: float, rng: float, atten: float = 1.4, shadows: bool = true) -> OmniLight3D:
+	var l := OmniLight3D.new()
+	l.name = name
+	l.position = pos
+	l.light_color = color
+	l.light_energy = energy
+	l.omni_range = rng
+	l.omni_attenuation = atten
+	l.shadow_enabled = shadows
+	if shadows:
+		l.shadow_blur = 1.1
+	root.add_child(l)
+	return l
+
+
+## Candle: warm parchment flame + purple sickness in the light
+func _add_candle(root: Node, name: String, pos: Vector3, energy: float = 0.85) -> void:
+	var stick := _static_box(name + "_Wax", Vector3(0.06, 0.18, 0.06), pos + Vector3(0, 0.09, 0), _col_parchment_dirty(0.2), TEX_PLASTER)
+	root.add_child(stick)
+	var flame := MeshInstance3D.new()
+	flame.name = name + "_Flame"
+	var sm := SphereMesh.new()
+	sm.radius = 0.045
+	sm.height = 0.09
+	flame.mesh = sm
+	flame.position = pos + Vector3(0, 0.22, 0)
+	flame.material_override = _style_mat(C_PARCHMENT.lightened(0.2), 0.05, 0.7, C_PURPLE_GLOW, 0.85, 77, TEX_CAP, 2.0)
+	root.add_child(flame)
+	# purple-warm candle light
+	_add_omni(root, name + "_L", pos + Vector3(0, 0.25, 0), Color(0.85, 0.45, 0.62), energy, 3.8, 1.55, true)
+
+
+## Wall torch: wood haft + purple fire
+func _add_torch(root: Node, name: String, pos: Vector3, yaw_deg: float = 0.0, energy: float = 1.15) -> void:
+	var body := Node3D.new()
+	body.name = name
+	body.position = pos
+	body.rotation_degrees = Vector3(0, yaw_deg, 0)
+	var haft := _box_mesh(Vector3(0.07, 0.55, 0.07), C_WOOD.darkened(0.1), TEX_WOOD)
+	haft.position = Vector3(0.12, 0.2, 0)
+	body.add_child(haft)
+	var head := MeshInstance3D.new()
+	head.name = "Head"
+	var cm := SphereMesh.new()
+	cm.radius = 0.09
+	cm.height = 0.16
+	head.mesh = cm
+	head.position = Vector3(0.12, 0.52, 0)
+	head.material_override = _style_mat(C_PURPLE_GLOW, 0.1, 0.75, C_PURPLE_GLOW, 0.9, 88, TEX_CAP, 1.8)
+	body.add_child(head)
+	var br := MeshInstance3D.new()
+	br.name = "Bracket"
+	var bm := BoxMesh.new()
+	bm.size = Vector3(0.18, 0.05, 0.05)
+	br.mesh = bm
+	br.position = Vector3(0.05, 0.35, 0)
+	br.material_override = _style_mat(Color(0.28, 0.24, 0.2), 0.25, 0.9, Color(0,0,0), 0.0, 90, TEX_METAL, 1.2)
+	body.add_child(br)
+	root.add_child(body)
+	var light_off := Vector3(0.18, 0.55, 0)
+	if abs(yaw_deg) > 1.0:
+		# approximate yaw without Basis dance
+		var rad := deg_to_rad(yaw_deg)
+		light_off = Vector3(cos(rad) * 0.18, 0.55, -sin(rad) * 0.18)
+	_add_omni(root, name + "_L", pos + light_off, Color(0.78, 0.38, 0.7), energy, 5.5, 1.35, true)
+
+
+func _add_window_frame(root: Node, name: String, pos: Vector3, size: Vector3, rot_y: float = 0.0) -> void:
+	# hole (dark) + wood frame — breaks flat wall
+	var hole := _static_box(name + "_Hole", size, pos, C_INK.lightened(0.04), TEX_INK)
+	hole.rotation_degrees = Vector3(0, rot_y, 0)
+	root.add_child(hole)
+	var thick := 0.06
+	var frame_col := C_WOOD.darkened(0.05)
+	# simple frame strips along local axes (axis-aligned approx)
+	root.add_child(_static_box(name + "_FT", Vector3(size.x + thick * 2.0, thick, size.z + 0.04), pos + Vector3(0, size.y * 0.5 + thick * 0.5, 0), frame_col, TEX_WOOD))
+	root.add_child(_static_box(name + "_FB", Vector3(size.x + thick * 2.0, thick, size.z + 0.04), pos + Vector3(0, -size.y * 0.5 - thick * 0.5, 0), frame_col, TEX_WOOD))
+	root.add_child(_static_box(name + "_FL", Vector3(thick, size.y, size.z + 0.04), pos + Vector3(-size.x * 0.5 - thick * 0.5, 0, 0), frame_col, TEX_WOOD))
+	root.add_child(_static_box(name + "_FR", Vector3(thick, size.y, size.z + 0.04), pos + Vector3(size.x * 0.5 + thick * 0.5, 0, 0), frame_col, TEX_WOOD))
+
+
+func _add_clothesline(root: Node, name: String, a: Vector3, b: Vector3, pieces: int = 4) -> void:
+	var mid := (a + b) * 0.5
+	var length := a.distance_to(b)
+	var rope := _static_box(name + "_Rope", Vector3(length, 0.03, 0.03), mid, C_INK.lightened(0.1), TEX_INK)
+	root.add_child(rope)
+	for i in range(pieces):
+		var t := (float(i) + 0.5) / float(pieces)
+		var p := a.lerp(b, t)
+		var h := 0.45 + 0.15 * float(i % 3)
+		var w := 0.35 + 0.1 * float((i * 3) % 4)
+		root.add_child(_static_box("%s_Cloth%d" % [name, i], Vector3(w, h, 0.04), p + Vector3(0, -h * 0.45, 0), _col_cloth(float(i) * 0.2), TEX_PLASTER))
+
+
 func _save_attic() -> Error:
+
 	var root := Node3D.new()
 	root.name = "Attic"
 
 	# Dominant: dirty parchment — key+shadow, weak fill (DD/Lunacid read)
 	root.add_child(_underground_env(
-		Color(0.08, 0.05, 0.03),
-		Color(0.42, 0.32, 0.18),
-		Color(0.32, 0.22, 0.12),
-		0.032,
-		0.42,
-		0.95,
-		0.85
+		Color(0.09, 0.05, 0.06),
+		Color(0.48, 0.32, 0.28),
+		Color(0.34, 0.2, 0.22),
+		0.028,
+		0.5,
+		1.02,
+		0.9
 	))
 
-	var lamp := OmniLight3D.new()
-	lamp.name = "AtticLamp"
-	lamp.position = Vector3(0.6, 2.15, 0.4)
-	lamp.light_color = Color(1.0, 0.72, 0.38)
-	lamp.light_energy = 1.55
-	lamp.omni_range = 5.2
-	lamp.omni_attenuation = 1.55
-	lamp.shadow_enabled = true
-	lamp.shadow_blur = 1.2
-	root.add_child(lamp)
-	var lamp2 := OmniLight3D.new()
-	lamp2.name = "AtticCorner"
-	lamp2.position = Vector3(-2.1, 1.25, -1.6)
-	lamp2.light_color = Color(0.5, 0.18, 0.42)
-	lamp2.light_energy = 0.28
-	lamp2.omni_range = 3.2
-	root.add_child(lamp2)
-	var lamp3 := OmniLight3D.new()
-	lamp3.name = "AtticHatchLight"
-	lamp3.position = Vector3(2.0, 2.45, 1.2)
-	lamp3.light_color = Color(0.7, 0.5, 0.28)
-	lamp3.light_energy = 0.35
-	lamp3.omni_range = 2.6
-	lamp3.omni_attenuation = 1.4
-	root.add_child(lamp3)
+	# Candles only — warm parchment body, purple sickness in the light
+	_add_candle(root, "CandleBed", Vector3(-1.1, 0.45, -1.35), 1.05)
+	_add_candle(root, "CandleCrate", Vector3(-2.0, 0.55, 1.35), 0.9)
+	_add_candle(root, "CandleMirror", Vector3(1.7, 0.9, -1.5), 0.8)
+	_add_candle(root, "CandleHatch", Vector3(1.55, 0.35, 1.35), 0.75)
+	# soft purple ambient spill (sick vision), not a fake sun
+	_add_omni(root, "PurpleSpill", Vector3(0.0, 1.8, 0.2), Color(0.55, 0.22, 0.5), 0.45, 6.5, 1.2, false)
 
 	var wood := C_WOOD
 	var plaster := C_PARCHMENT
@@ -524,7 +613,9 @@ func _save_attic() -> Error:
 	root.add_child(_static_box("JoistBrace", Vector3(0.14, 0.9, 1.6), Vector3(-2.75, 1.7, 0.2), wood, TEX_WOOD))
 	root.add_child(_static_box("Trunk", Vector3(1.1, 0.55, 0.7), Vector3(2.1, 0.28, -1.5), Color(0.34, 0.24, 0.15), TEX_WOOD))
 	root.add_child(_static_box("BoardStack", Vector3(1.4, 0.25, 0.55), Vector3(-0.4, 0.15, 1.9), wood, TEX_WOOD))
-	root.add_child(_static_box("ClothHang", Vector3(1.2, 0.7, 0.08), Vector3(1.0, 1.55, -2.35), Color(0.42, 0.36, 0.28), TEX_PLASTER))
+	_add_clothesline(root, "AtticLine", Vector3(-1.8, 1.85, -2.2), Vector3(1.6, 1.85, -2.2), 5)
+	# Window hole in side wall (wood frame)
+	_add_window_frame(root, "AtticWin", Vector3(2.95, 1.15, -0.6), Vector3(0.08, 0.85, 0.7))
 	# Relief: shelf niche + pipe + floor debris
 	root.add_child(_static_box("ShelfNiche", Vector3(1.1, 0.08, 0.35), Vector3(-2.55, 1.35, 0.9), wood, TEX_WOOD))
 	root.add_child(_static_box("ShelfNiche2", Vector3(1.1, 0.08, 0.35), Vector3(-2.55, 1.0, 0.9), wood, TEX_WOOD))
@@ -534,7 +625,7 @@ func _save_attic() -> Error:
 
 	# Bed stub
 	root.add_child(_static_box("Bed", Vector3(2.0, 0.35, 1.0), Vector3(-1.6, 0.2, -1.6), Color(0.35, 0.3, 0.28), TEX_WOOD))
-	root.add_child(_static_box("BedPillow", Vector3(0.5, 0.15, 0.4), Vector3(-2.2, 0.45, -1.6), Color(0.45, 0.42, 0.4), TEX_PLASTER))
+	root.add_child(_static_box("BedPillow", Vector3(0.5, 0.15, 0.4), Vector3(-2.2, 0.45, -1.6), _col_parchment_dirty(0.15), TEX_PLASTER))
 
 	# Mirror stub (no character select)
 	var mirror := _make_interactable(
@@ -709,58 +800,19 @@ func _save_alley() -> Error:
 	var root := Node3D.new()
 	root.name = "Alley"
 
-	# Dominant: dirty purple — hard key + weak fill (hide flat boxes via shadow)
+	# Dominant: dirty purple — torches carry light; glow is purple-sick
 	root.add_child(_underground_env(
-		Color(0.05, 0.03, 0.06),
-		Color(0.28, 0.14, 0.26),
-		Color(0.22, 0.1, 0.2),
-		0.022,
-		0.38,
-		1.0,
+		Color(0.07, 0.04, 0.08),
+		Color(0.36, 0.16, 0.34),
+		Color(0.28, 0.12, 0.26),
+		0.02,
+		0.48,
+		1.05,
 		1.0
 	))
 
-	var key := OmniLight3D.new()
-	key.name = "Key"
-	key.position = Vector3(-2.5, 3.1, -0.2)
-	key.light_color = Color(0.85, 0.55, 0.35)
-	key.light_energy = 1.7
-	key.omni_range = 11.0
-	key.omni_attenuation = 1.45
-	key.shadow_enabled = true
-	key.shadow_blur = 1.0
-	root.add_child(key)
-	var fill := OmniLight3D.new()
-	fill.name = "Fill"
-	fill.position = Vector3(2.5, 2.4, 0.4)
-	fill.light_color = Color(0.55, 0.28, 0.5)
-	fill.light_energy = 0.35
-	fill.omni_range = 12.0
-	fill.omni_attenuation = 1.2
-	root.add_child(fill)
-	var fill2 := OmniLight3D.new()
-	fill2.name = "FillWide"
-	fill2.position = Vector3(5.5, 2.0, 0.0)
-	fill2.light_color = Color(0.4, 0.28, 0.22)
-	fill2.light_energy = 0.22
-	fill2.omni_range = 9.0
-	root.add_child(fill2)
-	var nar_key := OmniLight3D.new()
-	nar_key.name = "NarrowKey"
-	nar_key.position = Vector3(0.0, 2.6, 6.5)
-	nar_key.light_color = Color(0.62, 0.32, 0.55)
-	nar_key.light_energy = 0.95
-	nar_key.omni_range = 6.0
-	nar_key.omni_attenuation = 1.5
-	nar_key.shadow_enabled = true
-	root.add_child(nar_key)
-	var mush_glow := OmniLight3D.new()
-	mush_glow.name = "MushroomGlow"
-	mush_glow.position = Vector3(0.2, 1.35, 8.0)
-	mush_glow.light_color = C_PURPLE_GLOW
-	mush_glow.light_energy = 0.7
-	mush_glow.omni_range = 4.5
-	root.add_child(mush_glow)
+	# Temporary spill until torches placed after layout consts
+	_add_omni(root, "PurpleSpill", Vector3(0.0, 2.5, 0.0), Color(0.5, 0.2, 0.48), 0.4, 14.0, 1.15, false)
 
 	var stone := C_STONE.lightened(0.06)
 	var stone2 := C_STONE.lightened(0.1)
@@ -829,6 +881,23 @@ func _save_alley() -> Error:
 	root.add_child(_static_box("Rubble2", Vector3(0.45, 0.18, 0.6), Vector3(0.15, 0.1, 5.5), stone2, TEX_STONE))
 	root.add_child(_static_box("BeamNar1", Vector3(1.4, 0.14, 0.14), Vector3(0, 3.6, 5.0), Color(0.3, 0.22, 0.14), TEX_WOOD))
 	root.add_child(_static_box("BeamNar2", Vector3(1.4, 0.14, 0.14), Vector3(0, 3.6, 9.0), Color(0.3, 0.22, 0.14), TEX_WOOD))
+
+	# Torches (diegetic keys) — purple fire
+	_add_torch(root, "TorchS1", Vector3(-5.2, 1.55, wide_z0 + 0.22), 0.0, 1.4)
+	_add_torch(root, "TorchS2", Vector3(2.8, 1.55, wide_z0 + 0.22), 0.0, 1.25)
+	_add_torch(root, "TorchN1", Vector3(-3.5, 1.55, wide_z1 - 0.22), 180.0, 1.2)
+	_add_torch(root, "TorchNar1", Vector3(nar_x0 + 0.22, 1.7, 5.5), 90.0, 1.15)
+	_add_torch(root, "TorchNar2", Vector3(nar_x1 - 0.22, 1.7, 10.0), -90.0, 1.2)
+	# Window frames / wall holes
+	_add_window_frame(root, "WinS1", Vector3(-1.2, 2.35, wide_z0 + 0.1), Vector3(0.85, 1.0, 0.08))
+	_add_window_frame(root, "WinS2", Vector3(4.0, 2.4, wide_z0 + 0.1), Vector3(0.7, 0.9, 0.08))
+	_add_window_frame(root, "WinNar1", Vector3(nar_x1 - 0.08, 2.3, 7.2), Vector3(0.08, 0.85, 0.55))
+	# Clothesline across wide street mouth
+	_add_clothesline(root, "LineWide", Vector3(-2.2, 3.3, 0.15), Vector3(2.4, 3.25, -0.2), 5)
+	_add_clothesline(root, "LineNar", Vector3(nar_x0 + 0.15, 3.0, 6.0), Vector3(nar_x1 - 0.15, 3.05, 6.0), 3)
+	# Extra parchment-dirty props
+	root.add_child(_static_box("Sack1", Vector3(0.5, 0.4, 0.4), Vector3(4.2, 0.22, wide_z0 + 0.6), _col_parchment_dirty(0.4), TEX_PLASTER))
+	root.add_child(_static_box("BoardLean", Vector3(0.08, 1.4, 0.5), Vector3(-6.5, 0.7, wide_z1 - 0.45), C_WOOD.darkened(0.08), TEX_WOOD))
 
 	root.add_child(_mushroom("Mush1", Vector3(nar_x0 + 0.12, 1.2, 4.0), 1.0))
 	root.add_child(_mushroom("Mush2", Vector3(nar_x1 - 0.12, 1.8, 8.0), 1.2))
