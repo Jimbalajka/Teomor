@@ -33,14 +33,19 @@ const C_WOOD := Color(0.4, 0.28, 0.16)
 const C_STONE := Color(0.28, 0.24, 0.22)
 const C_DAMP := Color(0.3, 0.26, 0.22)
 
-const TEX_DIR := "res://assets/textures/style/"
-const TEX_PLASTER := "tex_attic_plaster_512.png"
-const TEX_WOOD := "tex_attic_wood_512.png"
-const TEX_STONE := "tex_alley_stone_512.png"
-const TEX_FLOOR := "tex_alley_floor_512.png"
+# Author Poly Haven packs (color-corrected) live in author/; mushrooms/ink remain in style/.
+const TEX_DIR_AUTHOR := "res://assets/textures/author/"
+const TEX_DIR_STYLE := "res://assets/textures/style/"
+# Mapping from author: wood=floor/boards, concrete=inner walls, brick=building mass,
+# ceramic/tile=building base, metal=props/cornices, floor=concrete+ceramic mix.
+const TEX_PLASTER := "concrete_512.png"
+const TEX_WOOD := "wood_weathered_512.png"
+const TEX_STONE := "brick_broken_512.png"
+const TEX_FLOOR := "floor_mix_512.png"
+const TEX_BASE := "tile_worn_512.png"
+const TEX_METAL := "metal_rusty_512.png"
 const TEX_FLESH := "tex_vsegrib_flesh_512.png"
 const TEX_CAP := "tex_vsegrib_cap_512.png"
-const TEX_METAL := "tex_metal_barrel_512.png"
 const TEX_INK := "tex_ink_grime_512.png"
 
 var _tex_cache: Dictionary = {}
@@ -68,29 +73,38 @@ func _noise_tex(base: Color, ink_amt: float = 0.18, size: int = 48, salt: int = 
 	return tex
 
 
+func _tex_dirs_for(file_name: String) -> PackedStringArray:
+	# Mushrooms / ink stay in style; architecture uses author packs.
+	if file_name.begins_with("tex_vsegrib_") or file_name == TEX_INK or file_name.begins_with("tex_"):
+		return PackedStringArray([TEX_DIR_STYLE, TEX_DIR_AUTHOR])
+	return PackedStringArray([TEX_DIR_AUTHOR, TEX_DIR_STYLE])
+
+
 func _load_style_tex(file_name: String) -> Texture2D:
 	if file_name.is_empty():
 		return null
 	if _tex_cache.has(file_name):
 		return _tex_cache[file_name]
-	var path := TEX_DIR + file_name
-	# Prefer imported CompressedTexture2D so PackedScene keeps ExtResource (not megabyte embeds).
-	if ResourceLoader.exists(path):
-		var tex := load(path) as Texture2D
-		if tex != null:
-			_tex_cache[file_name] = tex
-			return tex
-	# Headless / pre-import fallback — still bind path to avoid embedding raw pixels in .tscn
-	var img := Image.new()
-	var err := img.load(ProjectSettings.globalize_path(path) if path.begins_with("res://") else path)
-	if err != OK:
-		err = img.load(path)
-	if err != OK:
-		return null
-	var itex := ImageTexture.create_from_image(img)
-	itex.take_over_path(path)
-	_tex_cache[file_name] = itex
-	return itex
+	for tex_dir in _tex_dirs_for(file_name):
+		var path := tex_dir + file_name
+		# Prefer imported CompressedTexture2D so PackedScene keeps ExtResource (not megabyte embeds).
+		if ResourceLoader.exists(path):
+			var tex := load(path) as Texture2D
+			if tex != null:
+				_tex_cache[file_name] = tex
+				return tex
+		# Headless / pre-import fallback — still bind path to avoid embedding raw pixels in .tscn
+		var img := Image.new()
+		var err := img.load(ProjectSettings.globalize_path(path) if path.begins_with("res://") else path)
+		if err != OK:
+			err = img.load(path)
+		if err != OK:
+			continue
+		var itex := ImageTexture.create_from_image(img)
+		itex.take_over_path(path)
+		_tex_cache[file_name] = itex
+		return itex
+	return null
 
 
 func _color_dist(a: Color, b: Color) -> float:
@@ -142,7 +156,7 @@ func _style_mat(base: Color, ink_amt: float = 0.18, rough: float = 0.92, emit: C
 		mat.albedo_color = Color(1, 1, 1)
 	else:
 		# Mild tint; baked AO/bevel already in albedo
-		mat.albedo_color = base.lerp(Color(1, 1, 1), 0.82)
+		mat.albedo_color = base.lerp(Color(1, 1, 1), 0.9)
 	mat.albedo_texture = tex
 	var ntex: Texture2D = _load_style_tex(_companion_name(file_name, "n"))
 	if ntex != null:
@@ -734,6 +748,14 @@ func _save_alley() -> Error:
 	root.add_child(_static_box("Barrel1", Vector3(0.45, 0.7, 0.45), Vector3(-0.15, 0.35, nar_z1 - 0.9), Color(0.35, 0.32, 0.3), TEX_METAL))
 	root.add_child(_static_box("Barrel2", Vector3(0.4, 0.6, 0.4), Vector3(0.2, 0.3, nar_z1 - 1.5), Color(0.32, 0.3, 0.28), TEX_METAL))
 	root.add_child(_static_box("Barrel3", Vector3(0.35, 0.55, 0.35), Vector3(-0.2, 0.28, nar_z1 - 2.0), Color(0.3, 0.28, 0.26), TEX_METAL))
+
+	# Ceramic / tile base of building mass (author mapping)
+	var plinth_h := 0.85
+	_slab(root, "WideBaseSouth", Vector3(wide_x1 - wide_x0, plinth_h, 0.22), Vector3(0, plinth_h * 0.5, wide_z0 + 0.02), C_STONE.lightened(0.12), TEX_BASE)
+	_slab(root, "WideBaseNorthL", Vector3(7.35, plinth_h, 0.22), Vector3(-4.325, plinth_h * 0.5, wide_z1 - 0.02), C_STONE.lightened(0.1), TEX_BASE)
+	_slab(root, "WideBaseNorthR", Vector3(7.35, plinth_h, 0.22), Vector3(4.325, plinth_h * 0.5, wide_z1 - 0.02), C_STONE.lightened(0.1), TEX_BASE)
+	_slab(root, "NarBaseL", Vector3(0.22, plinth_h, nar_z1 - nar_z0), Vector3(nar_x0 + 0.02, plinth_h * 0.5, (nar_z0 + nar_z1) * 0.5), C_STONE.lightened(0.08), TEX_BASE)
+	_slab(root, "NarBaseR", Vector3(0.22, plinth_h, nar_z1 - nar_z0), Vector3(nar_x1 - 0.02, plinth_h * 0.5, (nar_z0 + nar_z1) * 0.5), C_STONE.lightened(0.08), TEX_BASE)
 
 	root.add_child(_mushroom("Mush1", Vector3(nar_x0 + 0.12, 1.2, 4.0), 1.0))
 	root.add_child(_mushroom("Mush2", Vector3(nar_x1 - 0.12, 1.8, 8.0), 1.2))

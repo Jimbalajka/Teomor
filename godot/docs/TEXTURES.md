@@ -1,39 +1,34 @@
-# Текстуры стиля (attic / alley) — v1.4 depth
+# Текстуры стиля — author packs v1.5
 
 ## Файлы
-`godot/assets/textures/style/`
+godot/assets/textures/author/ — рабочие 512 (albedo / normal / rough)
 
-На каждый материал:
-- `*_512.png` — albedo **с запечённой глубиной** (AO + soft bevel из normal)
-- `*_n_512.png` — normal
-- `*_r_512.png` — roughness
+| Стем | Зона | Источник (авторская папка Текстурки) |
+|------|------|----------------------------------------|
+| wood_weathered | пол / балки / доски | wood_peeling_paint_weathered_1k |
+| concrete | внутренние стены, надстройки | cracked_concrete_1k |
+| brick_broken | основной массив зданий | broken_brick_wall_1k |
+| brick_mossy | запас / сырые пятна | mossy_brick_1k |
+| tile_worn | низ зданий (цоколь) | worn_tile_floor_1k |
+| floor_mix | пол переулка | бетон + керамика |
+| metal_rusty | бочки / карнизы / металл | rusty_metal_02_1k |
 
-| Стем | Зона | CC0 / рефы |
-|------|------|------------|
-| `tex_attic_plaster` | стены чердака | Plaster003 |
-| `tex_attic_wood` | пол/балки | WoodSiding001 + WoodFloor044 |
-| `tex_alley_stone` | стены переулка | PavingStones070 + Rocks022 + пурпур `Эмб1` |
-| `tex_alley_floor` | пол переулка | pavement/concrete + ink |
-| `tex_metal_barrel` | металл | MetalPlates006 + Rust001 |
-| `tex_ink_grime` | швы | `стиль 1.1/` |
-| `tex_vsegrib_*` | грибы | `Грибы/` + синтетический normal |
+Грибы / ink-grime пока в assets/textures/style/ (tex_vsegrib_*, tex_ink_grime).
 
-Сырьё: `assets/textures/_src/` (gitignore).
+Сырьё zip: assets/textures/_src/author/ (gitignore). Указатель: Текстурки/README.md.
 
 ## Зачем так
-Фидбек автора / DD: не плоский «наклеенный PNG», а глубина + единый стиль; без мозаичного тайлинга.
+Авторские бесшовные карты уже под цветокор; отказ от плоских наклеенных bake-only PNG.
+Раскладка от автора: дерево=пол, бетон=внутр. стены, кирпич=массив, керамика=низ, металл=детали, пол=бетон+керамика.
 
-В Godot: normal+rough + **per-mesh UV offset/jitter** (`build_scenes.gd`).
+В Godot: normal+rough + per-mesh UV jitter (build_scenes.gd).
 
 ## Пересборка
-См. [`TOOLS.md`](TOOLS.md).
+См. TOOLS.md.
 
 ```bash
 cd godot
-python3 scripts/tools/fetch_open_materials.py
-python3 scripts/bake_style_textures.py
-python3 scripts/tools/check_textures.py
 godot4 --path . --headless -s res://scripts/build_scenes.gd
 ```
 
-Лицензии: ambientCG **CC0**; авторские рефы — собственность автора.
+Лицензии: паки из Текстурки — от автора (Poly Haven–подобные 1k); старые ambientCG CC0 в style/ как запас.
