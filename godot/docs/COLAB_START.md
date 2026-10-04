@@ -32,3 +32,12 @@ https://colab.research.google.com/github/Jimbalajka/Teomor/blob/main/godot/docs/
 Если `tokenizers` снова ругается на building wheel — пришли скрин; тогда уйдём на Kaggle (там Python 3.10) или web-генератор.
 
 Промпты слотов: [AI_ASSETS.md](AI_ASSETS.md).
+
+
+## Ошибка `_Ink` даже после установки PIL 11
+
+Pillow убрал `_Ink`, а diffusers ещё дергает. В ноутбуке есть патч.
+
+Быстрый фикс: см. [colab/PASTE_IF_INK_ERROR.md](colab/PASTE_IF_INK_ERROR.md)
+
+Предупреждения pip про jedi/tensorboard/setuptools — **не стоп**, если в конце ячейки `ImageDraw OK` / `model ready`.
