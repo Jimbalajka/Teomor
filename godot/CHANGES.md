@@ -2,6 +2,12 @@
 
 Лог решений и изменений. Новые записи — сверху.
 
+## 2026-10-04 — project skills
+
+**По OK:** внедрить grill-me / ok-gate / screenshot-feedback / ship-for-look / style-anchor + geo-first и соседние; слэш не обязателен — агент сам по контексту.
+
+**Сделано:** `godot/.cursor/skills/*`, правило `teomor-skills.mdc`, указатель в AGENT.md.
+
 ## 2026-10-04 — depth maps + anti-mosaic (DD-pass)
 
 **Автор:** плоско/дешево, мозаика тайлов; в DD текстуры на боксах имеют глубину и аккуратность.

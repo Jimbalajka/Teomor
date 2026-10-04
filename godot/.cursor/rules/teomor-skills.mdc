@@ -1,0 +1,21 @@
+---
+description: Проактивно включать project skills Теомора по контексту
+alwaysApply: true
+---
+
+# Skills — инициатива без слэша
+
+Автор может забывать `/grill-me`, `/screenshot-feedback` и т.п.
+Агент **сам** включает skill из `.cursor/skills/` по контексту:
+
+- новая/размытая задача >15 мин → `grill-me` + `teomor-ok-gate`
+- скрин / реф / «смотри фото» → `screenshot-feedback` (+ `geo-first` если «плоско/дёшево»)
+- визуал / текстуры / свет → `style-anchor-check`
+- папка/zip/маппинг текстур → `author-assets-intake`
+- «смотри / пушь / на гит» или готовый кусок → `ship-for-look`
+- конец дня / обрыв → `session-handoff`
+- игровой текст / доки → `ru-only-game`
+- «а давай ещё систему…» → `scope-shrink`
+
+Не ждать волшебного слэша. Не раздувать ответ «я включил skill X» — просто
+вести себя по skill.
