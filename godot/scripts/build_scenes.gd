@@ -437,7 +437,11 @@ func _shop_choice(root: Node, name: String, pos: Vector3, choice_id: String, pro
 func _add_player(root: Node, pos: Vector3) -> void:
 	var player := CharacterBody3D.new()
 	player.name = "Player"
-	player.position = pos
+	# pos historically ~eye/center (y≈0.9); convert to feet for crouch-safe capsule.
+	var feet_y := pos.y
+	if feet_y > 0.45:
+		feet_y = maxf(pos.y - 0.85, 0.02)
+	player.position = Vector3(pos.x, feet_y, pos.z)
 	player.set_script(load("res://scripts/player_fps.gd"))
 
 	var pcol := CollisionShape3D.new()
@@ -446,6 +450,7 @@ func _add_player(root: Node, pos: Vector3) -> void:
 	pshape.radius = 0.28
 	pshape.height = 1.6
 	pcol.shape = pshape
+	pcol.position = Vector3(0, 0.8, 0)
 	player.add_child(pcol)
 
 	var cam := Camera3D.new()
@@ -477,6 +482,20 @@ func _add_player(root: Node, pos: Vector3) -> void:
 	prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	prompt.text = "[E]"
 	prompt_layer.add_child(prompt)
+	var hint := Label.new()
+	hint.name = "ControlsHint"
+	hint.anchor_left = 0.0
+	hint.anchor_right = 1.0
+	hint.anchor_top = 1.0
+	hint.anchor_bottom = 1.0
+	hint.offset_left = 16
+	hint.offset_right = -16
+	hint.offset_top = -36
+	hint.offset_bottom = -10
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	hint.add_theme_font_size_override("font_size", 14)
+	hint.text = "WASD · Shift бег · Ctrl присед · Пробел прыжок · E · Esc"
+	prompt_layer.add_child(hint)
 	root.add_child(player)
 
 
@@ -1948,13 +1967,28 @@ func _save_playtest() -> Error:
 		{"n": "PadLock", "p": Vector3(2.5, 0.0, -3.0), "c": Color(0.35, 0.32, 0.28), "t": "[E] Станция: Взлом (слоты)", "l": PackedStringArray(["3 спина; цель — 2/3/4/5 подряд.", "1 замораживается; ловкость +1 попытка."])},
 		{"n": "PadSkills", "p": Vector3(5.0, 0.0, -3.0), "c": C_PURPLE_GLOW.darkened(0.2), "t": "[E] Станция: Навыки", "l": PackedStringArray(["Мощь / Разум / Моторика / Стержень.", "Пока только подписи."])},
 		{"n": "PadCombat", "p": Vector3(-4.0, 0.0, 2.5), "c": Color(0.45, 0.18, 0.16), "t": "[E] Станция: Бой", "l": PackedStringArray(["Тут манекен + оружие + FX ударов.", "Бой подключим отдельным OK."])},
-		{"n": "PadMove", "p": Vector3(0.0, 0.0, 2.5), "c": Color(0.2, 0.35, 0.4), "t": "[E] Станция: Движение", "l": PackedStringArray(["Прыжок / спринт / присед — чеклист.", "Сейчас базовый FPS-контроллер."])},
+		{"n": "PadMove", "p": Vector3(0.0, 0.0, 2.5), "c": Color(0.2, 0.35, 0.4), "t": "[E] Станция: Движение", "l": PackedStringArray(["Фаза 1: WASD, Shift бег, Ctrl присед, Пробел прыжок.", "Платформы справа и низкий лаз в центре."])},
 		{"n": "PadFX", "p": Vector3(4.0, 0.0, 2.5), "c": Color(0.55, 0.45, 0.2), "t": "[E] Станция: FX", "l": PackedStringArray(["Pixel effects gigapack — сюда тестовые вспышки.", "Пока заглушка."])},
 	]
 	for s in stations:
 		_poi(root, str(s["n"]), s["p"], Vector3(1.2, 0.15, 1.2), s["c"], str(s["t"]), s["l"])
 		# tall marker post
 		root.add_child(_static_box(str(s["n"]) + "_Post", Vector3(0.12, 1.6, 0.12), s["p"] + Vector3(0, 0.9, -0.55), s["c"]))
+
+	# Movement course (phase 1)
+	root.add_child(_static_box("JumpBlock1", Vector3(1.4, 0.45, 1.4), Vector3(2.2, 0.22, 1.0), C_STONE.lightened(0.12), TEX_STONE))
+	root.add_child(_static_box("JumpBlock2", Vector3(1.2, 0.9, 1.2), Vector3(4.0, 0.45, 1.2), C_STONE.lightened(0.08), TEX_STONE))
+	root.add_child(_static_box("JumpBlock3", Vector3(1.0, 1.4, 1.0), Vector3(5.6, 0.7, 1.4), C_STONE.lightened(0.05), TEX_STONE))
+	# Low crawl tunnel
+	root.add_child(_static_box("CrawlRoof", Vector3(3.5, 0.2, 1.6), Vector3(0.0, 1.15, 3.5), C_WOOD.darkened(0.05), TEX_WOOD))
+	root.add_child(_static_box("CrawlWallL", Vector3(0.2, 1.1, 1.6), Vector3(-1.75, 0.55, 3.5), C_STONE, TEX_STONE))
+	root.add_child(_static_box("CrawlWallR", Vector3(0.2, 1.1, 1.6), Vector3(1.75, 0.55, 3.5), C_STONE, TEX_STONE))
+	_poi(root, "PadMoveCheck", Vector3(0.0, 0.0, 1.2), Vector3(1.4, 0.12, 0.8), Color(0.2, 0.4, 0.45),
+		"[E] Чеклист движения",
+		PackedStringArray([
+			"Проверь: WASD, Shift-бег, Ctrl-присед под низкой крышей, прыжок по блокам.",
+			"Подсказка управления всегда внизу экрана."
+		]))
 
 	# Dummy combat block
 	root.add_child(_static_box("Mannequin", Vector3(0.55, 1.7, 0.35), Vector3(-4.0, 0.85, 3.6), Color(0.55, 0.5, 0.45), TEX_PLASTER))
