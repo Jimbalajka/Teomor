@@ -6,6 +6,7 @@ godot/assets/textures/author/ — рабочие 512 (albedo / normal / rough)
 | Стем | Зона | Источник (авторская папка Текстурки) |
 |------|------|----------------------------------------|
 | wood_weathered | пол / балки / доски | wood_peeling_paint_weathered_1k |
+| wood_hand | балки / ящики / чердак (preview) | hand-paint author wood_1 |
 | concrete | внутренние стены, надстройки | cracked_concrete_1k |
 | brick_broken | основной массив зданий | broken_brick_wall_1k |
 | brick_mossy | запас / сырые пятна | mossy_brick_1k |
@@ -34,6 +35,8 @@ godot4 --path . --headless -s res://scripts/build_scenes.gd
 ```
 
 Лицензии: паки из Текстурки — от автора (Poly Haven–подобные 1k); старые ambientCG CC0 в style/ как запас.
+
+Активное дерево в игре сейчас: `wood_hand_512` (вместо weathered).
 
 ## Hand-paint
 Бесшовка в Krita: [`KRITA_SEAMLESS.md`](KRITA_SEAMLESS.md).

@@ -39,7 +39,7 @@ const TEX_DIR_STYLE := "res://assets/textures/style/"
 # Mapping from author: wood=floor/boards, concrete=inner walls, brick=building mass,
 # ceramic/tile=building base, metal=props/cornices, floor=concrete+ceramic mix.
 const TEX_PLASTER := "concrete_512.png"
-const TEX_WOOD := "wood_weathered_512.png"
+const TEX_WOOD := "wood_hand_512.png"  # author hand-paint preview; old: wood_weathered_512.png
 const TEX_STONE := "brick_broken_512.png"
 # Author hand-paint for alley walls (albedo only for now)
 const TEX_STONE_WIDE := "stone_broken_512.png"
@@ -158,7 +158,7 @@ func _world_uv(tex_name: String, size: Vector3) -> float:
 	elif file_name == TEX_FLOOR:
 		base = 0.4
 	elif file_name == TEX_WOOD:
-		base = 0.55
+		base = 0.42  # readable planks
 	elif file_name == TEX_PLASTER:
 		base = 0.38
 	elif file_name == TEX_METAL:
