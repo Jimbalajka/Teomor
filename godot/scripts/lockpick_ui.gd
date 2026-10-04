@@ -75,6 +75,10 @@ func open_lockpick(lock_id: String, title: String = "Замок", success_lines:
 	_title.text = _lock_title
 	_refresh()
 	_panel.visible = true
+	if _is_win(_values):
+		# стартовый ролл уже победный — засчитываем без лишнего спина
+		_on_success()
+		return
 	if gs:
 		gs.set("input_locked", true)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -197,12 +201,15 @@ func _toggle_freeze(idx: int) -> void:
 	_refresh()
 
 
-func _is_consecutive(vals: Array) -> bool:
+func _is_win(vals: Array) -> bool:
 	if vals.size() != 3:
 		return false
 	var a := int(vals[0])
 	var b := int(vals[1])
 	var c := int(vals[2])
+	# три одинаковых
+	if a == b and b == c:
+		return true
 	# подряд вверх или вниз
 	if b - a == 1 and c - b == 1:
 		return true
@@ -219,12 +226,12 @@ func _on_spin() -> void:
 	await _animate_spin()
 	_attempts_left -= 1
 	_busy = false
-	if _is_consecutive(_values):
+	if _is_win(_values):
 		_on_success()
 	elif _attempts_left <= 0:
 		_on_fail()
 	else:
-		_status.text += "\nНе подряд. Ещё попытки есть."
+		_status.text += "\nНе открыло (нужны подряд или три одинаковых). Ещё попытки есть."
 		_refresh()
 
 

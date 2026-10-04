@@ -62,7 +62,7 @@ const MESH_PROTO := "res://assets/meshes/modular/proto/"
 
 ## Instance glb prop via GLTFDocument (works headless without .import).
 ## FBX: open project in editor once, or prefer Kenney .glb paths.
-func _add_mesh_prop(root: Node, name: String, res_path: String, pos: Vector3, rot_y_deg: float = 0.0, uniform_scale: float = 1.0, col_size: Vector3 = Vector3.ZERO) -> Node3D:
+func _add_mesh_prop(root: Node, name: String, res_path: String, pos: Vector3, rot_y_deg: float = 0.0, uniform_scale: float = 1.0, col_size: Vector3 = Vector3.ZERO, tint: Color = Color(1, 1, 1, 1)) -> Node3D:
 	var holder := Node3D.new()
 	holder.name = name
 	holder.position = pos
@@ -100,8 +100,35 @@ func _add_mesh_prop(root: Node, name: String, res_path: String, pos: Vector3, ro
 		col.position = Vector3(0, col_size.y * 0.5, 0)
 		body.add_child(col)
 		holder.add_child(body)
+	if tint != Color(1, 1, 1, 1):
+		_tint_mesh_instances(holder, tint)
 	root.add_child(holder)
 	return holder
+
+
+func _tint_mesh_instances(node: Node, tint: Color) -> void:
+	if node is MeshInstance3D:
+		var mi := node as MeshInstance3D
+		var mat := StandardMaterial3D.new()
+		# Keep any existing albedo texture if present, just multiply color.
+		var src = mi.material_override
+		if src == null and mi.mesh != null and mi.mesh.get_surface_count() > 0:
+			src = mi.mesh.surface_get_material(0)
+		if src is StandardMaterial3D:
+			var sm := src as StandardMaterial3D
+			mat = sm.duplicate() as StandardMaterial3D
+			mat.albedo_color = sm.albedo_color * tint
+		elif src is BaseMaterial3D:
+			var bm := src as BaseMaterial3D
+			mat = StandardMaterial3D.new()
+			mat.albedo_texture = bm.albedo_texture
+			mat.albedo_color = tint
+		else:
+			mat.albedo_color = tint
+		mat.roughness = 0.92
+		mi.material_override = mat
+	for c in node.get_children():
+		_tint_mesh_instances(c, tint)
 
 
 
@@ -999,10 +1026,10 @@ func _save_alley() -> Error:
 	root.add_child(_static_box("Barrel2", Vector3(0.4, 0.6, 0.4), Vector3(0.2, 0.3, nar_z1 - 1.5), Color(0.32, 0.3, 0.28), TEX_METAL))
 	root.add_child(_static_box("Barrel3", Vector3(0.35, 0.55, 0.35), Vector3(-0.2, 0.28, nar_z1 - 2.0), Color(0.3, 0.28, 0.26), TEX_METAL))
 	# Mesh props over primitive clutter
-	_add_mesh_prop(root, "MeshBarrelNar1", MESH_KENNEY + "detail-barrel.glb", Vector3(-0.15, 0.0, nar_z1 - 0.85), 15.0, 1.05, Vector3(0.5, 0.75, 0.5))
-	_add_mesh_prop(root, "MeshBarrelNar2", MESH_KENNEY + "barrels.glb", Vector3(0.25, 0.0, nar_z1 - 1.55), -25.0, 1.0, Vector3(0.45, 0.7, 0.45))
-	_add_mesh_prop(root, "MeshCrateRopesA", MESH_KENNEY + "detail-crate-ropes.glb", Vector3(-5.15, 0.0, wide_z0 + 0.55), 8.0, 1.0, Vector3(0.75, 0.6, 0.65))
-	_add_mesh_prop(root, "MeshCrateSmall", MESH_KENNEY + "detail-crate-small.glb", Vector3(-4.55, 0.0, wide_z0 + 0.75), -12.0, 1.0, Vector3(0.55, 0.45, 0.5))
+	_add_mesh_prop(root, "MeshBarrelNar1", MESH_KENNEY + "detail-barrel.glb", Vector3(-0.15, 0.0, nar_z1 - 0.85), 15.0, 1.05, Vector3(0.5, 0.75, 0.5), Color(1.2, 0.75, 0.5))
+	_add_mesh_prop(root, "MeshBarrelNar2", MESH_KENNEY + "barrels.glb", Vector3(0.25, 0.0, nar_z1 - 1.55), -25.0, 1.0, Vector3(0.45, 0.7, 0.45), Color(0.7, 0.55, 1.15))
+	_add_mesh_prop(root, "MeshCrateRopesA", MESH_KENNEY + "detail-crate-ropes.glb", Vector3(-5.15, 0.0, wide_z0 + 0.55), 8.0, 1.0, Vector3(0.75, 0.6, 0.65), Color(1.1, 0.95, 0.55))
+	_add_mesh_prop(root, "MeshCrateSmall", MESH_KENNEY + "detail-crate-small.glb", Vector3(-4.55, 0.0, wide_z0 + 0.75), -12.0, 1.0, Vector3(0.55, 0.45, 0.5), Color(0.55, 1.0, 0.85))
 	_add_mesh_prop(root, "MeshOverhangS", MESH_KENNEY + "overhang.glb", Vector3(-2.0, 2.35, wide_z0 + 0.05), 0.0, 1.2, Vector3.ZERO)
 	_add_mesh_prop(root, "MeshOverhangS2", MESH_KENNEY + "overhang-fence.glb", Vector3(3.2, 2.35, wide_z0 + 0.05), 0.0, 1.1, Vector3.ZERO)
 	_add_mesh_prop(root, "MeshDoorShop", MESH_KENNEY + "wall-door.glb", Vector3(-7.15, 0.0, 0.0), 90.0, 1.3, Vector3(0.2, 2.2, 1.1))
@@ -2176,9 +2203,9 @@ func _save_playtest() -> Error:
 	root.add_child(_static_box("JumpBlock2", Vector3(1.2, 0.9, 1.2), Vector3(4.0, 0.45, 1.2), C_STONE.lightened(0.08), TEX_STONE))
 	root.add_child(_static_box("JumpBlock3", Vector3(1.0, 1.4, 1.0), Vector3(5.6, 0.7, 1.4), C_STONE.lightened(0.05), TEX_STONE))
 	# Low crawl tunnel
-	root.add_child(_static_box("CrawlRoof", Vector3(3.5, 0.2, 1.6), Vector3(0.0, 1.15, 3.5), C_WOOD.darkened(0.05), TEX_WOOD))
-	root.add_child(_static_box("CrawlWallL", Vector3(0.2, 1.1, 1.6), Vector3(-1.75, 0.55, 3.5), C_STONE, TEX_STONE))
-	root.add_child(_static_box("CrawlWallR", Vector3(0.2, 1.1, 1.6), Vector3(1.75, 0.55, 3.5), C_STONE, TEX_STONE))
+	root.add_child(_static_box("CrawlRoof", Vector3(3.5, 0.2, 1.6), Vector3(0.0, 1.35, 3.5), Color(0.55, 0.38, 0.2)))
+	root.add_child(_static_box("CrawlWallL", Vector3(0.2, 1.3, 1.6), Vector3(-1.75, 0.65, 3.5), Color(0.35, 0.45, 0.55)))
+	root.add_child(_static_box("CrawlWallR", Vector3(0.2, 1.3, 1.6), Vector3(1.75, 0.65, 3.5), Color(0.55, 0.35, 0.45)))
 	_poi(root, "PadMoveCheck", Vector3(0.0, 0.0, 1.2), Vector3(1.4, 0.12, 0.8), Color(0.2, 0.4, 0.45),
 		"[E] Чеклист движения",
 		PackedStringArray([
@@ -2326,67 +2353,69 @@ func _zone_label(root: Node, name: String, pos: Vector3, title: String) -> void:
 	root.add_child(_static_box(name + "_Post", Vector3(0.08, 1.3, 0.08), pos + Vector3(0, 0.75, -0.35), C_WOOD, TEX_WOOD))
 
 
-func _add_table(root: Node, name: String, pos: Vector3, size: Vector3 = Vector3(1.2, 0.08, 0.7), rot_y: float = 0.0) -> void:
-	var top := _static_box(name + "_Top", size, pos + Vector3(0, 0.72, 0), C_WOOD.lightened(0.05), TEX_WOOD)
+func _add_table(root: Node, name: String, pos: Vector3, size: Vector3 = Vector3(1.2, 0.08, 0.7), rot_y: float = 0.0, top_col: Color = Color(0.72, 0.55, 0.28)) -> void:
+	# Flat-color greybox (no style tex) so pieces don't muddy into one wood atlas.
+	var top := _static_box(name + "_Top", size, pos + Vector3(0, 0.72, 0), top_col)
 	top.rotation_degrees.y = rot_y
 	root.add_child(top)
 	var leg_h := 0.68
 	var inset_x := size.x * 0.42
 	var inset_z := size.z * 0.38
+	var leg_col := top_col.darkened(0.25)
 	for i in range(4):
 		var sx := -1.0 if i % 2 == 0 else 1.0
 		var sz := -1.0 if i < 2 else 1.0
-		var leg := _static_box("%s_Leg%d" % [name, i], Vector3(0.07, leg_h, 0.07), pos + Vector3(sx * inset_x, leg_h * 0.5, sz * inset_z), C_WOOD.darkened(0.08), TEX_WOOD)
+		var leg := _static_box("%s_Leg%d" % [name, i], Vector3(0.07, leg_h, 0.07), pos + Vector3(sx * inset_x, leg_h * 0.5, sz * inset_z), leg_col)
 		leg.rotation_degrees.y = rot_y
 		root.add_child(leg)
 
 
-func _add_chair(root: Node, name: String, pos: Vector3, rot_y: float = 0.0) -> void:
-	var seat := _static_box(name + "_Seat", Vector3(0.42, 0.06, 0.42), pos + Vector3(0, 0.45, 0), C_WOOD.lightened(0.02), TEX_WOOD)
+func _add_chair(root: Node, name: String, pos: Vector3, rot_y: float = 0.0, col: Color = Color(0.55, 0.32, 0.45)) -> void:
+	var seat := _static_box(name + "_Seat", Vector3(0.42, 0.06, 0.42), pos + Vector3(0, 0.45, 0), col)
 	seat.rotation_degrees.y = rot_y
 	root.add_child(seat)
-	var back := _static_box(name + "_Back", Vector3(0.42, 0.5, 0.06), pos + Vector3(0, 0.72, -0.18), C_WOOD, TEX_WOOD)
+	var back := _static_box(name + "_Back", Vector3(0.42, 0.5, 0.06), pos + Vector3(0, 0.72, -0.18), col.lightened(0.08))
 	back.rotation_degrees.y = rot_y
 	root.add_child(back)
 	for i in range(4):
 		var sx := -1.0 if i % 2 == 0 else 1.0
 		var sz := -1.0 if i < 2 else 1.0
-		var leg := _static_box("%s_Leg%d" % [name, i], Vector3(0.05, 0.42, 0.05), pos + Vector3(sx * 0.16, 0.21, sz * 0.16), C_WOOD.darkened(0.1), TEX_WOOD)
+		var leg := _static_box("%s_Leg%d" % [name, i], Vector3(0.05, 0.42, 0.05), pos + Vector3(sx * 0.16, 0.21, sz * 0.16), col.darkened(0.2))
 		leg.rotation_degrees.y = rot_y
 		root.add_child(leg)
 
 
 func _add_bed(root: Node, name: String, pos: Vector3, rot_y: float = 0.0) -> void:
-	var frame := _static_box(name + "_Frame", Vector3(2.0, 0.28, 1.05), pos + Vector3(0, 0.22, 0), C_WOOD.darkened(0.05), TEX_WOOD)
+	var frame := _static_box(name + "_Frame", Vector3(2.0, 0.28, 1.05), pos + Vector3(0, 0.22, 0), Color(0.48, 0.3, 0.16))
 	frame.rotation_degrees.y = rot_y
 	root.add_child(frame)
-	var mattress := _static_box(name + "_Matt", Vector3(1.85, 0.16, 0.92), pos + Vector3(0, 0.42, 0), C_PARCHMENT.darkened(0.12), TEX_PLASTER)
+	var mattress := _static_box(name + "_Matt", Vector3(1.85, 0.16, 0.92), pos + Vector3(0, 0.42, 0), Color(0.62, 0.52, 0.7))
 	mattress.rotation_degrees.y = rot_y
 	root.add_child(mattress)
-	var pillow := _static_box(name + "_Pillow", Vector3(0.45, 0.12, 0.55), pos + Vector3(-0.65, 0.55, 0), C_PARCHMENT.lightened(0.05), TEX_PLASTER)
+	var pillow := _static_box(name + "_Pillow", Vector3(0.45, 0.12, 0.55), pos + Vector3(-0.65, 0.55, 0), Color(0.78, 0.72, 0.55))
 	pillow.rotation_degrees.y = rot_y
 	root.add_child(pillow)
-	var head := _static_box(name + "_Head", Vector3(0.1, 0.7, 1.05), pos + Vector3(-0.95, 0.55, 0), C_WOOD, TEX_WOOD)
+	var head := _static_box(name + "_Head", Vector3(0.1, 0.7, 1.05), pos + Vector3(-0.95, 0.55, 0), Color(0.4, 0.24, 0.14))
 	head.rotation_degrees.y = rot_y
 	root.add_child(head)
 
 
-func _add_shelf(root: Node, name: String, pos: Vector3, rot_y: float = 0.0) -> void:
-	var body := _static_box(name + "_Body", Vector3(1.2, 1.6, 0.35), pos + Vector3(0, 0.8, 0), C_WOOD.darkened(0.02), TEX_WOOD)
+func _add_shelf(root: Node, name: String, pos: Vector3, rot_y: float = 0.0, col: Color = Color(0.58, 0.4, 0.22)) -> void:
+	var body := _static_box(name + "_Body", Vector3(1.2, 1.6, 0.35), pos + Vector3(0, 0.8, 0), col)
 	body.rotation_degrees.y = rot_y
 	root.add_child(body)
 	for i in range(3):
 		var y := 0.35 + float(i) * 0.45
-		var board := _static_box("%s_Board%d" % [name, i], Vector3(1.1, 0.05, 0.32), pos + Vector3(0, y, 0.02), C_WOOD.lightened(0.08), TEX_WOOD)
+		var board := _static_box("%s_Board%d" % [name, i], Vector3(1.1, 0.05, 0.32), pos + Vector3(0, y, 0.02), col.lightened(0.12))
 		board.rotation_degrees.y = rot_y
 		root.add_child(board)
 
 
-func _add_partition(root: Node, name: String, pos: Vector3, size: Vector3 = Vector3(2.4, 2.2, 0.12), rot_y: float = 0.0) -> void:
-	var wall := _static_box(name, size, pos + Vector3(0, size.y * 0.5, 0), C_PARCHMENT_DARK.lightened(0.05), TEX_PLASTER)
+func _add_partition(root: Node, name: String, pos: Vector3, size: Vector3 = Vector3(2.4, 2.2, 0.12), rot_y: float = 0.0, col: Color = Color(0.7, 0.58, 0.35)) -> void:
+	var wall := _static_box(name, size, pos + Vector3(0, size.y * 0.5, 0), col)
 	wall.rotation_degrees.y = rot_y
 	root.add_child(wall)
-	var rail := _static_box(name + "_Rail", Vector3(size.x, 0.08, size.z + 0.04), pos + Vector3(0, size.y + 0.04, 0), C_WOOD, TEX_WOOD)
+	var rail := _static_box(name + "_Rail", Vector3(size.x, 0.08, size.z + 0.04), pos + Vector3(0, size.y + 0.04, 0), col.darkened(0.2))
 	rail.rotation_degrees.y = rot_y
 	root.add_child(rail)
 
@@ -2457,10 +2486,12 @@ func _save_asset_room() -> Error:
 	_zone_label(root, "ZoneInterior", Vector3(-8.5, 0.0, 5.5), "Интерьер / хлам")
 	_add_shelf(root, "ShelfA", Vector3(-9.5, 0.0, 6.5), 0.0)
 	_add_shelf(root, "ShelfB", Vector3(-7.8, 0.0, 6.5), 0.0)
-	_add_mesh_prop(root, "CratePile1", MESH_KENNEY + "detail-crate.glb", Vector3(-6.2, 0.0, 5.8), 12.0, 1.0, Vector3(0.7, 0.55, 0.65))
-	_add_mesh_prop(root, "CratePile2", MESH_KENNEY + "detail-crate-ropes.glb", Vector3(-5.4, 0.0, 6.4), -20.0, 1.0, Vector3(0.65, 0.55, 0.6))
-	_add_mesh_prop(root, "BarrelA", MESH_KENNEY + "detail-barrel.glb", Vector3(-4.6, 0.0, 5.6), 30.0, 1.0, Vector3(0.5, 0.7, 0.5))
-	_add_mesh_prop(root, "BarrelB", MESH_KENNEY + "barrels.glb", Vector3(-4.0, 0.0, 6.3), -10.0, 1.0, Vector3(0.55, 0.7, 0.55))
+	_add_mesh_prop(root, "CratePile1", MESH_KENNEY + "detail-crate.glb", Vector3(-6.2, 0.0, 5.8), 12.0, 1.0, Vector3(0.7, 0.55, 0.65), Color(1.15, 0.85, 0.55))
+	_add_mesh_prop(root, "CratePile2", MESH_KENNEY + "detail-crate-ropes.glb", Vector3(-5.4, 0.0, 6.4), -20.0, 1.0, Vector3(0.65, 0.55, 0.6), Color(0.75, 0.95, 1.2))
+	_add_mesh_prop(root, "BarrelA", MESH_KENNEY + "detail-barrel.glb", Vector3(-4.6, 0.0, 5.6), 30.0, 1.0, Vector3(0.5, 0.7, 0.5), Color(1.25, 0.7, 0.45))
+	_add_mesh_prop(root, "BarrelB", MESH_KENNEY + "barrels.glb", Vector3(-4.0, 0.0, 6.3), -10.0, 1.0, Vector3(0.55, 0.7, 0.55), Color(0.85, 0.55, 1.15))
+	_add_mesh_prop(root, "BarrelC", MESH_KENNEY + "detail-barrel.glb", Vector3(-5.0, 0.0, 5.2), 8.0, 1.05, Vector3(0.5, 0.7, 0.5), Color(0.55, 1.05, 0.7))
+	_add_mesh_prop(root, "CrateSmallA", MESH_KENNEY + "detail-crate-small.glb", Vector3(-6.8, 0.0, 5.3), 40.0, 1.1, Vector3(0.5, 0.4, 0.5), Color(1.2, 1.05, 0.4))
 	_add_candle(root, "CandleShelf", Vector3(-9.3, 1.45, 6.35), 0.7)
 	_add_candle(root, "CandleCrate", Vector3(-6.0, 0.7, 5.6), 0.55)
 	# small desk clutter as boxes
@@ -2544,8 +2575,8 @@ func _save_asset_room() -> Error:
 		"[E] Каталог ассетов",
 		PackedStringArray([
 			"Зоны: столы/стулья · кровати · интерьер · двери · окна · перегородки · грибы · растительность · модули.",
-			"Мебель пока greybox (столы/стулья/кровати/полки). Двери/окна/деревья — Kenney GLB.",
-			"Текстурный трек-лист: docs/TEXTURE_TRACK.md"
+			"Бочки/ящики/двери/окна — готовые Kenney (с цветовым tint). Мебель — плоский цвет без style-текстур.",
+			"Грибы-заглушки procedural, пока нет 3D-пака в incoming. Трек текстур: docs/TEXTURE_TRACK.md"
 		]))
 
 	# Exits

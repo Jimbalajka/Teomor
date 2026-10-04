@@ -1,16 +1,16 @@
 extends CharacterBody3D
 
-@export var walk_speed: float = 4.0
-@export var sprint_speed: float = 6.8
-@export var crouch_speed: float = 2.2
-@export var jump_velocity: float = 4.8
-@export var gravity: float = 9.8
+@export var walk_speed: float = 4.6
+@export var sprint_speed: float = 8.0
+@export var crouch_speed: float = 2.4
+@export var jump_velocity: float = 7.2
+@export var gravity: float = 18.0
 @export var mouse_sensitivity: float = 0.0025
 @export var interact_distance: float = 2.8
-@export var stand_height: float = 1.6
-@export var crouch_height: float = 1.0
-@export var stand_cam_y: float = 0.7
-@export var crouch_cam_y: float = 0.38
+@export var stand_height: float = 1.85
+@export var crouch_height: float = 1.15
+@export var stand_cam_y: float = 0.98
+@export var crouch_cam_y: float = 0.55
 
 @onready var camera: Camera3D = $Camera3D
 @onready var ray: RayCast3D = $Camera3D/InteractRay
@@ -37,7 +37,7 @@ func _ready() -> void:
 		controls_hint.visible = true
 		controls_hint.text = "WASD · Shift · Ctrl · Пробел · E · ЛКМ/F удар · I инв · K навыки · Esc"
 	_apply_stance(false, true)
-	floor_snap_length = 0.15
+	floor_snap_length = 0.2
 	add_to_group("player")
 	_ensure_combat_ui()
 	refresh_weapon_view()
@@ -149,20 +149,22 @@ func _update_crouch() -> void:
 
 
 func _can_stand() -> bool:
-	# Short ray/shape check upward from crouch capsule top.
+	# Only the extra headroom ABOVE crouch capsule — never probe into the floor.
 	var space := get_world_3d().direct_space_state
 	if space == null:
 		return true
 	var shape := body_col.shape as CapsuleShape3D
 	if shape == null:
 		return true
-	var rise := (stand_height - crouch_height) * 0.5 + 0.05
+	var extra := stand_height - crouch_height
+	if extra <= 0.02:
+		return true
 	var params := PhysicsShapeQueryParameters3D.new()
-	var probe := CapsuleShape3D.new()
-	probe.radius = shape.radius * 0.95
-	probe.height = stand_height
+	var probe := BoxShape3D.new()
+	var w := shape.radius * 1.7
+	probe.size = Vector3(w, maxf(0.08, extra - 0.06), w)
 	params.shape = probe
-	params.transform = global_transform.translated(Vector3(0, rise, 0))
+	params.transform = global_transform.translated(Vector3(0, crouch_height + extra * 0.5, 0))
 	params.collision_mask = collision_mask
 	params.exclude = [get_rid()]
 	var hits := space.intersect_shape(params, 1)

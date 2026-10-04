@@ -25,7 +25,7 @@ static func spawn(parent: Node, kind: String, pos: Vector3, scale: float = 1.0) 
 		node.call("play", kind, scale)
 
 
-func play(kind: String = "hit", uniform_scale: float = 1.0) -> void:
+func play(kind: String = "hit", uniform_scale: float = 1.0, modulate: Color = Color(1, 1, 1, 1)) -> void:
 	var folder := str(KINDS.get(kind, "hit_spark"))
 	var frames := _load_frames(folder)
 	if frames.is_empty():
@@ -35,6 +35,13 @@ func play(kind: String = "hit", uniform_scale: float = 1.0) -> void:
 	spr.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	spr.pixel_size = 0.02 * uniform_scale
 	spr.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	var mod := modulate
+	if kind in ["hit", "hit_spark", "hit_purple"]:
+		# удар — в пурпур якоря стиля
+		mod = Color(0.72, 0.28, 1.0, 1.0) if modulate == Color(1, 1, 1, 1) else modulate
+	elif kind in ["hit_white"]:
+		mod = Color(0.85, 0.55, 1.0, 1.0) if modulate == Color(1, 1, 1, 1) else modulate
+	spr.modulate = mod
 	var sf := SpriteFrames.new()
 	sf.add_animation("fx")
 	sf.set_animation_speed("fx", 12.0)
