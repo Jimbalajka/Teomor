@@ -32,7 +32,7 @@ func _ready() -> void:
 	prompt.visible = false
 	if controls_hint:
 		controls_hint.visible = true
-		controls_hint.text = "WASD ход · Shift бег · Ctrl присед · Пробел прыжок · E действие · I инвентарь · Esc мышь"
+		controls_hint.text = "WASD ход · Shift бег · Ctrl присед · Пробел прыжок · E · I инвентарь · K навыки · Esc мышь"
 	_apply_stance(false, true)
 	floor_snap_length = 0.15
 

@@ -525,7 +525,7 @@ func _add_player(root: Node, pos: Vector3) -> void:
 	hint.offset_bottom = -10
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	hint.add_theme_font_size_override("font_size", 14)
-	hint.text = "WASD · Shift бег · Ctrl присед · Пробел · E · I инвентарь · Esc"
+	hint.text = "WASD · Shift · Ctrl · Пробел · E · I инв · K навыки · Esc"
 	prompt_layer.add_child(hint)
 	root.add_child(player)
 
@@ -2011,7 +2011,7 @@ func _save_playtest() -> Error:
 		{"n": "PadDiary", "p": Vector3(-2.5, 0.0, -3.0), "c": C_PARCHMENT, "t": "[E] Станция: Дневник", "l": PackedStringArray(["Интерактивный дневник — станция DiaryStation рядом.", "Заметки + маршрут (квест дня / флаги slice)."])},
 		{"n": "PadInv", "p": Vector3(0.0, 0.0, -3.0), "c": C_WOOD.lightened(0.1), "t": "[E] Станция: Инвентарь / глоссарий", "l": PackedStringArray(["Станция InventoryStation + клавиша I.", "12 слотов, квестовые вещи, глоссарий терминов."])},
 		{"n": "PadLock", "p": Vector3(2.5, 0.0, -3.0), "c": Color(0.35, 0.32, 0.28), "t": "[E] Станция: Взлом (слоты)", "l": PackedStringArray(["3 спина; цель — 2/3/4/5 подряд.", "1 замораживается; ловкость +1 попытка."])},
-		{"n": "PadSkills", "p": Vector3(5.0, 0.0, -3.0), "c": C_PURPLE_GLOW.darkened(0.2), "t": "[E] Станция: Навыки", "l": PackedStringArray(["Мощь / Разум / Моторика / Стержень.", "Пока только подписи."])},
+		{"n": "PadSkills", "p": Vector3(5.0, 0.0, -3.0), "c": C_PURPLE_GLOW.darkened(0.2), "t": "[E] Станция: Навыки", "l": PackedStringArray(["Станция SkillsStation + клавиша K.", "Мощь / Разум / Моторика / Стержень — очки и проверка d20."])},
 		{"n": "PadCombat", "p": Vector3(-4.0, 0.0, 2.5), "c": Color(0.45, 0.18, 0.16), "t": "[E] Станция: Бой", "l": PackedStringArray(["Тут манекен + оружие + FX ударов.", "Бой подключим отдельным OK."])},
 		{"n": "PadMove", "p": Vector3(0.0, 0.0, 2.5), "c": Color(0.2, 0.35, 0.4), "t": "[E] Станция: Движение", "l": PackedStringArray(["Фаза 1: WASD, Shift бег, Ctrl присед, Пробел прыжок.", "Платформы справа и низкий лаз в центре."])},
 		{"n": "PadFX", "p": Vector3(4.0, 0.0, 2.5), "c": Color(0.55, 0.45, 0.2), "t": "[E] Станция: FX", "l": PackedStringArray(["Pixel effects gigapack — сюда тестовые вспышки.", "Пока заглушка."])},
@@ -2041,6 +2041,27 @@ func _save_playtest() -> Error:
 	mcol.position = Vector3(0, 0.8, 0)
 	mpad.add_child(mcol)
 	root.add_child(mpad)
+
+	# Phase 5 skills station
+	var spad := StaticBody3D.new()
+	spad.name = "SkillsStation"
+	spad.position = Vector3(5.0, 0.0, -3.0)
+	spad.set_script(load("res://scripts/skills_interactable.gd"))
+	spad.set("prompt_text", "[E] Станция: Навыки")
+	var spad_mesh := _box_mesh(Vector3(1.2, 0.15, 1.2), C_PURPLE_GLOW.darkened(0.2))
+	spad_mesh.position = Vector3(0, 0.08, 0)
+	spad.add_child(spad_mesh)
+	var sigil := _box_mesh(Vector3(0.35, 0.7, 0.08), C_PURPLE.lightened(0.15))
+	sigil.position = Vector3(0, 0.55, -0.35)
+	spad.add_child(sigil)
+	var spad_col := CollisionShape3D.new()
+	spad_col.name = "Collision"
+	var spad_shape := BoxShape3D.new()
+	spad_shape.size = Vector3(1.3, 1.2, 1.3)
+	spad_col.shape = spad_shape
+	spad_col.position = Vector3(0, 0.55, 0)
+	spad.add_child(spad_col)
+	root.add_child(spad)
 
 	# Phase 4 inventory station
 	var ipad := StaticBody3D.new()

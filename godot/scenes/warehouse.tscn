@@ -1,19 +1,19 @@
 [gd_scene load_steps=279 format=3]
 
-[ext_resource type="Texture2D" path="res://assets/textures/author/wood_hand_512.png" id="1_1785j"]
-[ext_resource type="Texture2D" path="res://assets/textures/author/concrete_512.png" id="2_brade"]
-[ext_resource type="Texture2D" path="res://assets/textures/author/concrete_n_512.png" id="3_ywdk5"]
-[ext_resource type="Texture2D" path="res://assets/textures/author/concrete_r_512.png" id="4_b3s8b"]
-[ext_resource type="Texture2D" path="res://assets/textures/author/brick_broken_512.png" id="5_ywho5"]
-[ext_resource type="Texture2D" path="res://assets/textures/author/brick_broken_n_512.png" id="6_r3n7v"]
-[ext_resource type="Texture2D" path="res://assets/textures/author/brick_broken_r_512.png" id="7_cj8i6"]
-[ext_resource type="Texture2D" path="res://assets/textures/author/metal_rusty_512.png" id="8_2a3yh"]
-[ext_resource type="Texture2D" path="res://assets/textures/author/metal_rusty_n_512.png" id="9_fgkq3"]
-[ext_resource type="Texture2D" path="res://assets/textures/author/metal_rusty_r_512.png" id="10_h8bcu"]
-[ext_resource type="Script" path="res://scripts/interactable.gd" id="11_omq18"]
-[ext_resource type="Script" path="res://scripts/player_fps.gd" id="12_u5f38"]
+[ext_resource type="Texture2D" path="res://assets/textures/author/wood_hand_512.png" id="1_ocug2"]
+[ext_resource type="Texture2D" path="res://assets/textures/author/concrete_512.png" id="2_grvu3"]
+[ext_resource type="Texture2D" path="res://assets/textures/author/concrete_n_512.png" id="3_7pphe"]
+[ext_resource type="Texture2D" path="res://assets/textures/author/concrete_r_512.png" id="4_qhd1v"]
+[ext_resource type="Texture2D" path="res://assets/textures/author/brick_broken_512.png" id="5_ymgox"]
+[ext_resource type="Texture2D" path="res://assets/textures/author/brick_broken_n_512.png" id="6_wqclx"]
+[ext_resource type="Texture2D" path="res://assets/textures/author/brick_broken_r_512.png" id="7_fgfdw"]
+[ext_resource type="Texture2D" path="res://assets/textures/author/metal_rusty_512.png" id="8_osq0t"]
+[ext_resource type="Texture2D" path="res://assets/textures/author/metal_rusty_n_512.png" id="9_cn821"]
+[ext_resource type="Texture2D" path="res://assets/textures/author/metal_rusty_r_512.png" id="10_ldobf"]
+[ext_resource type="Script" path="res://scripts/interactable.gd" id="11_r0odg"]
+[ext_resource type="Script" path="res://scripts/player_fps.gd" id="12_lsl0d"]
 
-[sub_resource type="Environment" id="Environment_ufuau"]
+[sub_resource type="Environment" id="Environment_5j3s0"]
 background_mode = 1
 background_color = Color(0.42, 0.5, 0.58, 1)
 ambient_light_source = 2
@@ -22,1515 +22,1515 @@ ambient_light_energy = 0.95
 fog_enabled = true
 fog_light_color = Color(0.6, 0.68, 0.74, 1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rs36v"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_n326r"]
 albedo_color = Color(0.927, 0.927, 0.925, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.453261, 0.453261, 0.453261)
 uv1_offset = Vector3(0.919142, 0.302922, 0.333883)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_x3p1y"]
+[sub_resource type="BoxMesh" id="BoxMesh_77f7e"]
 size = Vector3(90, 0.25, 70)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_talge"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_257yo"]
 size = Vector3(90, 0.25, 70)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2qmrs"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qq8kk"]
 albedo_color = Color(0.14, 0.3, 0.46, 1)
 
-[sub_resource type="BoxMesh" id="BoxMesh_y654x"]
+[sub_resource type="BoxMesh" id="BoxMesh_3j7tt"]
 size = Vector3(200, 0.2, 140)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_78b5l"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xvqgm"]
 albedo_color = Color(0.93, 0.933, 0.936, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.377524, 0.377524, 0.377524)
 uv1_offset = Vector3(0.944854, 0.947021, 0.250645)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_531h4"]
+[sub_resource type="BoxMesh" id="BoxMesh_n7bnu"]
 size = Vector3(120, 2.5, 22)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_1o4sb"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_s43uy"]
 size = Vector3(120, 2.5, 22)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_k8k2k"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xrhqk"]
 albedo_color = Color(0.92, 0.922, 0.925, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.356694, 0.356694, 0.356694)
 uv1_offset = Vector3(0.493324, 0.532097, 0.996292)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_cv6vc"]
+[sub_resource type="BoxMesh" id="BoxMesh_hovlu"]
 size = Vector3(110, 1, 1.5)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_y73ny"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_u0eca"]
 size = Vector3(110, 1, 1.5)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iwaln"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_eaojs"]
 albedo_color = Color(0.925, 0.928, 0.93, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.385584, 0.385584, 0.385584)
 uv1_offset = Vector3(0.408621, 0.243336, 0.803403)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_ctgsm"]
+[sub_resource type="BoxMesh" id="BoxMesh_o6its"]
 size = Vector3(10, 2.2, 3.2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7kj6h"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fkldw"]
 albedo_color = Color(0.93, 0.932, 0.935, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.364932, 0.364932, 0.364932)
 uv1_offset = Vector3(0.419821, 0.416114, 0.339086)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_26py7"]
+[sub_resource type="BoxMesh" id="BoxMesh_2k4ux"]
 size = Vector3(2.5, 1.6, 2.4)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bv6ni"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2pyid"]
 albedo_color = Color(0.92, 0.92, 0.922, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.398354, 0.398354, 0.398354)
 uv1_offset = Vector3(0.105898, 0.389013, 0.736858)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_se72n"]
+[sub_resource type="BoxMesh" id="BoxMesh_6bpkr"]
 size = Vector3(1.2, 2, 1.2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_456m3"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3rsax"]
 albedo_color = Color(0.925, 0.928, 0.93, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.385584, 0.385584, 0.385584)
 uv1_offset = Vector3(0.408621, 0.243336, 0.803403)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_sxqlf"]
+[sub_resource type="BoxMesh" id="BoxMesh_d5084"]
 size = Vector3(10, 2.2, 3.2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tgbkn"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kigrb"]
 albedo_color = Color(0.93, 0.932, 0.935, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.364932, 0.364932, 0.364932)
 uv1_offset = Vector3(0.419821, 0.416114, 0.339086)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_2v80q"]
+[sub_resource type="BoxMesh" id="BoxMesh_lnkd3"]
 size = Vector3(2.5, 1.6, 2.4)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_73x84"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jt3ko"]
 albedo_color = Color(0.92, 0.92, 0.922, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.398354, 0.398354, 0.398354)
 uv1_offset = Vector3(0.105898, 0.389013, 0.736858)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_3cfu7"]
+[sub_resource type="BoxMesh" id="BoxMesh_opcqy"]
 size = Vector3(1.2, 2, 1.2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_48q60"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0alf5"]
 albedo_color = Color(0.925, 0.928, 0.93, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.385584, 0.385584, 0.385584)
 uv1_offset = Vector3(0.408621, 0.243336, 0.803403)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_kfc16"]
+[sub_resource type="BoxMesh" id="BoxMesh_lyyfi"]
 size = Vector3(10, 2.2, 3.2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ewp3g"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_stih5"]
 albedo_color = Color(0.93, 0.932, 0.935, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.364932, 0.364932, 0.364932)
 uv1_offset = Vector3(0.419821, 0.416114, 0.339086)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_0w3wv"]
+[sub_resource type="BoxMesh" id="BoxMesh_cma71"]
 size = Vector3(2.5, 1.6, 2.4)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fvddg"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_a236h"]
 albedo_color = Color(0.92, 0.92, 0.922, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.398354, 0.398354, 0.398354)
 uv1_offset = Vector3(0.105898, 0.389013, 0.736858)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_xvqy4"]
+[sub_resource type="BoxMesh" id="BoxMesh_d15qu"]
 size = Vector3(1.2, 2, 1.2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7w1cb"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qgdwn"]
 albedo_color = Color(0.18, 0.32, 0.48, 1)
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_oqweo"]
+[sub_resource type="CylinderMesh" id="CylinderMesh_xb7wr"]
 top_radius = 297.0
 bottom_radius = 297.0
 height = 1.0
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_a0yi6"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5cchy"]
 albedo_color = Color(0.932, 0.935, 0.94, 1)
-albedo_texture = ExtResource("5_ywho5")
-roughness_texture = ExtResource("7_cj8i6")
+albedo_texture = ExtResource("5_ymgox")
+roughness_texture = ExtResource("7_fgfdw")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("6_r3n7v")
+normal_texture = ExtResource("6_wqclx")
 uv1_scale = Vector3(0.301686, 0.301686, 0.301686)
 uv1_offset = Vector3(0.91722, 0.913008, 0.53521)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_nrldn"]
+[sub_resource type="BoxMesh" id="BoxMesh_aa6mf"]
 size = Vector3(189, 94.5, 189)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_wkqc4"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_mum2t"]
 size = Vector3(189, 94.5, 189)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gg5vc"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g1u70"]
 albedo_color = Color(0.918, 0.92, 0.924, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.367936, 0.367936, 0.367936)
 uv1_offset = Vector3(0.69102, 0.0750439, 0.617227)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_hftj8"]
+[sub_resource type="BoxMesh" id="BoxMesh_u2ifp"]
 size = Vector3(74.25, 67.5, 74.25)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_h6s4x"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_rhtu3"]
 size = Vector3(74.25, 67.5, 74.25)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ww5n0"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_eive7"]
 albedo_color = Color(0.932, 0.935, 0.94, 1)
-albedo_texture = ExtResource("5_ywho5")
-roughness_texture = ExtResource("7_cj8i6")
+albedo_texture = ExtResource("5_ymgox")
+roughness_texture = ExtResource("7_fgfdw")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("6_r3n7v")
+normal_texture = ExtResource("6_wqclx")
 uv1_scale = Vector3(0.309192, 0.309192, 0.309192)
 uv1_offset = Vector3(0.868284, 0.369192, 0.651728)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_va1lt"]
+[sub_resource type="BoxMesh" id="BoxMesh_cgm28"]
 size = Vector3(148.5, 162, 148.5)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_7jr5k"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_u4lli"]
 size = Vector3(148.5, 162, 148.5)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qxfvw"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qt2b5"]
 albedo_color = Color(0.918, 0.92, 0.924, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.362344, 0.362344, 0.362344)
 uv1_offset = Vector3(0.615702, 0.398703, 0.343313)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_nynef"]
+[sub_resource type="BoxMesh" id="BoxMesh_sc087"]
 size = Vector3(60.75, 135, 60.75)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_b41wq"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_o4nlm"]
 size = Vector3(60.75, 135, 60.75)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3s5pi"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_e3p36"]
 albedo_color = Color(0.4, 0.45, 0.52, 1)
 
-[sub_resource type="SphereMesh" id="SphereMesh_owqor"]
+[sub_resource type="SphereMesh" id="SphereMesh_4ii5n"]
 radius = 37.8
 height = 48.6
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_so2g8"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dgtyq"]
 albedo_color = Color(0.8, 0.6, 0.25, 1)
 
-[sub_resource type="BoxMesh" id="BoxMesh_odjfw"]
+[sub_resource type="BoxMesh" id="BoxMesh_nm4dr"]
 size = Vector3(21.6, 21.6, 2.7)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xisv7"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6rocl"]
 albedo_color = Color(0.928, 0.93, 0.934, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.381133, 0.381133, 0.381133)
 uv1_offset = Vector3(0.845838, 0.551751, 0.914717)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_ifw76"]
+[sub_resource type="BoxMesh" id="BoxMesh_sy1ef"]
 size = Vector3(432, 4.05, 37.8)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_8hkav"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_txko3"]
 size = Vector3(432, 4.05, 37.8)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_j5ycd"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mkduh"]
 albedo_color = Color(0.92, 0.922, 0.925, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.369891, 0.369891, 0.369891)
 uv1_offset = Vector3(0.695033, 0.821683, 0.457481)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_wia31"]
+[sub_resource type="BoxMesh" id="BoxMesh_5t800"]
 size = Vector3(405, 1.62, 2.7)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_ns2ug"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_3d3eo"]
 size = Vector3(405, 1.62, 2.7)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hcdvx"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_527ud"]
 albedo_color = Color(0.928, 0.93, 0.934, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.384854, 0.384854, 0.384854)
 uv1_offset = Vector3(0.645014, 0.42359, 0.607523)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_5n234"]
+[sub_resource type="BoxMesh" id="BoxMesh_k16gq"]
 size = Vector3(37.8, 4.05, 432)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_lj4yy"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_hp0qf"]
 size = Vector3(37.8, 4.05, 432)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g3rkr"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6ljph"]
 albedo_color = Color(0.92, 0.922, 0.925, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.407767, 0.407767, 0.407767)
 uv1_offset = Vector3(0.681117, 0.728954, 0.972869)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_83vwd"]
+[sub_resource type="BoxMesh" id="BoxMesh_hs20j"]
 size = Vector3(2.7, 1.62, 405)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_md8t0"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_vdns3"]
 size = Vector3(2.7, 1.62, 405)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_q8ua1"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_x5sx2"]
 albedo_color = Color(0.925, 0.928, 0.93, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.385584, 0.385584, 0.385584)
 uv1_offset = Vector3(0.408621, 0.243336, 0.803403)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_fa0cj"]
+[sub_resource type="BoxMesh" id="BoxMesh_308lt"]
 size = Vector3(10, 2.2, 3.2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wo0s7"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hv4o2"]
 albedo_color = Color(0.93, 0.932, 0.935, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.364932, 0.364932, 0.364932)
 uv1_offset = Vector3(0.419821, 0.416114, 0.339086)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_o1608"]
+[sub_resource type="BoxMesh" id="BoxMesh_ej05b"]
 size = Vector3(2.5, 1.6, 2.4)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2ohri"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_emmba"]
 albedo_color = Color(0.92, 0.92, 0.922, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.398354, 0.398354, 0.398354)
 uv1_offset = Vector3(0.105898, 0.389013, 0.736858)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_yyfs6"]
+[sub_resource type="BoxMesh" id="BoxMesh_emscw"]
 size = Vector3(1.2, 2, 1.2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_at2pl"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_y8r6a"]
 albedo_color = Color(0.925, 0.928, 0.93, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.385584, 0.385584, 0.385584)
 uv1_offset = Vector3(0.408621, 0.243336, 0.803403)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_gjx5g"]
+[sub_resource type="BoxMesh" id="BoxMesh_8wm5p"]
 size = Vector3(10, 2.2, 3.2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xgwu8"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6lbnx"]
 albedo_color = Color(0.93, 0.932, 0.935, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.364932, 0.364932, 0.364932)
 uv1_offset = Vector3(0.419821, 0.416114, 0.339086)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_hbxv0"]
+[sub_resource type="BoxMesh" id="BoxMesh_ttyli"]
 size = Vector3(2.5, 1.6, 2.4)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vdrhw"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2aqq7"]
 albedo_color = Color(0.92, 0.92, 0.922, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.398354, 0.398354, 0.398354)
 uv1_offset = Vector3(0.105898, 0.389013, 0.736858)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_nbvis"]
+[sub_resource type="BoxMesh" id="BoxMesh_4oy8y"]
 size = Vector3(1.2, 2, 1.2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_evaml"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1jfni"]
 albedo_color = Color(0.925, 0.928, 0.93, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.385584, 0.385584, 0.385584)
 uv1_offset = Vector3(0.408621, 0.243336, 0.803403)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_g4co6"]
+[sub_resource type="BoxMesh" id="BoxMesh_poqqn"]
 size = Vector3(10, 2.2, 3.2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p0ws3"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qj5u5"]
 albedo_color = Color(0.93, 0.932, 0.935, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.364932, 0.364932, 0.364932)
 uv1_offset = Vector3(0.419821, 0.416114, 0.339086)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_ab4pr"]
+[sub_resource type="BoxMesh" id="BoxMesh_ba6se"]
 size = Vector3(2.5, 1.6, 2.4)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wlqlj"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ovsvf"]
 albedo_color = Color(0.92, 0.92, 0.922, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.398354, 0.398354, 0.398354)
 uv1_offset = Vector3(0.105898, 0.389013, 0.736858)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_6xcn4"]
+[sub_resource type="BoxMesh" id="BoxMesh_p3fo5"]
 size = Vector3(1.2, 2, 1.2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2ubxe"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iuequ"]
 albedo_color = Color(0.925, 0.928, 0.93, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.385584, 0.385584, 0.385584)
 uv1_offset = Vector3(0.408621, 0.243336, 0.803403)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_ymyxo"]
+[sub_resource type="BoxMesh" id="BoxMesh_1wbbh"]
 size = Vector3(10, 2.2, 3.2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_eq7x2"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7ney4"]
 albedo_color = Color(0.93, 0.932, 0.935, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.364932, 0.364932, 0.364932)
 uv1_offset = Vector3(0.419821, 0.416114, 0.339086)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_7id3f"]
+[sub_resource type="BoxMesh" id="BoxMesh_fsmeu"]
 size = Vector3(2.5, 1.6, 2.4)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_i6n3t"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7sf1r"]
 albedo_color = Color(0.92, 0.92, 0.922, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.398354, 0.398354, 0.398354)
 uv1_offset = Vector3(0.105898, 0.389013, 0.736858)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_w4mfb"]
+[sub_resource type="BoxMesh" id="BoxMesh_yfrtr"]
 size = Vector3(1.2, 2, 1.2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_egikp"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5b5r2"]
 albedo_color = Color(0.925, 0.928, 0.932, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.353028, 0.353028, 0.353028)
 uv1_offset = Vector3(0.870481, 0.717067, 0.788128)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_fu4w4"]
+[sub_resource type="BoxMesh" id="BoxMesh_bn4p2"]
 size = Vector3(27, 108, 27)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_jvtuj"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_aneva"]
 size = Vector3(27, 108, 27)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_q2yfw"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1sqre"]
 albedo_color = Color(0.922, 0.925, 0.93, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.355839, 0.355839, 0.355839)
 uv1_offset = Vector3(0.853712, 0.620676, 0.72282)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_4baqd"]
+[sub_resource type="BoxMesh" id="BoxMesh_pmt0p"]
 size = Vector3(21.6, 81, 21.6)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_ypq7v"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_xxmed"]
 size = Vector3(21.6, 81, 21.6)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7gsre"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ypbii"]
 albedo_color = Color(0.925, 0.928, 0.932, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.403765, 0.403765, 0.403765)
 uv1_offset = Vector3(0.331044, 0.810834, 0.563165)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_m8kp2"]
+[sub_resource type="BoxMesh" id="BoxMesh_hgd33"]
 size = Vector3(40, 28, 8)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_r6k68"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_sfaju"]
 size = Vector3(40, 28, 8)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_04a1g"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yj61d"]
 albedo_color = Color(0.92, 0.922, 0.926, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.396353, 0.396353, 0.396353)
 uv1_offset = Vector3(0.777646, 0.941878, 0.889693)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_msy75"]
+[sub_resource type="BoxMesh" id="BoxMesh_62syj"]
 size = Vector3(18, 22, 6)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_p1fx4"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_3jwpj"]
 size = Vector3(18, 22, 6)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_px4lq"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ngjq8"]
 albedo_color = Color(0.938, 0.94, 0.942, 1)
-albedo_texture = ExtResource("8_2a3yh")
-roughness_texture = ExtResource("10_h8bcu")
+albedo_texture = ExtResource("8_osq0t")
+roughness_texture = ExtResource("10_ldobf")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("9_fgkq3")
+normal_texture = ExtResource("9_cn821")
 uv1_scale = Vector3(1.05254, 1.05254, 1.05254)
 uv1_offset = Vector3(0.251728, 0.0555123, 0.872862)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_lp6o4"]
+[sub_resource type="BoxMesh" id="BoxMesh_7pq6o"]
 size = Vector3(10, 55, 10)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_x8x1g"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_aipuy"]
 size = Vector3(10, 55, 10)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gyjgm"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xtdii"]
 albedo_color = Color(0.93, 0.932, 0.936, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.349968, 0.349968, 0.349968)
 uv1_offset = Vector3(0.272908, 0.635813, 0.334524)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_1q2ui"]
+[sub_resource type="BoxMesh" id="BoxMesh_hgytb"]
 size = Vector3(6, 12, 6)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_ugt08"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_curgo"]
 size = Vector3(6, 12, 6)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_irk7d"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qhvyd"]
 albedo_color = Color(0.935, 0.932, 0.928, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.44193, 0.44193, 0.44193)
 uv1_offset = Vector3(0.0649271, 0.377874, 0.0897383)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_0b4xt"]
+[sub_resource type="BoxMesh" id="BoxMesh_428no"]
 size = Vector3(7, 0.4, 22)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_yvexu"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_s6rmh"]
 size = Vector3(7, 0.4, 22)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_t4xq4"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_m4yr1"]
 albedo_color = Color(0.935, 0.932, 0.928, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.398369, 0.398369, 0.398369)
 uv1_offset = Vector3(0.155917, 0.716747, 0.194415)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_gjvwd"]
+[sub_resource type="BoxMesh" id="BoxMesh_pcl1n"]
 size = Vector3(7, 0.4, 22)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_g5atc"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_3rxtu"]
 size = Vector3(7, 0.4, 22)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ws82e"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_uo2s3"]
 albedo_color = Color(0.925, 0.928, 0.93, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.385584, 0.385584, 0.385584)
 uv1_offset = Vector3(0.408621, 0.243336, 0.803403)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_wjrd1"]
+[sub_resource type="BoxMesh" id="BoxMesh_67yb4"]
 size = Vector3(10, 2.2, 3.2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_t405l"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_q3tml"]
 albedo_color = Color(0.93, 0.932, 0.935, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.364932, 0.364932, 0.364932)
 uv1_offset = Vector3(0.419821, 0.416114, 0.339086)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_i2cn1"]
+[sub_resource type="BoxMesh" id="BoxMesh_6s5gw"]
 size = Vector3(2.5, 1.6, 2.4)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vgx67"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tl33u"]
 albedo_color = Color(0.92, 0.92, 0.922, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.398354, 0.398354, 0.398354)
 uv1_offset = Vector3(0.105898, 0.389013, 0.736858)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_phan8"]
+[sub_resource type="BoxMesh" id="BoxMesh_b1442"]
 size = Vector3(1.2, 2, 1.2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4mrmc"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1ceqv"]
 albedo_color = Color(0.935, 0.932, 0.928, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.396257, 0.396257, 0.396257)
 uv1_offset = Vector3(0.941772, 0.0293431, 0.292988)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_agrnb"]
+[sub_resource type="BoxMesh" id="BoxMesh_ndyhp"]
 size = Vector3(22, 0.2, 18)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_hmx66"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_qx6li"]
 size = Vector3(22, 0.2, 18)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_efx18"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ipdbb"]
 albedo_color = Color(0.93, 0.933, 0.936, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.372965, 0.372965, 0.372965)
 uv1_offset = Vector3(0.862181, 0.331289, 0.826001)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_riqn5"]
+[sub_resource type="BoxMesh" id="BoxMesh_5ia2q"]
 size = Vector3(22, 10, 0.3)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_j3jcp"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_xcfkm"]
 size = Vector3(22, 10, 0.3)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2wd24"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ejg3x"]
 albedo_color = Color(0.93, 0.933, 0.936, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.388321, 0.388321, 0.388321)
 uv1_offset = Vector3(0.755917, 0.0344701, 0.323842)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_ifupp"]
+[sub_resource type="BoxMesh" id="BoxMesh_qkrnb"]
 size = Vector3(0.3, 10, 18)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_pemp4"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_0j2ar"]
 size = Vector3(0.3, 10, 18)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_x2wwa"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vx13p"]
 albedo_color = Color(0.93, 0.933, 0.936, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.402737, 0.402737, 0.402737)
 uv1_offset = Vector3(0.48983, 0.483391, 0.0273899)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_vm4n1"]
+[sub_resource type="BoxMesh" id="BoxMesh_8mphm"]
 size = Vector3(0.3, 10, 18)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_0srnf"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_6rgyq"]
 size = Vector3(0.3, 10, 18)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1ovya"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_amgea"]
 albedo_color = Color(0.93, 0.933, 0.936, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.35097, 0.35097, 0.35097)
 uv1_offset = Vector3(0.17232, 0.841184, 0.509224)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_6qrie"]
+[sub_resource type="BoxMesh" id="BoxMesh_akp44"]
 size = Vector3(8, 10, 0.3)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_rg0l3"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_r351h"]
 size = Vector3(8, 10, 0.3)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mtqta"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gwqsq"]
 albedo_color = Color(0.93, 0.933, 0.936, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.362617, 0.362617, 0.362617)
 uv1_offset = Vector3(0.292012, 0.771862, 0.434195)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_mtdv5"]
+[sub_resource type="BoxMesh" id="BoxMesh_oq7na"]
 size = Vector3(8, 10, 0.3)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_vjyt7"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_cidtc"]
 size = Vector3(8, 10, 0.3)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pjwt7"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_e8agt"]
 albedo_color = Color(0.93, 0.933, 0.936, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.385469, 0.385469, 0.385469)
 uv1_offset = Vector3(0.44242, 0.389441, 0.578058)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_isbjn"]
+[sub_resource type="BoxMesh" id="BoxMesh_n5arv"]
 size = Vector3(6, 4, 0.3)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_vq4gl"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_ryc6g"]
 size = Vector3(6, 4, 0.3)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p7gb3"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_67qtm"]
 albedo_color = Color(0.925, 0.927, 0.93, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.406662, 0.406662, 0.406662)
 uv1_offset = Vector3(0.215259, 0.60824, 0.853483)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_4kl4q"]
+[sub_resource type="BoxMesh" id="BoxMesh_30hmf"]
 size = Vector3(22.5, 0.3, 18.5)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_5wepq"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_olacx"]
 size = Vector3(22.5, 0.3, 18.5)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_t03hh"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3f5k1"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.426574, 0.426574, 0.426574)
 uv1_offset = Vector3(0.296971, 0.835935, 0.61146)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_8laof"]
+[sub_resource type="BoxMesh" id="BoxMesh_ls56f"]
 size = Vector3(20, 0.25, 8)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_288iq"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_ld5lk"]
 size = Vector3(20, 0.25, 8)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cyquu"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ifo1m"]
 albedo_color = Color(0.945, 0.935, 0.925, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.425871, 0.425871, 0.425871)
 uv1_offset = Vector3(0.651148, 0.237766, 0.716731)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_yog1p"]
+[sub_resource type="BoxMesh" id="BoxMesh_hb6pp"]
 size = Vector3(20, 0.7, 0.15)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_fu8o5"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_3afcy"]
 size = Vector3(20, 0.7, 0.15)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_t04hb"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_o7wn2"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.44363, 0.44363, 0.44363)
 uv1_offset = Vector3(0.951675, 0.0121004, 0.367147)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_s3hj3"]
+[sub_resource type="BoxMesh" id="BoxMesh_625lp"]
 size = Vector3(2.4, 0.2, 0.55)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_ymmi8"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_wm3jl"]
 size = Vector3(2.4, 0.2, 0.55)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kwfm0"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8x6o8"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.392743, 0.392743, 0.392743)
 uv1_offset = Vector3(0.0435645, 0.584726, 0.915328)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_1wn33"]
+[sub_resource type="BoxMesh" id="BoxMesh_8n16h"]
 size = Vector3(2.4, 0.2, 0.55)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_iddav"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_14cy2"]
 size = Vector3(2.4, 0.2, 0.55)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ers24"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2mi4d"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.399025, 0.399025, 0.399025)
 uv1_offset = Vector3(0.328298, 0.828428, 0.693172)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_p47g2"]
+[sub_resource type="BoxMesh" id="BoxMesh_iwd6t"]
 size = Vector3(2.4, 0.2, 0.55)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_u8lfc"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_ucx2k"]
 size = Vector3(2.4, 0.2, 0.55)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rrhv0"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_43j5g"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.399854, 0.399854, 0.399854)
 uv1_offset = Vector3(0.0075227, 0.359228, 0.93933)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_ll61p"]
+[sub_resource type="BoxMesh" id="BoxMesh_atuk2"]
 size = Vector3(2.4, 0.2, 0.55)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_06oi6"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_07tq3"]
 size = Vector3(2.4, 0.2, 0.55)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aru4l"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6nvlr"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.451988, 0.451988, 0.451988)
 uv1_offset = Vector3(0.338552, 0.517037, 0.664744)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_4ohhw"]
+[sub_resource type="BoxMesh" id="BoxMesh_marmy"]
 size = Vector3(2.4, 0.2, 0.55)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_6s1aq"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_wk6fc"]
 size = Vector3(2.4, 0.2, 0.55)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wovrq"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bir4n"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.446084, 0.446084, 0.446084)
 uv1_offset = Vector3(0.384192, 0.166735, 0.381109)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_nmlrv"]
+[sub_resource type="BoxMesh" id="BoxMesh_td555"]
 size = Vector3(2.4, 0.2, 0.55)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_sk8s3"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_f2yqt"]
 size = Vector3(2.4, 0.2, 0.55)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_eal2h"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aalhn"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.416469, 0.416469, 0.416469)
 uv1_offset = Vector3(0.315312, 0.838148, 0.922988)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_lacfh"]
+[sub_resource type="BoxMesh" id="BoxMesh_vdksn"]
 size = Vector3(2.4, 0.2, 0.55)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_6guup"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_gp7u4"]
 size = Vector3(2.4, 0.2, 0.55)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hx7d3"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_v4gok"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.449216, 0.449216, 0.449216)
 uv1_offset = Vector3(0.0218204, 0.379751, 0.264515)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_4gp8c"]
+[sub_resource type="BoxMesh" id="BoxMesh_eamrd"]
 size = Vector3(2.4, 0.2, 0.55)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_swcm8"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_tijh6"]
 size = Vector3(2.4, 0.2, 0.55)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_awhyn"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ahuoh"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.423957, 0.423957, 0.423957)
 uv1_offset = Vector3(0.966796, 0.297749, 0.0899214)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_4ornk"]
+[sub_resource type="BoxMesh" id="BoxMesh_32tgb"]
 size = Vector3(2.4, 0.2, 0.55)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_keti2"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_4411b"]
 size = Vector3(2.4, 0.2, 0.55)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_et3hx"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_clwuy"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.416192, 0.416192, 0.416192)
 uv1_offset = Vector3(0.31899, 0.112352, 0.0154116)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_a6pyc"]
+[sub_resource type="BoxMesh" id="BoxMesh_xlbrl"]
 size = Vector3(2.4, 0.2, 0.55)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_x41et"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_7jh4d"]
 size = Vector3(2.4, 0.2, 0.55)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8mhwu"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kdbtr"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.415335, 0.415335, 0.415335)
 uv1_offset = Vector3(0.976623, 0.938674, 0.602029)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_fekkm"]
+[sub_resource type="BoxMesh" id="BoxMesh_7c8tv"]
 size = Vector3(2.4, 0.2, 0.55)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_abd1h"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_3kdcl"]
 size = Vector3(2.4, 0.2, 0.55)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3m7or"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0dupr"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.417799, 0.417799, 0.417799)
 uv1_offset = Vector3(0.803967, 0.261143, 0.134966)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_n6ks5"]
+[sub_resource type="BoxMesh" id="BoxMesh_xvqa8"]
 size = Vector3(0.5, 4.5, 0.5)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_2fiaw"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_lkihk"]
 size = Vector3(0.5, 4.5, 0.5)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_o3y0c"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iifqj"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.42045, 0.42045, 0.42045)
 uv1_offset = Vector3(0.0880903, 0.0753948, 0.804257)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_bbvab"]
+[sub_resource type="BoxMesh" id="BoxMesh_2mc56"]
 size = Vector3(0.5, 4.5, 0.5)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_4cq8k"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_jhnad"]
 size = Vector3(0.5, 4.5, 0.5)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yp6rm"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_300l8"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.416438, 0.416438, 0.416438)
 uv1_offset = Vector3(0.798505, 0.96997, 0.0289769)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_75w26"]
+[sub_resource type="BoxMesh" id="BoxMesh_s8o8x"]
 size = Vector3(0.5, 4.5, 0.5)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_4mhal"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_1b888"]
 size = Vector3(0.5, 4.5, 0.5)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cicku"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5pm0j"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.430343, 0.430343, 0.430343)
 uv1_offset = Vector3(0.832456, 0.229175, 0.15552)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_ld8od"]
+[sub_resource type="BoxMesh" id="BoxMesh_28ass"]
 size = Vector3(1.2, 1, 1.2)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_j6rdn"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_o24b1"]
 size = Vector3(1.2, 1, 1.2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ogije"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_37dp5"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.443557, 0.443557, 0.443557)
 uv1_offset = Vector3(0.448203, 0.638331, 0.000167849)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_amwjc"]
+[sub_resource type="BoxMesh" id="BoxMesh_08mny"]
 size = Vector3(1.3, 2.4, 1.3)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_d2ix8"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_fsj6b"]
 size = Vector3(1.3, 2.4, 1.3)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_uoxll"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0ahhw"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.452139, 0.452139, 0.452139)
 uv1_offset = Vector3(0.797833, 0.297124, 0.6121)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_0y4qa"]
+[sub_resource type="BoxMesh" id="BoxMesh_wmymp"]
 size = Vector3(1.1, 0.9, 1.1)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_yop6j"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_6p5oy"]
 size = Vector3(1.1, 0.9, 1.1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_j217v"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xg7rn"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.434967, 0.434967, 0.434967)
 uv1_offset = Vector3(0.726589, 0.796445, 0.43653)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_hvgkk"]
+[sub_resource type="BoxMesh" id="BoxMesh_vx7b4"]
 size = Vector3(1.1, 1.25, 1.1)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_el207"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_wyx36"]
 size = Vector3(1.1, 1.25, 1.1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nk1ye"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wl4hs"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.432513, 0.432513, 0.432513)
 uv1_offset = Vector3(0.658228, 0.626322, 0.0899367)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_ttsh4"]
+[sub_resource type="BoxMesh" id="BoxMesh_75067"]
 size = Vector3(1.1, 1.6, 1.1)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_xjytq"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_om5q1"]
 size = Vector3(1.1, 1.6, 1.1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pixgi"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kg66j"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.405541, 0.405541, 0.405541)
 uv1_offset = Vector3(0.444617, 0.151522, 0.601053)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_lh8qq"]
+[sub_resource type="BoxMesh" id="BoxMesh_botuy"]
 size = Vector3(1.1, 0.9, 1.1)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_rsgfg"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_osymb"]
 size = Vector3(1.1, 0.9, 1.1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3vgey"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dhewy"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.39646, 0.39646, 0.39646)
 uv1_offset = Vector3(0.989517, 0.417975, 0.0721447)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_phys7"]
+[sub_resource type="BoxMesh" id="BoxMesh_w0uuu"]
 size = Vector3(1.1, 1.25, 1.1)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_bdv1p"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_adrys"]
 size = Vector3(1.1, 1.25, 1.1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2yyy7"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_531ja"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.412491, 0.412491, 0.412491)
 uv1_offset = Vector3(0.162921, 0.694072, 0.866667)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_0ctwi"]
+[sub_resource type="BoxMesh" id="BoxMesh_h8bk1"]
 size = Vector3(1.1, 1.6, 1.1)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_0w7is"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_s5qs2"]
 size = Vector3(1.1, 1.6, 1.1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_uvd3k"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_x14qt"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.423862, 0.423862, 0.423862)
 uv1_offset = Vector3(0.442374, 0.585855, 0.170199)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_uwl08"]
+[sub_resource type="BoxMesh" id="BoxMesh_5j2mc"]
 size = Vector3(1.1, 0.9, 1.1)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_eudrs"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_38nbu"]
 size = Vector3(1.1, 0.9, 1.1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8vjfp"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lirw5"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.434044, 0.434044, 0.434044)
 uv1_offset = Vector3(0.795239, 0.787259, 0.511681)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_e7tnf"]
+[sub_resource type="BoxMesh" id="BoxMesh_h2aku"]
 size = Vector3(1.1, 1.25, 1.1)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_4yy4g"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_rw7rn"]
 size = Vector3(1.1, 1.25, 1.1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mef5s"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6qugj"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.418893, 0.418893, 0.418893)
 uv1_offset = Vector3(0.510201, 0.0760204, 0.813413)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_d5jpg"]
+[sub_resource type="BoxMesh" id="BoxMesh_44va8"]
 size = Vector3(1.1, 1.6, 1.1)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_lwyfv"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_3vsnw"]
 size = Vector3(1.1, 1.6, 1.1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sknla"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_47dqa"]
 albedo_color = Color(0.94, 0.93, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.449437, 0.449437, 0.449437)
 uv1_offset = Vector3(0.0366522, 0.0973373, 0.174899)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_nohj8"]
+[sub_resource type="BoxMesh" id="BoxMesh_sif2k"]
 size = Vector3(1.1, 0.9, 1.1)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_p1rux"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_pmjko"]
 size = Vector3(1.1, 0.9, 1.1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tysnp"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vf745"]
 albedo_color = Color(0.93, 0.933, 0.936, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.41012, 0.41012, 0.41012)
 uv1_offset = Vector3(0.627787, 0.903273, 0.0276646)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_etlw3"]
+[sub_resource type="BoxMesh" id="BoxMesh_mchv1"]
 size = Vector3(2.2, 10, 2.2)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_gut40"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_336or"]
 size = Vector3(2.2, 10, 2.2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lmoyd"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ihflo"]
 albedo_color = Color(0.93, 0.933, 0.936, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.365137, 0.365137, 0.365137)
 uv1_offset = Vector3(0.198306, 0.636851, 0.351797)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_nt40s"]
+[sub_resource type="BoxMesh" id="BoxMesh_avywt"]
 size = Vector3(16, 1.1, 1.3)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_a10qt"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_jij0n"]
 size = Vector3(16, 1.1, 1.3)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_t16gj"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7uxko"]
 albedo_color = Color(0.938, 0.928, 0.918, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.439926, 0.439926, 0.439926)
 uv1_offset = Vector3(0.0016022, 0.000167849, 0.784421)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_t8tdd"]
+[sub_resource type="BoxMesh" id="BoxMesh_hofdn"]
 size = Vector3(100, 4, 2)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_07a57"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_a1e01"]
 size = Vector3(100, 4, 2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_v45k5"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kgxwq"]
 albedo_color = Color(0.938, 0.928, 0.918, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.422084, 0.422084, 0.422084)
 uv1_offset = Vector3(0.961364, 0.665782, 0.411841)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_6hk5s"]
+[sub_resource type="BoxMesh" id="BoxMesh_57vjl"]
 size = Vector3(2, 4, 80)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_q631g"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_ecua7"]
 size = Vector3(2, 4, 80)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_my70u"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_u2158"]
 albedo_color = Color(0.938, 0.928, 0.918, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.446513, 0.446513, 0.446513)
 uv1_offset = Vector3(0.909651, 0.507652, 0.746883)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_24qn7"]
+[sub_resource type="BoxMesh" id="BoxMesh_nolxg"]
 size = Vector3(2, 4, 80)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_oi2ga"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_lon14"]
 size = Vector3(2, 4, 80)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_w4fys"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sgxny"]
 albedo_color = Color(0.938, 0.928, 0.918, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.402936, 0.402936, 0.402936)
 uv1_offset = Vector3(0.209125, 0.152422, 0.696696)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_xcol3"]
+[sub_resource type="BoxMesh" id="BoxMesh_xg8cx"]
 size = Vector3(10, 3.2, 3)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_7h25q"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_x3gjh"]
 size = Vector3(10, 3.2, 3)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_m67bl"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6ay3k"]
 albedo_color = Color(0.938, 0.928, 0.918, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.396462, 0.396462, 0.396462)
 uv1_offset = Vector3(0.487648, 0.789273, 0.421637)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_vpc5f"]
+[sub_resource type="BoxMesh" id="BoxMesh_ysir6"]
 size = Vector3(10, 3.2, 3)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_5274d"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_ujjbo"]
 size = Vector3(10, 3.2, 3)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_q5qm5"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mysvk"]
 albedo_color = Color(0.942, 0.93, 0.918, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.412758, 0.412758, 0.412758)
 uv1_offset = Vector3(0.819471, 0.0653849, 0.814679)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_nsefu"]
+[sub_resource type="BoxMesh" id="BoxMesh_jejbj"]
 size = Vector3(1.1, 0.9, 1.1)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_cowbr"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_a2gp3"]
 size = Vector3(1.2, 1, 1.2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ujvbr"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lniv2"]
 albedo_color = Color(0.45, 0.42, 0.4, 1)
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_5mck0"]
+[sub_resource type="CylinderMesh" id="CylinderMesh_s1ke8"]
 top_radius = 0.2
 bottom_radius = 0.22
 height = 1.1
 
-[sub_resource type="SphereMesh" id="SphereMesh_hc3to"]
+[sub_resource type="SphereMesh" id="SphereMesh_gjedj"]
 radius = 0.16
 height = 0.32
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_pmqyq"]
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_lv7l8"]
 radius = 0.28
 height = 1.7
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ackw2"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_embr5"]
 albedo_color = Color(0.935, 0.93, 0.925, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.417307, 0.417307, 0.417307)
 uv1_offset = Vector3(0.256413, 0.195804, 0.524483)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_7mc82"]
+[sub_resource type="BoxMesh" id="BoxMesh_n3k70"]
 size = Vector3(0.3, 1.7, 0.3)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_718gx"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_ximwy"]
 size = Vector3(0.7, 1.8, 0.7)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0a3k7"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_puj6g"]
 albedo_color = Color(0.922, 0.925, 0.928, 1)
-albedo_texture = ExtResource("2_brade")
-roughness_texture = ExtResource("4_b3s8b")
+albedo_texture = ExtResource("2_grvu3")
+roughness_texture = ExtResource("4_qhd1v")
 normal_enabled = true
 normal_scale = 1.4
-normal_texture = ExtResource("3_ywdk5")
+normal_texture = ExtResource("3_7pphe")
 uv1_scale = Vector3(0.395778, 0.395778, 0.395778)
 uv1_offset = Vector3(0.33933, 0.602243, 0.482078)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_5f3vi"]
+[sub_resource type="BoxMesh" id="BoxMesh_qv8h5"]
 size = Vector3(1.4, 1.2, 1)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_jsbet"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_1m3f6"]
 size = Vector3(1.5, 1.3, 1.1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jknu6"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5vvvu"]
 albedo_color = Color(0.95, 0.935, 0.92, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.437439, 0.437439, 0.437439)
 uv1_offset = Vector3(0.33933, 0.602243, 0.482078)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_cgqk7"]
+[sub_resource type="BoxMesh" id="BoxMesh_v888k"]
 size = Vector3(0.4, 1.6, 0.4)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_ojc2a"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_5agwy"]
 size = Vector3(0.5, 1.7, 0.5)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hj6mh"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4q76i"]
 albedo_color = Color(0.925, 0.92, 0.918, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.404018, 0.404018, 0.404018)
 uv1_offset = Vector3(0.438071, 0.516762, 0.320211)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_5cijg"]
+[sub_resource type="BoxMesh" id="BoxMesh_7iqgp"]
 size = Vector3(0.7, 1, 0.7)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_6h0sr"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_w1p23"]
 size = Vector3(0.8, 1.1, 0.8)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_62ii7"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rgaut"]
 albedo_color = Color(0.93, 0.928, 0.925, 1)
-albedo_texture = ExtResource("1_1785j")
+albedo_texture = ExtResource("1_ocug2")
 roughness = 0.9
 uv1_scale = Vector3(0.441847, 0.441847, 0.441847)
 uv1_offset = Vector3(0.855161, 0.848173, 0.853361)
 uv1_triplanar = true
 uv1_triplanar_sharpness = 3.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_ypccj"]
+[sub_resource type="BoxMesh" id="BoxMesh_dnsvd"]
 size = Vector3(2.4, 2.2, 0.4)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_x8wmi"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_0grd8"]
 size = Vector3(2.6, 2.2, 0.6)
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ldjdx"]
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_np4cc"]
 radius = 0.28
 height = 1.6
 
 [node name="Warehouse" type="Node3D"]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_ufuau")
+environment = SubResource("Environment_5j3s0")
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
 transform = Transform3D(-0.866025, -0.234736, 0.441474, 0, 0.882948, 0.469472, -0.5, 0.406574, -0.764655, 0, 0, 0)
@@ -1541,789 +1541,789 @@ shadow_enabled = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, -0.1, 10)
 
 [node name="Mesh" type="MeshInstance3D" parent="Yard"]
-material_override = SubResource("StandardMaterial3D_rs36v")
-mesh = SubResource("BoxMesh_x3p1y")
+material_override = SubResource("StandardMaterial3D_n326r")
+mesh = SubResource("BoxMesh_77f7e")
 
 [node name="Collision" type="CollisionShape3D" parent="Yard"]
-shape = SubResource("BoxShape3D_talge")
+shape = SubResource("BoxShape3D_257yo")
 
 [node name="HarborWater" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, -70)
-material_override = SubResource("StandardMaterial3D_2qmrs")
-mesh = SubResource("BoxMesh_y654x")
+material_override = SubResource("StandardMaterial3D_qq8kk")
+mesh = SubResource("BoxMesh_3j7tt")
 
 [node name="CanalDeck" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, -35)
 
 [node name="Mesh" type="MeshInstance3D" parent="CanalDeck"]
-material_override = SubResource("StandardMaterial3D_78b5l")
-mesh = SubResource("BoxMesh_531h4")
+material_override = SubResource("StandardMaterial3D_xvqgm")
+mesh = SubResource("BoxMesh_n7bnu")
 
 [node name="Collision" type="CollisionShape3D" parent="CanalDeck"]
-shape = SubResource("BoxShape3D_1o4sb")
+shape = SubResource("BoxShape3D_s43uy")
 
 [node name="CanalDivider" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.6, -35)
 
 [node name="Mesh" type="MeshInstance3D" parent="CanalDivider"]
-material_override = SubResource("StandardMaterial3D_k8k2k")
-mesh = SubResource("BoxMesh_cv6vc")
+material_override = SubResource("StandardMaterial3D_xrhqk")
+mesh = SubResource("BoxMesh_hovlu")
 
 [node name="Collision" type="CollisionShape3D" parent="CanalDivider"]
-shape = SubResource("BoxShape3D_y73ny")
+shape = SubResource("BoxShape3D_u0eca")
 
 [node name="CanalShipIn" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25, 8.2, -39)
 
 [node name="Mesh" type="MeshInstance3D" parent="CanalShipIn"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-material_override = SubResource("StandardMaterial3D_iwaln")
-mesh = SubResource("BoxMesh_ctgsm")
+material_override = SubResource("StandardMaterial3D_eaojs")
+mesh = SubResource("BoxMesh_o6its")
 
 [node name="@MeshInstance3D@14" type="MeshInstance3D" parent="CanalShipIn"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 2.6, 0)
-material_override = SubResource("StandardMaterial3D_7kj6h")
-mesh = SubResource("BoxMesh_26py7")
+material_override = SubResource("StandardMaterial3D_fkldw")
+mesh = SubResource("BoxMesh_2k4ux")
 
 [node name="@MeshInstance3D@15" type="MeshInstance3D" parent="CanalShipIn"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 2.8, 0)
-material_override = SubResource("StandardMaterial3D_bv6ni")
-mesh = SubResource("BoxMesh_se72n")
+material_override = SubResource("StandardMaterial3D_2pyid")
+mesh = SubResource("BoxMesh_6bpkr")
 
 [node name="CanalShipOut" type="Node3D" parent="."]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 30, 8.2, -31)
 
 [node name="Mesh" type="MeshInstance3D" parent="CanalShipOut"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-material_override = SubResource("StandardMaterial3D_456m3")
-mesh = SubResource("BoxMesh_sxqlf")
+material_override = SubResource("StandardMaterial3D_3rsax")
+mesh = SubResource("BoxMesh_d5084")
 
 [node name="@MeshInstance3D@16" type="MeshInstance3D" parent="CanalShipOut"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 2.6, 0)
-material_override = SubResource("StandardMaterial3D_tgbkn")
-mesh = SubResource("BoxMesh_2v80q")
+material_override = SubResource("StandardMaterial3D_kigrb")
+mesh = SubResource("BoxMesh_lnkd3")
 
 [node name="@MeshInstance3D@17" type="MeshInstance3D" parent="CanalShipOut"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 2.8, 0)
-material_override = SubResource("StandardMaterial3D_73x84")
-mesh = SubResource("BoxMesh_3cfu7")
+material_override = SubResource("StandardMaterial3D_jt3ko")
+mesh = SubResource("BoxMesh_opcqy")
 
 [node name="CanalShipMid" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 8.2, -35)
 
 [node name="Mesh" type="MeshInstance3D" parent="CanalShipMid"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-material_override = SubResource("StandardMaterial3D_48q60")
-mesh = SubResource("BoxMesh_kfc16")
+material_override = SubResource("StandardMaterial3D_0alf5")
+mesh = SubResource("BoxMesh_lyyfi")
 
 [node name="@MeshInstance3D@18" type="MeshInstance3D" parent="CanalShipMid"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 2.6, 0)
-material_override = SubResource("StandardMaterial3D_ewp3g")
-mesh = SubResource("BoxMesh_0w3wv")
+material_override = SubResource("StandardMaterial3D_stih5")
+mesh = SubResource("BoxMesh_cma71")
 
 [node name="@MeshInstance3D@19" type="MeshInstance3D" parent="CanalShipMid"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 2.8, 0)
-material_override = SubResource("StandardMaterial3D_fvddg")
-mesh = SubResource("BoxMesh_xvqy4")
+material_override = SubResource("StandardMaterial3D_a236h")
+mesh = SubResource("BoxMesh_d15qu")
 
 [node name="Lake" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.4, -260)
-material_override = SubResource("StandardMaterial3D_7w1cb")
-mesh = SubResource("CylinderMesh_oqweo")
+material_override = SubResource("StandardMaterial3D_qgdwn")
+mesh = SubResource("CylinderMesh_xb7wr")
 
 [node name="CityBase" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 47.25, -260)
 
 [node name="Mesh" type="MeshInstance3D" parent="CityBase"]
-material_override = SubResource("StandardMaterial3D_a0yi6")
-mesh = SubResource("BoxMesh_nrldn")
+material_override = SubResource("StandardMaterial3D_5cchy")
+mesh = SubResource("BoxMesh_aa6mf")
 
 [node name="Collision" type="CollisionShape3D" parent="CityBase"]
-shape = SubResource("BoxShape3D_wkqc4")
+shape = SubResource("BoxShape3D_mum2t")
 
 [node name="CityWaist" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 128.25, -260)
 
 [node name="Mesh" type="MeshInstance3D" parent="CityWaist"]
-material_override = SubResource("StandardMaterial3D_gg5vc")
-mesh = SubResource("BoxMesh_hftj8")
+material_override = SubResource("StandardMaterial3D_g1u70")
+mesh = SubResource("BoxMesh_u2ifp")
 
 [node name="Collision" type="CollisionShape3D" parent="CityWaist"]
-shape = SubResource("BoxShape3D_h6s4x")
+shape = SubResource("BoxShape3D_rhtu3")
 
 [node name="CityUpper" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 243, -260)
 
 [node name="Mesh" type="MeshInstance3D" parent="CityUpper"]
-material_override = SubResource("StandardMaterial3D_ww5n0")
-mesh = SubResource("BoxMesh_va1lt")
+material_override = SubResource("StandardMaterial3D_eive7")
+mesh = SubResource("BoxMesh_cgm28")
 
 [node name="Collision" type="CollisionShape3D" parent="CityUpper"]
-shape = SubResource("BoxShape3D_7jr5k")
+shape = SubResource("BoxShape3D_u4lli")
 
 [node name="CitySpire" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 391.5, -260)
 
 [node name="Mesh" type="MeshInstance3D" parent="CitySpire"]
-material_override = SubResource("StandardMaterial3D_qxfvw")
-mesh = SubResource("BoxMesh_nynef")
+material_override = SubResource("StandardMaterial3D_qt2b5")
+mesh = SubResource("BoxMesh_sc087")
 
 [node name="Collision" type="CollisionShape3D" parent="CitySpire"]
-shape = SubResource("BoxShape3D_b41wq")
+shape = SubResource("BoxShape3D_o4nlm")
 
 [node name="CityDome" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 486, -260)
-material_override = SubResource("StandardMaterial3D_3s5pi")
-mesh = SubResource("SphereMesh_owqor")
+material_override = SubResource("StandardMaterial3D_e3p36")
+mesh = SubResource("SphereMesh_4ii5n")
 
 [node name="CityDiamond" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.707107, -0.707107, 0, 0.707107, 0.707107, 0, 0, 0, 1, 0, 519.75, -260)
-material_override = SubResource("StandardMaterial3D_so2g8")
-mesh = SubResource("BoxMesh_odjfw")
+material_override = SubResource("StandardMaterial3D_dgtyq")
+mesh = SubResource("BoxMesh_nm4dr")
 
 [node name="CanalDeckA" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 243, 51.3, -260)
 
 [node name="Mesh" type="MeshInstance3D" parent="CanalDeckA"]
-material_override = SubResource("StandardMaterial3D_xisv7")
-mesh = SubResource("BoxMesh_ifw76")
+material_override = SubResource("StandardMaterial3D_6rocl")
+mesh = SubResource("BoxMesh_sy1ef")
 
 [node name="Collision" type="CollisionShape3D" parent="CanalDeckA"]
-shape = SubResource("BoxShape3D_8hkav")
+shape = SubResource("BoxShape3D_txko3")
 
 [node name="CanalDividerA" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 243, 54, -260)
 
 [node name="Mesh" type="MeshInstance3D" parent="CanalDividerA"]
-material_override = SubResource("StandardMaterial3D_j5ycd")
-mesh = SubResource("BoxMesh_wia31")
+material_override = SubResource("StandardMaterial3D_mkduh")
+mesh = SubResource("BoxMesh_5t800")
 
 [node name="Collision" type="CollisionShape3D" parent="CanalDividerA"]
-shape = SubResource("BoxShape3D_ns2ug")
+shape = SubResource("BoxShape3D_3d3eo")
 
 [node name="CanalDeckB" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 51.3, -17)
 
 [node name="Mesh" type="MeshInstance3D" parent="CanalDeckB"]
-material_override = SubResource("StandardMaterial3D_hcdvx")
-mesh = SubResource("BoxMesh_5n234")
+material_override = SubResource("StandardMaterial3D_527ud")
+mesh = SubResource("BoxMesh_k16gq")
 
 [node name="Collision" type="CollisionShape3D" parent="CanalDeckB"]
-shape = SubResource("BoxShape3D_lj4yy")
+shape = SubResource("BoxShape3D_hp0qf")
 
 [node name="CanalDividerB" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 54, -17)
 
 [node name="Mesh" type="MeshInstance3D" parent="CanalDividerB"]
-material_override = SubResource("StandardMaterial3D_g3rkr")
-mesh = SubResource("BoxMesh_83vwd")
+material_override = SubResource("StandardMaterial3D_6ljph")
+mesh = SubResource("BoxMesh_hs20j")
 
 [node name="Collision" type="CollisionShape3D" parent="CanalDividerB"]
-shape = SubResource("BoxShape3D_md8t0")
+shape = SubResource("BoxShape3D_vdns3")
 
 [node name="ShipInA" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 162, 55.35, -270.8)
 
 [node name="Mesh" type="MeshInstance3D" parent="ShipInA"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-material_override = SubResource("StandardMaterial3D_q8ua1")
-mesh = SubResource("BoxMesh_fa0cj")
+material_override = SubResource("StandardMaterial3D_x5sx2")
+mesh = SubResource("BoxMesh_308lt")
 
 [node name="@MeshInstance3D@20" type="MeshInstance3D" parent="ShipInA"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 2.6, 0)
-material_override = SubResource("StandardMaterial3D_wo0s7")
-mesh = SubResource("BoxMesh_o1608")
+material_override = SubResource("StandardMaterial3D_hv4o2")
+mesh = SubResource("BoxMesh_ej05b")
 
 [node name="@MeshInstance3D@21" type="MeshInstance3D" parent="ShipInA"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 2.8, 0)
-material_override = SubResource("StandardMaterial3D_2ohri")
-mesh = SubResource("BoxMesh_yyfs6")
+material_override = SubResource("StandardMaterial3D_emmba")
+mesh = SubResource("BoxMesh_emscw")
 
 [node name="ShipOutA" type="Node3D" parent="."]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 270, 55.35, -249.2)
 
 [node name="Mesh" type="MeshInstance3D" parent="ShipOutA"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-material_override = SubResource("StandardMaterial3D_at2pl")
-mesh = SubResource("BoxMesh_gjx5g")
+material_override = SubResource("StandardMaterial3D_y8r6a")
+mesh = SubResource("BoxMesh_8wm5p")
 
 [node name="@MeshInstance3D@22" type="MeshInstance3D" parent="ShipOutA"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 2.6, 0)
-material_override = SubResource("StandardMaterial3D_xgwu8")
-mesh = SubResource("BoxMesh_hbxv0")
+material_override = SubResource("StandardMaterial3D_6lbnx")
+mesh = SubResource("BoxMesh_ttyli")
 
 [node name="@MeshInstance3D@23" type="MeshInstance3D" parent="ShipOutA"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 2.8, 0)
-material_override = SubResource("StandardMaterial3D_vdrhw")
-mesh = SubResource("BoxMesh_nbvis")
+material_override = SubResource("StandardMaterial3D_2aqq7")
+mesh = SubResource("BoxMesh_4oy8y")
 
 [node name="ShipInB" type="Node3D" parent="."]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -10.8, 55.35, -71)
 
 [node name="Mesh" type="MeshInstance3D" parent="ShipInB"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-material_override = SubResource("StandardMaterial3D_evaml")
-mesh = SubResource("BoxMesh_g4co6")
+material_override = SubResource("StandardMaterial3D_1jfni")
+mesh = SubResource("BoxMesh_poqqn")
 
 [node name="@MeshInstance3D@24" type="MeshInstance3D" parent="ShipInB"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 2.6, 0)
-material_override = SubResource("StandardMaterial3D_p0ws3")
-mesh = SubResource("BoxMesh_ab4pr")
+material_override = SubResource("StandardMaterial3D_qj5u5")
+mesh = SubResource("BoxMesh_ba6se")
 
 [node name="@MeshInstance3D@25" type="MeshInstance3D" parent="ShipInB"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 2.8, 0)
-material_override = SubResource("StandardMaterial3D_wlqlj")
-mesh = SubResource("BoxMesh_6xcn4")
+material_override = SubResource("StandardMaterial3D_ovsvf")
+mesh = SubResource("BoxMesh_p3fo5")
 
 [node name="ShipOutB" type="Node3D" parent="."]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 10.8, 55.35, 23.5)
 
 [node name="Mesh" type="MeshInstance3D" parent="ShipOutB"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-material_override = SubResource("StandardMaterial3D_2ubxe")
-mesh = SubResource("BoxMesh_ymyxo")
+material_override = SubResource("StandardMaterial3D_iuequ")
+mesh = SubResource("BoxMesh_1wbbh")
 
 [node name="@MeshInstance3D@26" type="MeshInstance3D" parent="ShipOutB"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 2.6, 0)
-material_override = SubResource("StandardMaterial3D_eq7x2")
-mesh = SubResource("BoxMesh_7id3f")
+material_override = SubResource("StandardMaterial3D_7ney4")
+mesh = SubResource("BoxMesh_fsmeu")
 
 [node name="@MeshInstance3D@27" type="MeshInstance3D" parent="ShipOutB"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 2.8, 0)
-material_override = SubResource("StandardMaterial3D_i6n3t")
-mesh = SubResource("BoxMesh_w4mfb")
+material_override = SubResource("StandardMaterial3D_7sf1r")
+mesh = SubResource("BoxMesh_yfrtr")
 
 [node name="FogTower1" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 405, 67.5, -260)
 
 [node name="Mesh" type="MeshInstance3D" parent="FogTower1"]
-material_override = SubResource("StandardMaterial3D_egikp")
-mesh = SubResource("BoxMesh_fu4w4")
+material_override = SubResource("StandardMaterial3D_5b5r2")
+mesh = SubResource("BoxMesh_bn4p2")
 
 [node name="Collision" type="CollisionShape3D" parent="FogTower1"]
-shape = SubResource("BoxShape3D_jvtuj")
+shape = SubResource("BoxShape3D_aneva")
 
 [node name="FogTower2" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 459, 54, -219.5)
 
 [node name="Mesh" type="MeshInstance3D" parent="FogTower2"]
-material_override = SubResource("StandardMaterial3D_q2yfw")
-mesh = SubResource("BoxMesh_4baqd")
+material_override = SubResource("StandardMaterial3D_1sqre")
+mesh = SubResource("BoxMesh_pmt0p")
 
 [node name="Collision" type="CollisionShape3D" parent="FogTower2"]
-shape = SubResource("BoxShape3D_ypq7v")
+shape = SubResource("BoxShape3D_xxmed")
 
 [node name="CentralGates" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, -175)
 
 [node name="Mesh" type="MeshInstance3D" parent="CentralGates"]
-material_override = SubResource("StandardMaterial3D_7gsre")
-mesh = SubResource("BoxMesh_m8kp2")
+material_override = SubResource("StandardMaterial3D_ypbii")
+mesh = SubResource("BoxMesh_hgd33")
 
 [node name="Collision" type="CollisionShape3D" parent="CentralGates"]
-shape = SubResource("BoxShape3D_r6k68")
+shape = SubResource("BoxShape3D_sfaju")
 
 [node name="GateArch" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 18, -172)
 
 [node name="Mesh" type="MeshInstance3D" parent="GateArch"]
-material_override = SubResource("StandardMaterial3D_04a1g")
-mesh = SubResource("BoxMesh_msy75")
+material_override = SubResource("StandardMaterial3D_yj61d")
+mesh = SubResource("BoxMesh_62syj")
 
 [node name="Collision" type="CollisionShape3D" parent="GateArch"]
-shape = SubResource("BoxShape3D_p1fx4")
+shape = SubResource("BoxShape3D_3jwpj")
 
 [node name="NearTower" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 27.5, 8)
 
 [node name="Mesh" type="MeshInstance3D" parent="NearTower"]
-material_override = SubResource("StandardMaterial3D_px4lq")
-mesh = SubResource("BoxMesh_lp6o4")
+material_override = SubResource("StandardMaterial3D_ngjq8")
+mesh = SubResource("BoxMesh_7pq6o")
 
 [node name="Collision" type="CollisionShape3D" parent="NearTower"]
-shape = SubResource("BoxShape3D_x8x1g")
+shape = SubResource("BoxShape3D_aipuy")
 
 [node name="NearTowerTop" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 60, 8)
 
 [node name="Mesh" type="MeshInstance3D" parent="NearTowerTop"]
-material_override = SubResource("StandardMaterial3D_gyjgm")
-mesh = SubResource("BoxMesh_1q2ui")
+material_override = SubResource("StandardMaterial3D_xtdii")
+mesh = SubResource("BoxMesh_hgytb")
 
 [node name="Collision" type="CollisionShape3D" parent="NearTowerTop"]
-shape = SubResource("BoxShape3D_ugt08")
+shape = SubResource("BoxShape3D_curgo")
 
 [node name="Pier1" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 0.1, -12)
 
 [node name="Mesh" type="MeshInstance3D" parent="Pier1"]
-material_override = SubResource("StandardMaterial3D_irk7d")
-mesh = SubResource("BoxMesh_0b4xt")
+material_override = SubResource("StandardMaterial3D_qhvyd")
+mesh = SubResource("BoxMesh_428no")
 
 [node name="Collision" type="CollisionShape3D" parent="Pier1"]
-shape = SubResource("BoxShape3D_yvexu")
+shape = SubResource("BoxShape3D_s6rmh")
 
 [node name="Pier2" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0.1, -12)
 
 [node name="Mesh" type="MeshInstance3D" parent="Pier2"]
-material_override = SubResource("StandardMaterial3D_t4xq4")
-mesh = SubResource("BoxMesh_gjvwd")
+material_override = SubResource("StandardMaterial3D_m4yr1")
+mesh = SubResource("BoxMesh_pcl1n")
 
 [node name="Collision" type="CollisionShape3D" parent="Pier2"]
-shape = SubResource("BoxShape3D_g5atc")
+shape = SubResource("BoxShape3D_3rxtu")
 
 [node name="DockShip1" type="Node3D" parent="."]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -16, 0.2, -20)
 
 [node name="Mesh" type="MeshInstance3D" parent="DockShip1"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-material_override = SubResource("StandardMaterial3D_ws82e")
-mesh = SubResource("BoxMesh_wjrd1")
+material_override = SubResource("StandardMaterial3D_uo2s3")
+mesh = SubResource("BoxMesh_67yb4")
 
 [node name="@MeshInstance3D@28" type="MeshInstance3D" parent="DockShip1"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 2.6, 0)
-material_override = SubResource("StandardMaterial3D_t405l")
-mesh = SubResource("BoxMesh_i2cn1")
+material_override = SubResource("StandardMaterial3D_q3tml")
+mesh = SubResource("BoxMesh_6s5gw")
 
 [node name="@MeshInstance3D@29" type="MeshInstance3D" parent="DockShip1"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 2.8, 0)
-material_override = SubResource("StandardMaterial3D_vgx67")
-mesh = SubResource("BoxMesh_phan8")
+material_override = SubResource("StandardMaterial3D_tl33u")
+mesh = SubResource("BoxMesh_b1442")
 
 [node name="WH_Floor" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 0, 22)
 
 [node name="Mesh" type="MeshInstance3D" parent="WH_Floor"]
-material_override = SubResource("StandardMaterial3D_4mrmc")
-mesh = SubResource("BoxMesh_agrnb")
+material_override = SubResource("StandardMaterial3D_1ceqv")
+mesh = SubResource("BoxMesh_ndyhp")
 
 [node name="Collision" type="CollisionShape3D" parent="WH_Floor"]
-shape = SubResource("BoxShape3D_hmx66")
+shape = SubResource("BoxShape3D_qx6li")
 
 [node name="WH_WallBack" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 5, 31)
 
 [node name="Mesh" type="MeshInstance3D" parent="WH_WallBack"]
-material_override = SubResource("StandardMaterial3D_efx18")
-mesh = SubResource("BoxMesh_riqn5")
+material_override = SubResource("StandardMaterial3D_ipdbb")
+mesh = SubResource("BoxMesh_5ia2q")
 
 [node name="Collision" type="CollisionShape3D" parent="WH_WallBack"]
-shape = SubResource("BoxShape3D_j3jcp")
+shape = SubResource("BoxShape3D_xcfkm")
 
 [node name="WH_WallL" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 5, 22)
 
 [node name="Mesh" type="MeshInstance3D" parent="WH_WallL"]
-material_override = SubResource("StandardMaterial3D_2wd24")
-mesh = SubResource("BoxMesh_ifupp")
+material_override = SubResource("StandardMaterial3D_ejg3x")
+mesh = SubResource("BoxMesh_qkrnb")
 
 [node name="Collision" type="CollisionShape3D" parent="WH_WallL"]
-shape = SubResource("BoxShape3D_pemp4")
+shape = SubResource("BoxShape3D_0j2ar")
 
 [node name="WH_WallR" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39, 5, 22)
 
 [node name="Mesh" type="MeshInstance3D" parent="WH_WallR"]
-material_override = SubResource("StandardMaterial3D_x2wwa")
-mesh = SubResource("BoxMesh_vm4n1")
+material_override = SubResource("StandardMaterial3D_vx13p")
+mesh = SubResource("BoxMesh_8mphm")
 
 [node name="Collision" type="CollisionShape3D" parent="WH_WallR"]
-shape = SubResource("BoxShape3D_0srnf")
+shape = SubResource("BoxShape3D_6rgyq")
 
 [node name="WH_FrontL" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 5, 13)
 
 [node name="Mesh" type="MeshInstance3D" parent="WH_FrontL"]
-material_override = SubResource("StandardMaterial3D_1ovya")
-mesh = SubResource("BoxMesh_6qrie")
+material_override = SubResource("StandardMaterial3D_amgea")
+mesh = SubResource("BoxMesh_akp44")
 
 [node name="Collision" type="CollisionShape3D" parent="WH_FrontL"]
-shape = SubResource("BoxShape3D_rg0l3")
+shape = SubResource("BoxShape3D_r351h")
 
 [node name="WH_FrontR" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35, 5, 13)
 
 [node name="Mesh" type="MeshInstance3D" parent="WH_FrontR"]
-material_override = SubResource("StandardMaterial3D_mtqta")
-mesh = SubResource("BoxMesh_mtdv5")
+material_override = SubResource("StandardMaterial3D_gwqsq")
+mesh = SubResource("BoxMesh_oq7na")
 
 [node name="Collision" type="CollisionShape3D" parent="WH_FrontR"]
-shape = SubResource("BoxShape3D_vjyt7")
+shape = SubResource("BoxShape3D_cidtc")
 
 [node name="WH_FrontTop" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 8, 13)
 
 [node name="Mesh" type="MeshInstance3D" parent="WH_FrontTop"]
-material_override = SubResource("StandardMaterial3D_pjwt7")
-mesh = SubResource("BoxMesh_isbjn")
+material_override = SubResource("StandardMaterial3D_e8agt")
+mesh = SubResource("BoxMesh_n5arv")
 
 [node name="Collision" type="CollisionShape3D" parent="WH_FrontTop"]
-shape = SubResource("BoxShape3D_vq4gl")
+shape = SubResource("BoxShape3D_ryc6g")
 
 [node name="WH_Roof" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 10.1, 22)
 
 [node name="Mesh" type="MeshInstance3D" parent="WH_Roof"]
-material_override = SubResource("StandardMaterial3D_p7gb3")
-mesh = SubResource("BoxMesh_4kl4q")
+material_override = SubResource("StandardMaterial3D_67qtm")
+mesh = SubResource("BoxMesh_30hmf")
 
 [node name="Collision" type="CollisionShape3D" parent="WH_Roof"]
-shape = SubResource("BoxShape3D_5wepq")
+shape = SubResource("BoxShape3D_olacx")
 
 [node name="WH_Mezz" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 4.5, 25.5)
 
 [node name="Mesh" type="MeshInstance3D" parent="WH_Mezz"]
-material_override = SubResource("StandardMaterial3D_t03hh")
-mesh = SubResource("BoxMesh_8laof")
+material_override = SubResource("StandardMaterial3D_3f5k1")
+mesh = SubResource("BoxMesh_ls56f")
 
 [node name="Collision" type="CollisionShape3D" parent="WH_Mezz"]
-shape = SubResource("BoxShape3D_288iq")
+shape = SubResource("BoxShape3D_ld5lk")
 
 [node name="WH_Rail" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 5, 21.6)
 
 [node name="Mesh" type="MeshInstance3D" parent="WH_Rail"]
-material_override = SubResource("StandardMaterial3D_cyquu")
-mesh = SubResource("BoxMesh_yog1p")
+material_override = SubResource("StandardMaterial3D_ifo1m")
+mesh = SubResource("BoxMesh_hb6pp")
 
 [node name="Collision" type="CollisionShape3D" parent="WH_Rail"]
-shape = SubResource("BoxShape3D_fu8o5")
+shape = SubResource("BoxShape3D_3afcy")
 
 [node name="Stair_0" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0.2, 16)
 
 [node name="Mesh" type="MeshInstance3D" parent="Stair_0"]
-material_override = SubResource("StandardMaterial3D_t04hb")
-mesh = SubResource("BoxMesh_s3hj3")
+material_override = SubResource("StandardMaterial3D_o7wn2")
+mesh = SubResource("BoxMesh_625lp")
 
 [node name="Collision" type="CollisionShape3D" parent="Stair_0"]
-shape = SubResource("BoxShape3D_ymmi8")
+shape = SubResource("BoxShape3D_wm3jl")
 
 [node name="Stair_1" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0.6, 16.45)
 
 [node name="Mesh" type="MeshInstance3D" parent="Stair_1"]
-material_override = SubResource("StandardMaterial3D_kwfm0")
-mesh = SubResource("BoxMesh_1wn33")
+material_override = SubResource("StandardMaterial3D_8x6o8")
+mesh = SubResource("BoxMesh_8n16h")
 
 [node name="Collision" type="CollisionShape3D" parent="Stair_1"]
-shape = SubResource("BoxShape3D_iddav")
+shape = SubResource("BoxShape3D_14cy2")
 
 [node name="Stair_2" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 1, 16.9)
 
 [node name="Mesh" type="MeshInstance3D" parent="Stair_2"]
-material_override = SubResource("StandardMaterial3D_ers24")
-mesh = SubResource("BoxMesh_p47g2")
+material_override = SubResource("StandardMaterial3D_2mi4d")
+mesh = SubResource("BoxMesh_iwd6t")
 
 [node name="Collision" type="CollisionShape3D" parent="Stair_2"]
-shape = SubResource("BoxShape3D_u8lfc")
+shape = SubResource("BoxShape3D_ucx2k")
 
 [node name="Stair_3" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 1.4, 17.35)
 
 [node name="Mesh" type="MeshInstance3D" parent="Stair_3"]
-material_override = SubResource("StandardMaterial3D_rrhv0")
-mesh = SubResource("BoxMesh_ll61p")
+material_override = SubResource("StandardMaterial3D_43j5g")
+mesh = SubResource("BoxMesh_atuk2")
 
 [node name="Collision" type="CollisionShape3D" parent="Stair_3"]
-shape = SubResource("BoxShape3D_06oi6")
+shape = SubResource("BoxShape3D_07tq3")
 
 [node name="Stair_4" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 1.8, 17.8)
 
 [node name="Mesh" type="MeshInstance3D" parent="Stair_4"]
-material_override = SubResource("StandardMaterial3D_aru4l")
-mesh = SubResource("BoxMesh_4ohhw")
+material_override = SubResource("StandardMaterial3D_6nvlr")
+mesh = SubResource("BoxMesh_marmy")
 
 [node name="Collision" type="CollisionShape3D" parent="Stair_4"]
-shape = SubResource("BoxShape3D_6s1aq")
+shape = SubResource("BoxShape3D_wk6fc")
 
 [node name="Stair_5" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 2.2, 18.25)
 
 [node name="Mesh" type="MeshInstance3D" parent="Stair_5"]
-material_override = SubResource("StandardMaterial3D_wovrq")
-mesh = SubResource("BoxMesh_nmlrv")
+material_override = SubResource("StandardMaterial3D_bir4n")
+mesh = SubResource("BoxMesh_td555")
 
 [node name="Collision" type="CollisionShape3D" parent="Stair_5"]
-shape = SubResource("BoxShape3D_sk8s3")
+shape = SubResource("BoxShape3D_f2yqt")
 
 [node name="Stair_6" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 2.6, 18.7)
 
 [node name="Mesh" type="MeshInstance3D" parent="Stair_6"]
-material_override = SubResource("StandardMaterial3D_eal2h")
-mesh = SubResource("BoxMesh_lacfh")
+material_override = SubResource("StandardMaterial3D_aalhn")
+mesh = SubResource("BoxMesh_vdksn")
 
 [node name="Collision" type="CollisionShape3D" parent="Stair_6"]
-shape = SubResource("BoxShape3D_6guup")
+shape = SubResource("BoxShape3D_gp7u4")
 
 [node name="Stair_7" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 3, 19.15)
 
 [node name="Mesh" type="MeshInstance3D" parent="Stair_7"]
-material_override = SubResource("StandardMaterial3D_hx7d3")
-mesh = SubResource("BoxMesh_4gp8c")
+material_override = SubResource("StandardMaterial3D_v4gok")
+mesh = SubResource("BoxMesh_eamrd")
 
 [node name="Collision" type="CollisionShape3D" parent="Stair_7"]
-shape = SubResource("BoxShape3D_swcm8")
+shape = SubResource("BoxShape3D_tijh6")
 
 [node name="Stair_8" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 3.4, 19.6)
 
 [node name="Mesh" type="MeshInstance3D" parent="Stair_8"]
-material_override = SubResource("StandardMaterial3D_awhyn")
-mesh = SubResource("BoxMesh_4ornk")
+material_override = SubResource("StandardMaterial3D_ahuoh")
+mesh = SubResource("BoxMesh_32tgb")
 
 [node name="Collision" type="CollisionShape3D" parent="Stair_8"]
-shape = SubResource("BoxShape3D_keti2")
+shape = SubResource("BoxShape3D_4411b")
 
 [node name="Stair_9" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 3.8, 20.05)
 
 [node name="Mesh" type="MeshInstance3D" parent="Stair_9"]
-material_override = SubResource("StandardMaterial3D_et3hx")
-mesh = SubResource("BoxMesh_a6pyc")
+material_override = SubResource("StandardMaterial3D_clwuy")
+mesh = SubResource("BoxMesh_xlbrl")
 
 [node name="Collision" type="CollisionShape3D" parent="Stair_9"]
-shape = SubResource("BoxShape3D_x41et")
+shape = SubResource("BoxShape3D_7jh4d")
 
 [node name="Stair_10" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 4.2, 20.5)
 
 [node name="Mesh" type="MeshInstance3D" parent="Stair_10"]
-material_override = SubResource("StandardMaterial3D_8mhwu")
-mesh = SubResource("BoxMesh_fekkm")
+material_override = SubResource("StandardMaterial3D_kdbtr")
+mesh = SubResource("BoxMesh_7c8tv")
 
 [node name="Collision" type="CollisionShape3D" parent="Stair_10"]
-shape = SubResource("BoxShape3D_abd1h")
+shape = SubResource("BoxShape3D_3kdcl")
 
 [node name="Pillar_-6" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 2.25, 25.5)
 
 [node name="Mesh" type="MeshInstance3D" parent="Pillar_-6"]
-material_override = SubResource("StandardMaterial3D_3m7or")
-mesh = SubResource("BoxMesh_n6ks5")
+material_override = SubResource("StandardMaterial3D_0dupr")
+mesh = SubResource("BoxMesh_xvqa8")
 
 [node name="Collision" type="CollisionShape3D" parent="Pillar_-6"]
-shape = SubResource("BoxShape3D_2fiaw")
+shape = SubResource("BoxShape3D_lkihk")
 
 [node name="Pillar_0" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 2.25, 25.5)
 
 [node name="Mesh" type="MeshInstance3D" parent="Pillar_0"]
-material_override = SubResource("StandardMaterial3D_o3y0c")
-mesh = SubResource("BoxMesh_bbvab")
+material_override = SubResource("StandardMaterial3D_iifqj")
+mesh = SubResource("BoxMesh_2mc56")
 
 [node name="Collision" type="CollisionShape3D" parent="Pillar_0"]
-shape = SubResource("BoxShape3D_4cq8k")
+shape = SubResource("BoxShape3D_jhnad")
 
 [node name="Pillar_6" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 2.25, 25.5)
 
 [node name="Mesh" type="MeshInstance3D" parent="Pillar_6"]
-material_override = SubResource("StandardMaterial3D_yp6rm")
-mesh = SubResource("BoxMesh_75w26")
+material_override = SubResource("StandardMaterial3D_300l8")
+mesh = SubResource("BoxMesh_s8o8x")
 
 [node name="Collision" type="CollisionShape3D" parent="Pillar_6"]
-shape = SubResource("BoxShape3D_4mhal")
+shape = SubResource("BoxShape3D_1b888")
 
 [node name="CrateA" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 0.5, 20)
 
 [node name="Mesh" type="MeshInstance3D" parent="CrateA"]
-material_override = SubResource("StandardMaterial3D_cicku")
-mesh = SubResource("BoxMesh_ld8od")
+material_override = SubResource("StandardMaterial3D_5pm0j")
+mesh = SubResource("BoxMesh_28ass")
 
 [node name="Collision" type="CollisionShape3D" parent="CrateA"]
-shape = SubResource("BoxShape3D_j6rdn")
+shape = SubResource("BoxShape3D_o24b1")
 
 [node name="CrateStack" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 1.2, 26)
 
 [node name="Mesh" type="MeshInstance3D" parent="CrateStack"]
-material_override = SubResource("StandardMaterial3D_ogije")
-mesh = SubResource("BoxMesh_amwjc")
+material_override = SubResource("StandardMaterial3D_37dp5")
+mesh = SubResource("BoxMesh_08mny")
 
 [node name="Collision" type="CollisionShape3D" parent="CrateStack"]
-shape = SubResource("BoxShape3D_d2ix8")
+shape = SubResource("BoxShape3D_fsj6b")
 
 [node name="PortCrate_0" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 0.55, 0)
 
 [node name="Mesh" type="MeshInstance3D" parent="PortCrate_0"]
-material_override = SubResource("StandardMaterial3D_uoxll")
-mesh = SubResource("BoxMesh_0y4qa")
+material_override = SubResource("StandardMaterial3D_0ahhw")
+mesh = SubResource("BoxMesh_wmymp")
 
 [node name="Collision" type="CollisionShape3D" parent="PortCrate_0"]
-shape = SubResource("BoxShape3D_yop6j")
+shape = SubResource("BoxShape3D_6p5oy")
 
 [node name="PortCrate_1" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0.55, 1)
 
 [node name="Mesh" type="MeshInstance3D" parent="PortCrate_1"]
-material_override = SubResource("StandardMaterial3D_j217v")
-mesh = SubResource("BoxMesh_hvgkk")
+material_override = SubResource("StandardMaterial3D_xg7rn")
+mesh = SubResource("BoxMesh_vx7b4")
 
 [node name="Collision" type="CollisionShape3D" parent="PortCrate_1"]
-shape = SubResource("BoxShape3D_el207")
+shape = SubResource("BoxShape3D_wyx36")
 
 [node name="PortCrate_2" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0.55, 0)
 
 [node name="Mesh" type="MeshInstance3D" parent="PortCrate_2"]
-material_override = SubResource("StandardMaterial3D_nk1ye")
-mesh = SubResource("BoxMesh_ttsh4")
+material_override = SubResource("StandardMaterial3D_wl4hs")
+mesh = SubResource("BoxMesh_75067")
 
 [node name="Collision" type="CollisionShape3D" parent="PortCrate_2"]
-shape = SubResource("BoxShape3D_xjytq")
+shape = SubResource("BoxShape3D_om5q1")
 
 [node name="PortCrate_3" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 0.55, 1)
 
 [node name="Mesh" type="MeshInstance3D" parent="PortCrate_3"]
-material_override = SubResource("StandardMaterial3D_pixgi")
-mesh = SubResource("BoxMesh_lh8qq")
+material_override = SubResource("StandardMaterial3D_kg66j")
+mesh = SubResource("BoxMesh_botuy")
 
 [node name="Collision" type="CollisionShape3D" parent="PortCrate_3"]
-shape = SubResource("BoxShape3D_rsgfg")
+shape = SubResource("BoxShape3D_osymb")
 
 [node name="PortCrate_4" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0.55, 0)
 
 [node name="Mesh" type="MeshInstance3D" parent="PortCrate_4"]
-material_override = SubResource("StandardMaterial3D_3vgey")
-mesh = SubResource("BoxMesh_phys7")
+material_override = SubResource("StandardMaterial3D_dhewy")
+mesh = SubResource("BoxMesh_w0uuu")
 
 [node name="Collision" type="CollisionShape3D" parent="PortCrate_4"]
-shape = SubResource("BoxShape3D_bdv1p")
+shape = SubResource("BoxShape3D_adrys")
 
 [node name="PortCrate_5" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0.55, 1)
 
 [node name="Mesh" type="MeshInstance3D" parent="PortCrate_5"]
-material_override = SubResource("StandardMaterial3D_2yyy7")
-mesh = SubResource("BoxMesh_0ctwi")
+material_override = SubResource("StandardMaterial3D_531ja")
+mesh = SubResource("BoxMesh_h8bk1")
 
 [node name="Collision" type="CollisionShape3D" parent="PortCrate_5"]
-shape = SubResource("BoxShape3D_0w7is")
+shape = SubResource("BoxShape3D_s5qs2")
 
 [node name="PortCrate_6" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.55, 0)
 
 [node name="Mesh" type="MeshInstance3D" parent="PortCrate_6"]
-material_override = SubResource("StandardMaterial3D_uvd3k")
-mesh = SubResource("BoxMesh_uwl08")
+material_override = SubResource("StandardMaterial3D_x14qt")
+mesh = SubResource("BoxMesh_5j2mc")
 
 [node name="Collision" type="CollisionShape3D" parent="PortCrate_6"]
-shape = SubResource("BoxShape3D_eudrs")
+shape = SubResource("BoxShape3D_38nbu")
 
 [node name="PortCrate_7" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0.55, 1)
 
 [node name="Mesh" type="MeshInstance3D" parent="PortCrate_7"]
-material_override = SubResource("StandardMaterial3D_8vjfp")
-mesh = SubResource("BoxMesh_e7tnf")
+material_override = SubResource("StandardMaterial3D_lirw5")
+mesh = SubResource("BoxMesh_h2aku")
 
 [node name="Collision" type="CollisionShape3D" parent="PortCrate_7"]
-shape = SubResource("BoxShape3D_4yy4g")
+shape = SubResource("BoxShape3D_rw7rn")
 
 [node name="PortCrate_8" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0.55, 0)
 
 [node name="Mesh" type="MeshInstance3D" parent="PortCrate_8"]
-material_override = SubResource("StandardMaterial3D_mef5s")
-mesh = SubResource("BoxMesh_d5jpg")
+material_override = SubResource("StandardMaterial3D_6qugj")
+mesh = SubResource("BoxMesh_44va8")
 
 [node name="Collision" type="CollisionShape3D" parent="PortCrate_8"]
-shape = SubResource("BoxShape3D_lwyfv")
+shape = SubResource("BoxShape3D_3vsnw")
 
 [node name="PortCrate_9" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.55, 1)
 
 [node name="Mesh" type="MeshInstance3D" parent="PortCrate_9"]
-material_override = SubResource("StandardMaterial3D_sknla")
-mesh = SubResource("BoxMesh_nohj8")
+material_override = SubResource("StandardMaterial3D_47dqa")
+mesh = SubResource("BoxMesh_sif2k")
 
 [node name="Collision" type="CollisionShape3D" parent="PortCrate_9"]
-shape = SubResource("BoxShape3D_p1rux")
+shape = SubResource("BoxShape3D_pmjko")
 
 [node name="CraneBase" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 5, -8)
 
 [node name="Mesh" type="MeshInstance3D" parent="CraneBase"]
-material_override = SubResource("StandardMaterial3D_tysnp")
-mesh = SubResource("BoxMesh_etlw3")
+material_override = SubResource("StandardMaterial3D_vf745")
+mesh = SubResource("BoxMesh_mchv1")
 
 [node name="Collision" type="CollisionShape3D" parent="CraneBase"]
-shape = SubResource("BoxShape3D_gut40")
+shape = SubResource("BoxShape3D_336or")
 
 [node name="CraneArm" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 10, -8)
 
 [node name="Mesh" type="MeshInstance3D" parent="CraneArm"]
-material_override = SubResource("StandardMaterial3D_lmoyd")
-mesh = SubResource("BoxMesh_nt40s")
+material_override = SubResource("StandardMaterial3D_ihflo")
+mesh = SubResource("BoxMesh_avywt")
 
 [node name="Collision" type="CollisionShape3D" parent="CraneArm"]
-shape = SubResource("BoxShape3D_a10qt")
+shape = SubResource("BoxShape3D_jij0n")
 
 [node name="BlockNorth" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 2, 42)
 
 [node name="Mesh" type="MeshInstance3D" parent="BlockNorth"]
-material_override = SubResource("StandardMaterial3D_t16gj")
-mesh = SubResource("BoxMesh_t8tdd")
+material_override = SubResource("StandardMaterial3D_7uxko")
+mesh = SubResource("BoxMesh_hofdn")
 
 [node name="Collision" type="CollisionShape3D" parent="BlockNorth"]
-shape = SubResource("BoxShape3D_07a57")
+shape = SubResource("BoxShape3D_a1e01")
 
 [node name="BlockEast" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 52, 2, 5)
 
 [node name="Mesh" type="MeshInstance3D" parent="BlockEast"]
-material_override = SubResource("StandardMaterial3D_v45k5")
-mesh = SubResource("BoxMesh_6hk5s")
+material_override = SubResource("StandardMaterial3D_kgxwq")
+mesh = SubResource("BoxMesh_57vjl")
 
 [node name="Collision" type="CollisionShape3D" parent="BlockEast"]
-shape = SubResource("BoxShape3D_q631g")
+shape = SubResource("BoxShape3D_ecua7")
 
 [node name="BlockWest" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 2, 5)
 
 [node name="Mesh" type="MeshInstance3D" parent="BlockWest"]
-material_override = SubResource("StandardMaterial3D_my70u")
-mesh = SubResource("BoxMesh_24qn7")
+material_override = SubResource("StandardMaterial3D_u2158")
+mesh = SubResource("BoxMesh_nolxg")
 
 [node name="Collision" type="CollisionShape3D" parent="BlockWest"]
-shape = SubResource("BoxShape3D_oi2ga")
+shape = SubResource("BoxShape3D_lon14")
 
 [node name="CrateGateL" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1.6, 30)
 
 [node name="Mesh" type="MeshInstance3D" parent="CrateGateL"]
-material_override = SubResource("StandardMaterial3D_w4fys")
-mesh = SubResource("BoxMesh_xcol3")
+material_override = SubResource("StandardMaterial3D_sgxny")
+mesh = SubResource("BoxMesh_xg8cx")
 
 [node name="Collision" type="CollisionShape3D" parent="CrateGateL"]
-shape = SubResource("BoxShape3D_7h25q")
+shape = SubResource("BoxShape3D_x3gjh")
 
 [node name="CrateGateR" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 1.6, 30)
 
 [node name="Mesh" type="MeshInstance3D" parent="CrateGateR"]
-material_override = SubResource("StandardMaterial3D_m67bl")
-mesh = SubResource("BoxMesh_vpc5f")
+material_override = SubResource("StandardMaterial3D_6ay3k")
+mesh = SubResource("BoxMesh_ysir6")
 
 [node name="Collision" type="CollisionShape3D" parent="CrateGateR"]
-shape = SubResource("BoxShape3D_5274d")
+shape = SubResource("BoxShape3D_ujjbo")
 
 [node name="HaulCrate" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27, 0, 18)
-script = ExtResource("11_omq18")
+script = ExtResource("11_r0odg")
 prompt_text = "[E] Таскать ящики"
 dialogue_lines = PackedStringArray("Ты хватаешь ящик. Спина уже ноет — день только начался.", "(Полной механики переноски пока нет — заглушка работы.)")
 change_scene_to = ""
@@ -2331,16 +2331,16 @@ unlock_glossary = PackedStringArray()
 
 [node name="Mesh" type="MeshInstance3D" parent="HaulCrate"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
-material_override = SubResource("StandardMaterial3D_q5qm5")
-mesh = SubResource("BoxMesh_nsefu")
+material_override = SubResource("StandardMaterial3D_mysvk")
+mesh = SubResource("BoxMesh_jejbj")
 
 [node name="Collision" type="CollisionShape3D" parent="HaulCrate"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
-shape = SubResource("BoxShape3D_cowbr")
+shape = SubResource("BoxShape3D_a2gp3")
 
 [node name="TonTon" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.5, 0, 15)
-script = ExtResource("11_omq18")
+script = ExtResource("11_r0odg")
 prompt_text = "[E] Рубин Тон Тон"
 dialogue_lines = PackedStringArray("Не успев переступить порог, вопящий голос прораба кувалдой выбивает мысли.", "«Ты опять опоздал, грибная крыса! Ящики — живо!»", "Лавина матов и обвинений. Остаётся только бежать таскать груз.")
 change_scene_to = ""
@@ -2348,21 +2348,21 @@ unlock_glossary = PackedStringArray()
 
 [node name="Torso" type="MeshInstance3D" parent="TonTon"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-material_override = SubResource("StandardMaterial3D_ujvbr")
-mesh = SubResource("CylinderMesh_5mck0")
+material_override = SubResource("StandardMaterial3D_lniv2")
+mesh = SubResource("CylinderMesh_s1ke8")
 
 [node name="Head" type="MeshInstance3D" parent="TonTon"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
-material_override = SubResource("StandardMaterial3D_ujvbr")
-mesh = SubResource("SphereMesh_hc3to")
+material_override = SubResource("StandardMaterial3D_lniv2")
+mesh = SubResource("SphereMesh_gjedj")
 
 [node name="Collision" type="CollisionShape3D" parent="TonTon"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
-shape = SubResource("CapsuleShape3D_pmqyq")
+shape = SubResource("CapsuleShape3D_lv7l8")
 
 [node name="LookAtCanal" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -8)
-script = ExtResource("11_omq18")
+script = ExtResource("11_r0odg")
 prompt_text = "[E] Смотреть на канал и город"
 dialogue_lines = PackedStringArray("Склад стоит чуть в стороне — канал и грузовые видны целиком.", "Две полосы: корабли в город и из города. Вдали — ворота и мегаструктура Вастерсы.", "Рядом торчит районная башня. Мостки уходят в туман.")
 change_scene_to = ""
@@ -2370,16 +2370,16 @@ unlock_glossary = PackedStringArray()
 
 [node name="Mesh" type="MeshInstance3D" parent="LookAtCanal"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
-material_override = SubResource("StandardMaterial3D_ackw2")
-mesh = SubResource("BoxMesh_7mc82")
+material_override = SubResource("StandardMaterial3D_embr5")
+mesh = SubResource("BoxMesh_n3k70")
 
 [node name="Collision" type="CollisionShape3D" parent="LookAtCanal"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-shape = SubResource("BoxShape3D_718gx")
+shape = SubResource("BoxShape3D_ximwy")
 
 [node name="ShipHold" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 0, -14)
-script = ExtResource("11_omq18")
+script = ExtResource("11_r0odg")
 prompt_text = "[E] Заглянуть в трюм"
 dialogue_lines = PackedStringArray("Люк приоткрыт. Внизу — темнота и запах гниющей рыбы.", "Кто-то оставил там бочку без марки. Лучше не спрашивать.")
 change_scene_to = ""
@@ -2387,16 +2387,16 @@ unlock_glossary = PackedStringArray()
 
 [node name="Mesh" type="MeshInstance3D" parent="ShipHold"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
-material_override = SubResource("StandardMaterial3D_0a3k7")
-mesh = SubResource("BoxMesh_5f3vi")
+material_override = SubResource("StandardMaterial3D_puj6g")
+mesh = SubResource("BoxMesh_qv8h5")
 
 [node name="Collision" type="CollisionShape3D" parent="ShipHold"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
-shape = SubResource("BoxShape3D_jsbet")
+shape = SubResource("BoxShape3D_1m3f6")
 
 [node name="CraneLever" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.5, 0, -8)
-script = ExtResource("11_omq18")
+script = ExtResource("11_r0odg")
 prompt_text = "[E] Рычаг крана"
 dialogue_lines = PackedStringArray("Старый портовый кран. Рычаг тёплый — недавно дергали.", "Стрела висит над водой. Сейчас тебе его не дадут.")
 change_scene_to = ""
@@ -2404,16 +2404,16 @@ unlock_glossary = PackedStringArray()
 
 [node name="Mesh" type="MeshInstance3D" parent="CraneLever"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-material_override = SubResource("StandardMaterial3D_jknu6")
-mesh = SubResource("BoxMesh_cgqk7")
+material_override = SubResource("StandardMaterial3D_5vvvu")
+mesh = SubResource("BoxMesh_v888k")
 
 [node name="Collision" type="CollisionShape3D" parent="CraneLever"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-shape = SubResource("BoxShape3D_ojc2a")
+shape = SubResource("BoxShape3D_5agwy")
 
 [node name="ContrabandBarrel" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 17)
-script = ExtResource("11_omq18")
+script = ExtResource("11_r0odg")
 prompt_text = "[E] Бочка без марки"
 dialogue_lines = PackedStringArray("Бочка без клейма. От неё тянет сладкой гнилью и маслом.", "Тон Тон орёт, чтобы «не нюхать чужое». Значит, нюхать можно.")
 change_scene_to = ""
@@ -2421,16 +2421,16 @@ unlock_glossary = PackedStringArray()
 
 [node name="Mesh" type="MeshInstance3D" parent="ContrabandBarrel"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
-material_override = SubResource("StandardMaterial3D_hj6mh")
-mesh = SubResource("BoxMesh_5cijg")
+material_override = SubResource("StandardMaterial3D_4q76i")
+mesh = SubResource("BoxMesh_7iqgp")
 
 [node name="Collision" type="CollisionShape3D" parent="ContrabandBarrel"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
-shape = SubResource("BoxShape3D_6h0sr")
+shape = SubResource("BoxShape3D_w1p23")
 
 [node name="BackToAlley" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 32)
-script = ExtResource("11_omq18")
+script = ExtResource("11_r0odg")
 prompt_text = "[E] Вернуться в Грибной район"
 dialogue_lines = PackedStringArray("Узкий проход между штабелями ящиков — единственная дорога назад.")
 change_scene_to = "res://scenes/alley.tscn"
@@ -2438,16 +2438,16 @@ unlock_glossary = PackedStringArray()
 
 [node name="Mesh" type="MeshInstance3D" parent="BackToAlley"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
-material_override = SubResource("StandardMaterial3D_62ii7")
-mesh = SubResource("BoxMesh_ypccj")
+material_override = SubResource("StandardMaterial3D_rgaut")
+mesh = SubResource("BoxMesh_dnsvd")
 
 [node name="Collision" type="CollisionShape3D" parent="BackToAlley"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
-shape = SubResource("BoxShape3D_x8wmi")
+shape = SubResource("BoxShape3D_0grd8")
 
 [node name="Player" type="CharacterBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0.05, 6)
-script = ExtResource("12_u5f38")
+script = ExtResource("12_lsl0d")
 walk_speed = 4.0
 sprint_speed = 6.8
 crouch_speed = 2.2
@@ -2462,7 +2462,7 @@ crouch_cam_y = 0.38
 
 [node name="Collision" type="CollisionShape3D" parent="Player"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-shape = SubResource("CapsuleShape3D_ldjdx")
+shape = SubResource("CapsuleShape3D_np4cc")
 
 [node name="Camera3D" type="Camera3D" parent="Player"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
@@ -2497,4 +2497,4 @@ offset_top = -36.0
 offset_right = -16.0
 offset_bottom = -10.0
 theme_override_font_sizes/font_size = 14
-text = "WASD · Shift бег · Ctrl присед · Пробел · E · I инвентарь · Esc"
+text = "WASD · Shift · Ctrl · Пробел · E · I инв · K навыки · Esc"

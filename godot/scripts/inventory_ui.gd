@@ -32,6 +32,9 @@ func open_inventory() -> void:
 	var name_ui := get_node_or_null("/root/NameEntry")
 	if name_ui and name_ui.has_method("is_open") and bool(name_ui.call("is_open")):
 		return
+	var skills := get_node_or_null("/root/Skills")
+	if skills and skills.has_method("is_open") and bool(skills.call("is_open")):
+		return
 	_tab = "items"
 	_refresh()
 	_panel.visible = true
@@ -248,6 +251,9 @@ func _ui_blocked_by_other() -> bool:
 		return true
 	var name_ui := get_node_or_null("/root/NameEntry")
 	if name_ui and name_ui.has_method("is_open") and bool(name_ui.call("is_open")):
+		return true
+	var skills := get_node_or_null("/root/Skills")
+	if skills and skills.has_method("is_open") and bool(skills.call("is_open")):
 		return true
 	return false
 

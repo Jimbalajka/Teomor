@@ -20,10 +20,46 @@ var money_nb: int = 10
 var money_vb: int = 0
 var glossary: Dictionary = {}  # id -> {name, description}
 
+## Phase 5 skills (столбы; полное древо — отдельный OK)
+var madness: int = 0
+var skill_points: int = 2
+var skills: Dictionary = {
+	"might": 10,
+	"mind": 10,
+	"motor": 10,
+	"core": 10,
+}
+var skill_floor: Dictionary = {
+	"might": 10,
+	"mind": 10,
+	"motor": 10,
+	"core": 10,
+}
+
 const APPEARANCE_LABELS := {
 	"gaunt": "Худой, впалый",
 	"common": "Обычный дес",
 	"stocky": "Тяжёлый, узловатый",
+}
+
+const SKILL_ORDER := ["might", "mind", "motor", "core"]
+const SKILL_META := {
+	"might": {
+		"name": "Мощь",
+		"blurb": "Тело, удар, ноша, стойкость. Дар силы без магии.",
+	},
+	"mind": {
+		"name": "Разум",
+		"blurb": "Память, чтение людей и схем. Для никчемыша — без сферидов, но с головой.",
+	},
+	"motor": {
+		"name": "Моторика",
+		"blurb": "Точность рук, шаг, взлом, уклонение. То, что спасает в сырых щелях.",
+	},
+	"core": {
+		"name": "Стержень",
+		"blurb": "Воля против вони Вастерса и безумия. Держит деса собранным.",
+	},
 }
 
 const GLOSSARY_BASE := {
@@ -49,6 +85,7 @@ const GLOSSARY_BASE := {
 func _ready() -> void:
 	_seed_diary()
 	_seed_inventory()
+	_seed_skills()
 
 
 func _seed_diary() -> void:
@@ -87,6 +124,7 @@ func set_appearance(value: String) -> void:
 		appearance_id = value
 	else:
 		appearance_id = "common"
+	apply_appearance_skills(appearance_id)
 	if has_mirror_setup():
 		add_note(
 			"mirror_look",
@@ -272,3 +310,119 @@ func inventory_status_line() -> String:
 	return "Слоты %d/%d · Квест. %d · Глоссарий %d · НБ %d" % [
 		inventory.size(), INV_CAPACITY, quest_items.size(), glossary.size(), money_nb
 	]
+
+
+func _seed_skills() -> void:
+	apply_appearance_skills(appearance_id if not appearance_id.is_empty() else "common")
+	# стартовый запас на плейтест; зеркало может сбросить шаблон, очки вернём
+	skill_points = 2
+
+
+func apply_appearance_skills(appearance: String) -> void:
+	var a := appearance
+	if a.is_empty():
+		a = "common"
+	var template := {"might": 10, "mind": 10, "motor": 10, "core": 10}
+	match a:
+		"gaunt":
+			template = {"might": 8, "mind": 12, "motor": 12, "core": 10}
+		"stocky":
+			template = {"might": 13, "mind": 9, "motor": 8, "core": 12}
+		_:
+			template = {"might": 10, "mind": 10, "motor": 10, "core": 10}
+	for k in SKILL_ORDER:
+		var v := int(template[k])
+		skills[k] = v
+		skill_floor[k] = v
+	skill_points = 2
+
+
+func skill_name(skill_id: String) -> String:
+	if SKILL_META.has(skill_id):
+		return str(SKILL_META[skill_id].get("name", skill_id))
+	return skill_id
+
+
+func skill_blurb(skill_id: String) -> String:
+	if SKILL_META.has(skill_id):
+		return str(SKILL_META[skill_id].get("blurb", ""))
+	return ""
+
+
+func get_skill(skill_id: String) -> int:
+	return int(skills.get(skill_id, 10))
+
+
+func skill_modifier(skill_id: String) -> int:
+	return int(floor((float(get_skill(skill_id)) - 10.0) / 2.0))
+
+
+func can_raise_skill(skill_id: String) -> bool:
+	if not skills.has(skill_id):
+		return false
+	return skill_points > 0 and get_skill(skill_id) < 18
+
+
+func can_lower_skill(skill_id: String) -> bool:
+	if not skills.has(skill_id):
+		return false
+	return get_skill(skill_id) > int(skill_floor.get(skill_id, 8))
+
+
+func raise_skill(skill_id: String) -> bool:
+	if not can_raise_skill(skill_id):
+		return false
+	skills[skill_id] = get_skill(skill_id) + 1
+	skill_points -= 1
+	return true
+
+
+func lower_skill(skill_id: String) -> bool:
+	if not can_lower_skill(skill_id):
+		return false
+	skills[skill_id] = get_skill(skill_id) - 1
+	skill_points += 1
+	return true
+
+
+func skills_status_line() -> String:
+	var bits: PackedStringArray = []
+	for k in SKILL_ORDER:
+		var mod := skill_modifier(k)
+		var mod_s := ("+%d" % mod) if mod >= 0 else str(mod)
+		bits.append("%s %d (%s)" % [skill_name(k), get_skill(k), mod_s])
+	bits.append("очки: %d" % skill_points)
+	bits.append("безумие: %d" % madness)
+	return " · ".join(bits)
+
+
+## d20 + модификатор; для плейтеста/будущих проверок.
+func roll_skill_check(skill_id: String, dc: int = 12) -> Dictionary:
+	var roll := int(randi_range(1, 20))
+	var mod := skill_modifier(skill_id)
+	var total := roll + mod
+	var ok := total >= dc
+	return {
+		"skill": skill_id,
+		"name": skill_name(skill_id),
+		"roll": roll,
+		"mod": mod,
+		"total": total,
+		"dc": dc,
+		"ok": ok,
+	}
+
+
+func format_skill_check(result: Dictionary) -> String:
+	var mod := int(result.get("mod", 0))
+	var mod_s := ("+%d" % mod) if mod >= 0 else str(mod)
+	var verdict := "успех" if bool(result.get("ok", false)) else "провал"
+	return "%s: d20=%d %s = %d против DC %d — %s." % [
+		str(result.get("name", "?")),
+		int(result.get("roll", 0)),
+		mod_s,
+		int(result.get("total", 0)),
+		int(result.get("dc", 0)),
+		verdict,
+	]
+
