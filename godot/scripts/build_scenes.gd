@@ -58,6 +58,9 @@ const MESH_KENNEY := "res://assets/meshes/props/kenney/"
 const MESH_PROPSLITE := "res://assets/meshes/props/propslite/"
 const MESH_DUNGEON := "res://assets/meshes/props/dungeon_items/"
 const MESH_PROTO := "res://assets/meshes/modular/proto/"
+const MESH_MUSH := "res://assets/meshes/props/mushrooms/"
+const MESH_CHAR := "res://assets/meshes/props/character/"
+const MESH_HUMANOID := "res://assets/meshes/props/humanoid/"
 
 
 ## Instance glb prop via GLTFDocument (works headless without .import).
@@ -328,48 +331,156 @@ func _static_box(name: String, size: Vector3, pos: Vector3, color: Color, tex_na
 	return body
 
 
-func _mushroom(name: String, pos: Vector3, scale: float = 1.0) -> StaticBody3D:
+var _mush_rr: int = 0
+var _img_tex_cache: Dictionary = {}
+
+
+func _load_image_tex(res_path: String) -> Texture2D:
+	if _img_tex_cache.has(res_path):
+		return _img_tex_cache[res_path]
+	var abs_path := ProjectSettings.globalize_path(res_path) if res_path.begins_with("res://") else res_path
+	if not FileAccess.file_exists(abs_path):
+		return null
+	var img := Image.new()
+	if img.load(abs_path) != OK:
+		return null
+	var tex := ImageTexture.create_from_image(img)
+	_img_tex_cache[res_path] = tex
+	return tex
+
+
+func _apply_albedo_tex(node: Node, tex: Texture2D, multiply: Color = Color(1, 1, 1, 1)) -> void:
+	if node is MeshInstance3D and tex != null:
+		var mi := node as MeshInstance3D
+		var mat := StandardMaterial3D.new()
+		mat.albedo_texture = tex
+		mat.albedo_color = multiply
+		mat.roughness = 0.92
+		mi.material_override = mat
+	for c in node.get_children():
+		_apply_albedo_tex(c, tex, multiply)
+
+
+func _hide_named_meshes(node: Node, needle: String) -> void:
+	if node is MeshInstance3D:
+		var nm := String(node.name)
+		# Match Overlapping but not NotOverlapping.
+		if needle in nm and not ("Not" + needle) in nm:
+			(node as MeshInstance3D).visible = false
+	for c in node.get_children():
+		_hide_named_meshes(c, needle)
+
+
+func _instance_glb(res_path: String, uniform_scale: float = 1.0) -> Node3D:
+	var holder := Node3D.new()
+	var abs_path := ProjectSettings.globalize_path(res_path) if res_path.begins_with("res://") else res_path
+	if not FileAccess.file_exists(abs_path):
+		return holder
+	var doc := GLTFDocument.new()
+	var state := GLTFState.new()
+	if doc.append_from_file(abs_path, state) != OK:
+		return holder
+	var scn := doc.generate_scene(state)
+	if scn == null:
+		return holder
+	scn.scale = Vector3.ONE * uniform_scale
+	holder.add_child(scn)
+	return holder
+
+
+func _mushroom(name: String, pos: Vector3, scale: float = 1.0, variant: int = -1) -> StaticBody3D:
 	var body := StaticBody3D.new()
 	body.name = name
 	body.position = pos
-	var stem_mat := _style_mat(C_PURPLE.darkened(0.25), 0.25, 0.9, Color(0, 0, 0), 0.0, 11, TEX_FLESH, 1.1)
-	var stem := MeshInstance3D.new()
-	stem.name = "Stem"
-	var stem_mesh := CylinderMesh.new()
-	stem_mesh.top_radius = 0.05 * scale
-	stem_mesh.bottom_radius = 0.08 * scale
-	stem_mesh.height = 0.28 * scale
-	stem.mesh = stem_mesh
-	stem.position = Vector3(0, 0.14 * scale, 0)
-	stem.material_override = stem_mat
-	body.add_child(stem)
-	var cap := MeshInstance3D.new()
-	cap.name = "Cap"
-	var cap_mesh := SphereMesh.new()
-	cap_mesh.radius = 0.16 * scale
-	cap_mesh.height = 0.18 * scale
-	cap.mesh = cap_mesh
-	cap.position = Vector3(0, 0.32 * scale, 0)
-	cap.material_override = _style_mat(C_PURPLE_GLOW, 0.12, 0.85, C_PURPLE_GLOW, 0.55, 17, TEX_CAP, 1.3)
-	body.add_child(cap)
-	# tiny spores around base
-	for i in range(3):
-		var spore := MeshInstance3D.new()
-		spore.name = "Spore_%d" % i
-		var sm := SphereMesh.new()
-		sm.radius = 0.035 * scale * (1.0 + float(i) * 0.15)
-		sm.height = sm.radius * 2.0
-		spore.mesh = sm
-		var ang := float(i) * 2.1
-		spore.position = Vector3(cos(ang) * 0.12 * scale, 0.03 * scale, sin(ang) * 0.12 * scale)
-		spore.material_override = _style_mat(C_PURPLE, 0.2, 0.9, C_PURPLE_GLOW, 0.35, 20 + i, TEX_FLESH, 1.6)
-		body.add_child(spore)
+	var idx := variant
+	if idx < 0:
+		_mush_rr = (_mush_rr % 8) + 1
+		idx = _mush_rr
+	idx = clampi(idx, 1, 8)
+	var res_path := MESH_MUSH + "Mushroom%d_SM.glb" % idx
+	var abs_path := ProjectSettings.globalize_path(res_path)
+	var loaded := false
+	if FileAccess.file_exists(abs_path):
+		var doc := GLTFDocument.new()
+		var state := GLTFState.new()
+		if doc.append_from_file(abs_path, state) == OK:
+			var scn := doc.generate_scene(state)
+			if scn != null:
+				# Pack mushrooms ~0.45 m; scale is relative visual size.
+				scn.scale = Vector3.ONE * scale
+				body.add_child(scn)
+				var tex := _load_image_tex(MESH_MUSH + "Mushrooms_T.png")
+				if tex != null:
+					# Soft purple multiply so pack reads as Грибной, not stock green.
+					_apply_albedo_tex(scn, tex, Color(0.92, 0.72, 1.05))
+				loaded = true
+	if not loaded:
+		# Procedural fallback if GLB missing.
+		var stem_mat := _style_mat(C_PURPLE.darkened(0.25), 0.25, 0.9, Color(0, 0, 0), 0.0, 11, TEX_FLESH, 1.1)
+		var stem := MeshInstance3D.new()
+		stem.name = "Stem"
+		var stem_mesh := CylinderMesh.new()
+		stem_mesh.top_radius = 0.05 * scale
+		stem_mesh.bottom_radius = 0.08 * scale
+		stem_mesh.height = 0.28 * scale
+		stem.mesh = stem_mesh
+		stem.position = Vector3(0, 0.14 * scale, 0)
+		stem.material_override = stem_mat
+		body.add_child(stem)
+		var cap := MeshInstance3D.new()
+		cap.name = "Cap"
+		var cap_mesh := SphereMesh.new()
+		cap_mesh.radius = 0.16 * scale
+		cap_mesh.height = 0.18 * scale
+		cap.mesh = cap_mesh
+		cap.position = Vector3(0, 0.32 * scale, 0)
+		cap.material_override = _style_mat(C_PURPLE_GLOW, 0.12, 0.85, C_PURPLE_GLOW, 0.55, 17, TEX_CAP, 1.3)
+		body.add_child(cap)
+		for i in range(3):
+			var spore := MeshInstance3D.new()
+			spore.name = "Spore_%d" % i
+			var sm := SphereMesh.new()
+			sm.radius = 0.035 * scale * (1.0 + float(i) * 0.15)
+			sm.height = sm.radius * 2.0
+			spore.mesh = sm
+			var ang := float(i) * 2.1
+			spore.position = Vector3(cos(ang) * 0.12 * scale, 0.03 * scale, sin(ang) * 0.12 * scale)
+			spore.material_override = _style_mat(C_PURPLE, 0.2, 0.9, C_PURPLE_GLOW, 0.35, 20 + i, TEX_FLESH, 1.6)
+			body.add_child(spore)
 	var col := CollisionShape3D.new()
 	col.name = "Collision"
 	var shape := SphereShape3D.new()
 	shape.radius = 0.18 * scale
 	col.shape = shape
-	col.position = Vector3(0, 0.24 * scale, 0)
+	col.position = Vector3(0, 0.22 * scale, 0)
+	body.add_child(col)
+	return body
+
+
+func _mushroom_cluster(name: String, pos: Vector3, scale: float = 1.0, glow: bool = false) -> StaticBody3D:
+	var body := StaticBody3D.new()
+	body.name = name
+	body.position = pos
+	var res_path := MESH_MUSH + "MushroomCluster_SM.glb"
+	var abs_path := ProjectSettings.globalize_path(res_path)
+	if FileAccess.file_exists(abs_path):
+		var doc := GLTFDocument.new()
+		var state := GLTFState.new()
+		if doc.append_from_file(abs_path, state) == OK:
+			var scn := doc.generate_scene(state)
+			if scn != null:
+				scn.scale = Vector3.ONE * scale
+				body.add_child(scn)
+				var tex := _load_image_tex(MESH_MUSH + "MushroomCluster_T.png")
+				var mul := Color(1.05, 0.7, 1.15) if glow else Color(0.9, 0.75, 1.0)
+				if tex != null:
+					_apply_albedo_tex(scn, tex, mul)
+	var col := CollisionShape3D.new()
+	col.name = "Collision"
+	var shape := SphereShape3D.new()
+	shape.radius = 0.22 * scale
+	col.shape = shape
+	col.position = Vector3(0, 0.16 * scale, 0)
 	body.add_child(col)
 	return body
 
@@ -893,7 +1004,7 @@ func _save_attic() -> Error:
 		PackedStringArray())
 
 	# Form break: spore deposits / ink streaks
-	_growth_blob(root, "Growth_AtticBig", Vector3(-2.6, 0.35, 1.6), 0.28, true)
+	root.add_child(_mushroom_cluster("Growth_AtticBig", Vector3(-2.6, 0.0, 1.6), 1.5, true))
 	_growth_blob(root, "Growth_AtticWall", Vector3(2.85, 1.1, 0.2), 0.18, false)
 	_ink_streak(root, "InkSeam1", Vector3(0.0, 1.3, -2.45), Vector3(2.2, 0.08, 0.06))
 	_ink_streak(root, "InkSeam2", Vector3(-2.95, 0.8, 0.4), Vector3(0.06, 1.1, 0.08))
@@ -914,38 +1025,45 @@ func _slab(root: Node, name: String, size: Vector3, pos: Vector3, color: Color, 
 
 func _npc_stub(name: String, pos: Vector3, sitting: bool, prompt: String, lines: PackedStringArray) -> StaticBody3D:
 	var body := _make_interactable(name, pos, prompt, lines)
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.45, 0.42, 0.4)
-	var torso := MeshInstance3D.new()
-	torso.name = "Torso"
-	var torso_mesh := CylinderMesh.new()
-	if sitting:
-		torso_mesh.height = 0.7
-		torso.position = Vector3(0, 0.45, 0)
+	# Standing NPCs use Base Humanoid (~1.80 m GLB, already meters). Sitting keeps compact stub.
+	if not sitting:
+		var hum := _instance_glb(MESH_HUMANOID + "Humanoid.glb", 1.0)
+		hum.name = "Humanoid"
+		_hide_named_meshes(hum, "Overlapping")
+		var skin := _load_image_tex(MESH_HUMANOID + "NonOverlapping.png")
+		if skin != null:
+			_apply_albedo_tex(hum, skin, Color(0.85, 0.78, 0.74))
+		body.add_child(hum)
 	else:
-		torso_mesh.height = 1.1
-		torso.position = Vector3(0, 0.9, 0)
-	torso_mesh.top_radius = 0.2
-	torso_mesh.bottom_radius = 0.22
-	torso.mesh = torso_mesh
-	torso.material_override = mat
-	body.add_child(torso)
-	var head := MeshInstance3D.new()
-	head.name = "Head"
-	var head_mesh := SphereMesh.new()
-	head_mesh.radius = 0.16
-	head_mesh.height = 0.32
-	head.mesh = head_mesh
-	head.position = Vector3(0, 1.05 if sitting else 1.6, 0)
-	head.material_override = mat
-	body.add_child(head)
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = Color(0.45, 0.42, 0.4)
+		var torso := MeshInstance3D.new()
+		torso.name = "Torso"
+		var torso_mesh := CylinderMesh.new()
+		torso_mesh.height = 0.75
+		torso.position = Vector3(0, 0.48, 0)
+		torso_mesh.top_radius = 0.22
+		torso_mesh.bottom_radius = 0.24
+		torso.mesh = torso_mesh
+		torso.material_override = mat
+		body.add_child(torso)
+		var head := MeshInstance3D.new()
+		head.name = "Head"
+		var head_mesh := SphereMesh.new()
+		head_mesh.radius = 0.17
+		head_mesh.height = 0.34
+		head.mesh = head_mesh
+		head.position = Vector3(0, 1.08, 0)
+		head.material_override = mat
+		body.add_child(head)
 	var col := CollisionShape3D.new()
 	col.name = "Collision"
 	var shape := CapsuleShape3D.new()
 	shape.radius = 0.28
-	shape.height = 1.2 if sitting else 1.7
+	# Match Dummy/player ~1.85 when standing.
+	shape.height = 1.25 if sitting else 1.85
 	col.shape = shape
-	col.position = Vector3(0, 0.6 if sitting else 0.95, 0)
+	col.position = Vector3(0, 0.62 if sitting else 0.925, 0)
 	body.add_child(col)
 	return body
 
@@ -1247,7 +1365,7 @@ func _save_alley() -> Error:
 		]))
 
 	# Large fungal deposits + ink seams (form break)
-	_growth_blob(root, "Growth_AlleyMass", Vector3(-0.1, 0.45, 12.6), 0.42, true)
+	root.add_child(_mushroom_cluster("Growth_AlleyMass", Vector3(-0.1, 0.0, 12.6), 2.2, true))
 	_growth_blob(root, "Growth_AlleyCorner", Vector3(-7.2, 0.5, -0.9), 0.32, true)
 	_growth_blob(root, "Growth_AlleyWall", Vector3(7.0, 1.3, 0.2), 0.22, false)
 	_ink_streak(root, "InkAlley1", Vector3(0.0, 2.0, 1.25), Vector3(3.5, 0.07, 0.05))
@@ -2535,18 +2653,40 @@ func _save_asset_room() -> Error:
 	_add_mesh_prop(root, "WallLow", MESH_KENNEY + "wall-low.glb", Vector3(0.8, 0.0, 6.6), 0.0, 1.0, Vector3(1.2, 1.0, 0.3))
 	_add_mesh_prop(root, "StructWall", MESH_KENNEY + "structure-wall.glb", Vector3(2.6, 0.0, 5.0), 90.0, 1.0, Vector3(0.3, 2.2, 1.2))
 
-	# === G: Mushrooms ===
+	# === G: Mushrooms (PS1 Mushroom Asset Pack) ===
 	_zone_label(root, "ZoneMushrooms", Vector3(6.5, 0.0, -6.5), "Грибы / наросты")
-	root.add_child(_mushroom("MushTiny", Vector3(5.2, 0.0, -5.2), 0.6))
-	root.add_child(_mushroom("MushSmall", Vector3(6.0, 0.0, -5.0), 0.9))
-	root.add_child(_mushroom("MushMed", Vector3(7.0, 0.0, -5.3), 1.2))
-	root.add_child(_mushroom("MushLarge", Vector3(8.2, 0.0, -4.8), 1.7))
-	root.add_child(_mushroom("MushWall", Vector3(9.2, 1.1, -5.5), 1.0))
-	_growth_blob(root, "GrowthFloor", Vector3(5.5, 0.15, -3.8), 0.35, false)
-	_growth_blob(root, "GrowthGlow", Vector3(7.2, 0.2, -3.5), 0.45, true)
-	_growth_blob(root, "GrowthCorner", Vector3(9.0, 0.25, -3.2), 0.55, true)
+	root.add_child(_mushroom("Mush1", Vector3(5.2, 0.0, -5.2), 1.0, 1))
+	root.add_child(_mushroom("Mush2", Vector3(6.0, 0.0, -5.0), 1.1, 2))
+	root.add_child(_mushroom("Mush3", Vector3(7.0, 0.0, -5.3), 1.2, 3))
+	root.add_child(_mushroom("Mush4", Vector3(8.0, 0.0, -4.9), 1.3, 4))
+	root.add_child(_mushroom("Mush5", Vector3(5.4, 0.0, -4.0), 1.0, 5))
+	root.add_child(_mushroom("Mush6", Vector3(6.5, 0.0, -3.8), 1.15, 6))
+	root.add_child(_mushroom("Mush7", Vector3(7.6, 0.0, -4.1), 1.05, 7))
+	root.add_child(_mushroom("Mush8", Vector3(8.6, 0.0, -3.7), 1.25, 8))
+	root.add_child(_mushroom_cluster("MushCluster", Vector3(9.2, 0.0, -5.0), 1.6, true))
+	_add_mesh_prop(root, "TreeStump", MESH_MUSH + "TreeStump_SM.glb", Vector3(9.0, 0.0, -3.2), 25.0, 1.0, Vector3(0.7, 0.7, 0.7), Color(0.85, 0.7, 1.05))
+	var stump_tex := _load_image_tex(MESH_MUSH + "Mushrooms_T.png")
+	if stump_tex != null:
+		var stump_n := root.get_node_or_null("TreeStump")
+		if stump_n:
+			_apply_albedo_tex(stump_n, stump_tex, Color(0.8, 0.65, 0.9))
 	_ink_streak(root, "InkPatch1", Vector3(6.5, 0.02, -4.2), Vector3(1.4, 0.04, 0.5))
 	_ink_streak(root, "InkPatch2", Vector3(8.0, 0.02, -3.6), Vector3(0.8, 0.04, 0.9))
+
+	# Height refs: Dummy/Humanoid GLB already ~1.8 m (UFBX unit convert).
+	_zone_label(root, "ZoneChars", Vector3(-6.5, 0.0, -6.5), "Рост: Dummy / Humanoid")
+	var dummy := _instance_glb(MESH_CHAR + "Dummy.glb", 1.0)
+	dummy.name = "DummyRef"
+	dummy.position = Vector3(-7.2, 0.0, -5.2)
+	root.add_child(dummy)
+	var hum_ref := _instance_glb(MESH_HUMANOID + "Humanoid.glb", 1.0)
+	hum_ref.name = "HumanoidRef"
+	hum_ref.position = Vector3(-5.8, 0.0, -5.2)
+	_hide_named_meshes(hum_ref, "Overlapping")
+	var hum_skin := _load_image_tex(MESH_HUMANOID + "NonOverlapping.png")
+	if hum_skin != null:
+		_apply_albedo_tex(hum_ref, hum_skin, Color(0.85, 0.78, 0.74))
+	root.add_child(hum_ref)
 
 	# === H: Vegetation ===
 	_zone_label(root, "ZoneVeg", Vector3(6.5, 0.0, -1.0), "Растительность")
@@ -2576,7 +2716,7 @@ func _save_asset_room() -> Error:
 		PackedStringArray([
 			"Зоны: столы/стулья · кровати · интерьер · двери · окна · перегородки · грибы · растительность · модули.",
 			"Бочки/ящики/двери/окна — готовые Kenney (с цветовым tint). Мебель — плоский цвет без style-текстур.",
-			"Грибы-заглушки procedural, пока нет 3D-пака в incoming. Трек текстур: docs/TEXTURE_TRACK.md"
+			"Грибы — PS1 Mushroom Pack (GLB). Рост НПС = Humanoid/Dummy ~1.8 м. Трек текстур: docs/TEXTURE_TRACK.md"
 		]))
 
 	# Exits

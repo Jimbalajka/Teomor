@@ -1,11 +1,16 @@
 # Meshes — Teomor
 
-- `_src/` — сырые zip с Drive/itch (**gitignore**, не пушить). Сейчас: `model.zip` / распаковка.
-- `props/` — отобранное для сцен (Kenney GLB, PropsLite, Dungeon Items, Dummy)
+- `_src/` — сырые zip с Drive/itch (**gitignore**, не пушить).
+- `props/` — отобранное для сцен:
+  - `kenney/` GLB
+  - `propslite/`, `dungeon_items/`
+  - `mushrooms/` — **PS1 Mushroom Asset Pack** (FBX→GLB + PNG)
+  - `character/Dummy.*`, `humanoid/Humanoid.*` — референс роста ~1.8 м
 - `modular/` — двери/забор proto (CC0)
-- `env/` — HDRI (Daysky)
+- `env/` — HDRI
 
-В сценах: `build_scenes.gd` → `_add_mesh_prop`.
-Приоритет п.2: Kenney barrels/crates/overhang + dungeon gates + proto doors.
+В сценах: `build_scenes.gd` → `_add_mesh_prop` / `_mushroom` / `_mushroom_cluster`.
 
-Не в git (только _src): Medieval Village ~161MB, soiTavern ~322MB, PSX Modular Medieval.
+Шейдер из SourceCode.zip: `assets/shaders/stylized_toon.gdshader` (toon; пока не навешан на всю сцену).
+
+Масштаб / огромный AABB: [`SCALE.md`](SCALE.md).

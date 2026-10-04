@@ -1,5 +1,14 @@
 # CHANGES — Теомор Godot
 
+## 2026-10-04 — PS1 грибы + Humanoid/Dummy
+
+- Intake: `PS1 Mushroom Asset Pack` → `props/mushrooms/` (FBX→GLB + PNG).
+- `Base Humanoid Mesh` освежён в `props/humanoid/`; `Dummy.glb`/`Humanoid.glb` для headless.
+- `_mushroom` / `_mushroom_cluster` берут пак вместо procedural (fallback остаётся).
+- Стоячие НПС → Humanoid ~1.8 м; в asset_room зона роста Dummy/Humanoid.
+- `SourceCode.zip` фактически только `stylized_toon.gdshader` → `assets/shaders/` (не полный пак грибов).
+
+
 Лог решений и изменений. Новые записи — сверху.
 
 ## 2026-10-04 — гайд Krita seamless
