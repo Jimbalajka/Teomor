@@ -14,8 +14,9 @@ func _init() -> void:
 	var e6 := _save_shop()
 	var e7 := _save_central_library()
 	var e8 := _save_playtest()
-	if e1 != OK or e2 != OK or e3 != OK or e4 != OK or e5 != OK or e6 != OK or e7 != OK or e8 != OK:
-		push_error("BUILD_FAIL attic=%s alley=%s warehouse=%s libstreet=%s library=%s shop=%s central=%s playtest=%s" % [e1, e2, e3, e4, e5, e6, e7, e8])
+	var e9 := _save_asset_room()
+	if e1 != OK or e2 != OK or e3 != OK or e4 != OK or e5 != OK or e6 != OK or e7 != OK or e8 != OK or e9 != OK:
+		push_error("BUILD_FAIL attic=%s alley=%s warehouse=%s libstreet=%s library=%s shop=%s central=%s playtest=%s asset_room=%s" % [e1, e2, e3, e4, e5, e6, e7, e8, e9])
 		quit(1)
 		return
 	if FileAccess.file_exists("res://scenes/outside_stub.tscn"):
@@ -2270,6 +2271,26 @@ func _save_playtest() -> Error:
 	cpad.add_child(ccol)
 	root.add_child(cpad)
 
+	# Asset room portal
+	var to_assets := _make_interactable(
+		"ToAssetRoom",
+		Vector3(6.2, 0.0, 4.4),
+		"[E] Комната ассетов",
+		PackedStringArray(["Каталог мебели, дверей, окон, грибов и растительности."]),
+		"res://scenes/asset_room.tscn"
+	)
+	var to_assets_m := _box_mesh(Vector3(1.1, 2.0, 0.2), Color(0.35, 0.42, 0.3))
+	to_assets_m.position = Vector3(0, 1.0, 0)
+	to_assets.add_child(to_assets_m)
+	var to_assets_col := CollisionShape3D.new()
+	to_assets_col.name = "Collision"
+	var to_assets_shape := BoxShape3D.new()
+	to_assets_shape.size = Vector3(1.3, 2.1, 0.5)
+	to_assets_col.shape = to_assets_shape
+	to_assets_col.position = Vector3(0, 1.05, 0)
+	to_assets.add_child(to_assets_col)
+	root.add_child(to_assets)
+
 	# Back to attic
 	var back := _make_interactable(
 		"BackAttic",
@@ -2297,4 +2318,280 @@ func _save_playtest() -> Error:
 	if pack_err != OK:
 		return pack_err
 	return ResourceSaver.save(packed, "res://scenes/playtest.tscn")
+
+func _zone_label(root: Node, name: String, pos: Vector3, title: String) -> void:
+	_poi(root, name, pos, Vector3(1.0, 0.12, 0.7), C_PARCHMENT.darkened(0.05),
+		"[E] " + title,
+		PackedStringArray([title, "Зона каталога ассетов. Смотри модели рядом."]))
+	root.add_child(_static_box(name + "_Post", Vector3(0.08, 1.3, 0.08), pos + Vector3(0, 0.75, -0.35), C_WOOD, TEX_WOOD))
+
+
+func _add_table(root: Node, name: String, pos: Vector3, size: Vector3 = Vector3(1.2, 0.08, 0.7), rot_y: float = 0.0) -> void:
+	var top := _static_box(name + "_Top", size, pos + Vector3(0, 0.72, 0), C_WOOD.lightened(0.05), TEX_WOOD)
+	top.rotation_degrees.y = rot_y
+	root.add_child(top)
+	var leg_h := 0.68
+	var inset_x := size.x * 0.42
+	var inset_z := size.z * 0.38
+	for i in range(4):
+		var sx := -1.0 if i % 2 == 0 else 1.0
+		var sz := -1.0 if i < 2 else 1.0
+		var leg := _static_box("%s_Leg%d" % [name, i], Vector3(0.07, leg_h, 0.07), pos + Vector3(sx * inset_x, leg_h * 0.5, sz * inset_z), C_WOOD.darkened(0.08), TEX_WOOD)
+		leg.rotation_degrees.y = rot_y
+		root.add_child(leg)
+
+
+func _add_chair(root: Node, name: String, pos: Vector3, rot_y: float = 0.0) -> void:
+	var seat := _static_box(name + "_Seat", Vector3(0.42, 0.06, 0.42), pos + Vector3(0, 0.45, 0), C_WOOD.lightened(0.02), TEX_WOOD)
+	seat.rotation_degrees.y = rot_y
+	root.add_child(seat)
+	var back := _static_box(name + "_Back", Vector3(0.42, 0.5, 0.06), pos + Vector3(0, 0.72, -0.18), C_WOOD, TEX_WOOD)
+	back.rotation_degrees.y = rot_y
+	root.add_child(back)
+	for i in range(4):
+		var sx := -1.0 if i % 2 == 0 else 1.0
+		var sz := -1.0 if i < 2 else 1.0
+		var leg := _static_box("%s_Leg%d" % [name, i], Vector3(0.05, 0.42, 0.05), pos + Vector3(sx * 0.16, 0.21, sz * 0.16), C_WOOD.darkened(0.1), TEX_WOOD)
+		leg.rotation_degrees.y = rot_y
+		root.add_child(leg)
+
+
+func _add_bed(root: Node, name: String, pos: Vector3, rot_y: float = 0.0) -> void:
+	var frame := _static_box(name + "_Frame", Vector3(2.0, 0.28, 1.05), pos + Vector3(0, 0.22, 0), C_WOOD.darkened(0.05), TEX_WOOD)
+	frame.rotation_degrees.y = rot_y
+	root.add_child(frame)
+	var mattress := _static_box(name + "_Matt", Vector3(1.85, 0.16, 0.92), pos + Vector3(0, 0.42, 0), C_PARCHMENT.darkened(0.12), TEX_PLASTER)
+	mattress.rotation_degrees.y = rot_y
+	root.add_child(mattress)
+	var pillow := _static_box(name + "_Pillow", Vector3(0.45, 0.12, 0.55), pos + Vector3(-0.65, 0.55, 0), C_PARCHMENT.lightened(0.05), TEX_PLASTER)
+	pillow.rotation_degrees.y = rot_y
+	root.add_child(pillow)
+	var head := _static_box(name + "_Head", Vector3(0.1, 0.7, 1.05), pos + Vector3(-0.95, 0.55, 0), C_WOOD, TEX_WOOD)
+	head.rotation_degrees.y = rot_y
+	root.add_child(head)
+
+
+func _add_shelf(root: Node, name: String, pos: Vector3, rot_y: float = 0.0) -> void:
+	var body := _static_box(name + "_Body", Vector3(1.2, 1.6, 0.35), pos + Vector3(0, 0.8, 0), C_WOOD.darkened(0.02), TEX_WOOD)
+	body.rotation_degrees.y = rot_y
+	root.add_child(body)
+	for i in range(3):
+		var y := 0.35 + float(i) * 0.45
+		var board := _static_box("%s_Board%d" % [name, i], Vector3(1.1, 0.05, 0.32), pos + Vector3(0, y, 0.02), C_WOOD.lightened(0.08), TEX_WOOD)
+		board.rotation_degrees.y = rot_y
+		root.add_child(board)
+
+
+func _add_partition(root: Node, name: String, pos: Vector3, size: Vector3 = Vector3(2.4, 2.2, 0.12), rot_y: float = 0.0) -> void:
+	var wall := _static_box(name, size, pos + Vector3(0, size.y * 0.5, 0), C_PARCHMENT_DARK.lightened(0.05), TEX_PLASTER)
+	wall.rotation_degrees.y = rot_y
+	root.add_child(wall)
+	var rail := _static_box(name + "_Rail", Vector3(size.x, 0.08, size.z + 0.04), pos + Vector3(0, size.y + 0.04, 0), C_WOOD, TEX_WOOD)
+	rail.rotation_degrees.y = rot_y
+	root.add_child(rail)
+
+
+func _add_plant_clump(root: Node, name: String, pos: Vector3, scale: float = 1.0) -> void:
+	# Greybox vegetation: pot + leafy blobs (until author plant meshes).
+	root.add_child(_static_box(name + "_Pot", Vector3(0.28 * scale, 0.22 * scale, 0.28 * scale), pos + Vector3(0, 0.11 * scale, 0), Color(0.35, 0.22, 0.16), TEX_WOOD))
+	_growth_blob(root, name + "_Leaf", pos + Vector3(0, 0.38 * scale, 0), 0.18 * scale, false)
+	var tip := MeshInstance3D.new()
+	tip.name = name + "_Tip"
+	tip.position = pos + Vector3(0.05 * scale, 0.55 * scale, 0.02 * scale)
+	var tip_m := SphereMesh.new()
+	tip_m.radius = 0.1 * scale
+	tip_m.height = 0.16 * scale
+	tip.mesh = tip_m
+	tip.material_override = _style_mat(Color(0.28, 0.36, 0.22), 0.2, 0.95, Color(0, 0, 0), 0.0, 61, TEX_PLASTER, 1.4)
+	root.add_child(tip)
+
+
+func _save_asset_room() -> Error:
+	var root := Node3D.new()
+	root.name = "AssetRoom"
+	root.add_child(_underground_env(
+		Color(0.07, 0.07, 0.08),
+		Color(0.28, 0.26, 0.24),
+		Color(0.2, 0.18, 0.16),
+		0.008,
+		0.62,
+		1.05,
+		0.85
+	))
+	_add_omni(root, "Fill", Vector3(0, 4.5, 0), Color(0.8, 0.76, 0.7), 0.7, 28.0, 1.0, false)
+	_add_omni(root, "WarmA", Vector3(-6, 3.2, -4), Color(0.85, 0.65, 0.4), 0.55, 10.0, 1.3, false)
+	_add_omni(root, "WarmB", Vector3(6, 3.2, 4), Color(0.55, 0.45, 0.7), 0.4, 10.0, 1.3, false)
+
+	# Hall ~22 x 16
+	_slab(root, "Floor", Vector3(22, 0.2, 16), Vector3(0, -0.1, 0), C_WOOD.lightened(0.08), TEX_WOOD)
+	_slab(root, "Ceil", Vector3(22, 0.2, 16), Vector3(0, 4.6, 0), C_INK.lightened(0.14), TEX_INK)
+	_slab(root, "WallN", Vector3(22, 4.6, 0.3), Vector3(0, 2.3, -8.0), C_PARCHMENT_DARK, TEX_PLASTER)
+	_slab(root, "WallS", Vector3(22, 4.6, 0.3), Vector3(0, 2.3, 8.0), C_PARCHMENT_DARK, TEX_PLASTER)
+	_slab(root, "WallW", Vector3(0.3, 4.6, 16), Vector3(-11.0, 2.3, 0), C_STONE.lightened(0.04), TEX_STONE)
+	_slab(root, "WallE", Vector3(0.3, 4.6, 16), Vector3(11.0, 2.3, 0), C_STONE.lightened(0.04), TEX_STONE)
+
+	# Lane markers / aisle rails
+	root.add_child(_static_box("AisleRailW", Vector3(0.08, 0.05, 14), Vector3(-0.5, 0.03, 0), C_INK.lightened(0.2), TEX_INK))
+	root.add_child(_static_box("AisleRailE", Vector3(0.08, 0.05, 14), Vector3(0.5, 0.03, 0), C_INK.lightened(0.2), TEX_INK))
+
+	# === A: Tables & chairs ===
+	_zone_label(root, "ZoneTables", Vector3(-8.5, 0.0, -6.5), "Столы / стулья")
+	_add_table(root, "TableA", Vector3(-8.5, 0.0, -5.0), Vector3(1.4, 0.08, 0.8))
+	_add_chair(root, "ChairA1", Vector3(-8.5, 0.0, -4.2), 0.0)
+	_add_chair(root, "ChairA2", Vector3(-8.5, 0.0, -5.8), 180.0)
+	_add_table(root, "TableB", Vector3(-6.2, 0.0, -5.2), Vector3(0.9, 0.08, 0.9), 15.0)
+	_add_chair(root, "ChairB1", Vector3(-5.5, 0.0, -4.5), -30.0)
+	_add_chair(root, "ChairB2", Vector3(-6.9, 0.0, -5.8), 140.0)
+	_add_table(root, "TableLong", Vector3(-7.4, 0.0, -3.2), Vector3(2.2, 0.08, 0.7))
+	_add_chair(root, "ChairL1", Vector3(-8.1, 0.0, -2.5), 0.0)
+	_add_chair(root, "ChairL2", Vector3(-7.4, 0.0, -2.5), 0.0)
+	_add_chair(root, "ChairL3", Vector3(-6.7, 0.0, -2.5), 0.0)
+
+	# === B: Beds ===
+	_zone_label(root, "ZoneBeds", Vector3(-8.5, 0.0, -0.5), "Кровати")
+	_add_bed(root, "BedA", Vector3(-8.5, 0.0, 1.2), 0.0)
+	_add_bed(root, "BedB", Vector3(-8.5, 0.0, 3.6), 0.0)
+	_add_bed(root, "BedNarrow", Vector3(-5.8, 0.0, 2.2), 90.0)
+
+	# === C: Shelves / interior clutter ===
+	_zone_label(root, "ZoneInterior", Vector3(-8.5, 0.0, 5.5), "Интерьер / хлам")
+	_add_shelf(root, "ShelfA", Vector3(-9.5, 0.0, 6.5), 0.0)
+	_add_shelf(root, "ShelfB", Vector3(-7.8, 0.0, 6.5), 0.0)
+	_add_mesh_prop(root, "CratePile1", MESH_KENNEY + "detail-crate.glb", Vector3(-6.2, 0.0, 5.8), 12.0, 1.0, Vector3(0.7, 0.55, 0.65))
+	_add_mesh_prop(root, "CratePile2", MESH_KENNEY + "detail-crate-ropes.glb", Vector3(-5.4, 0.0, 6.4), -20.0, 1.0, Vector3(0.65, 0.55, 0.6))
+	_add_mesh_prop(root, "BarrelA", MESH_KENNEY + "detail-barrel.glb", Vector3(-4.6, 0.0, 5.6), 30.0, 1.0, Vector3(0.5, 0.7, 0.5))
+	_add_mesh_prop(root, "BarrelB", MESH_KENNEY + "barrels.glb", Vector3(-4.0, 0.0, 6.3), -10.0, 1.0, Vector3(0.55, 0.7, 0.55))
+	_add_candle(root, "CandleShelf", Vector3(-9.3, 1.45, 6.35), 0.7)
+	_add_candle(root, "CandleCrate", Vector3(-6.0, 0.7, 5.6), 0.55)
+	# small desk clutter as boxes
+	root.add_child(_static_box("BottleRow", Vector3(0.5, 0.25, 0.2), Vector3(-7.6, 0.95, 6.35), Color(0.35, 0.45, 0.4), TEX_PLASTER))
+	root.add_child(_static_box("BookStack", Vector3(0.28, 0.22, 0.35), Vector3(-8.1, 0.95, 6.35), Color(0.45, 0.28, 0.2), TEX_WOOD))
+
+	# === D: Doors gallery ===
+	_zone_label(root, "ZoneDoors", Vector3(-2.5, 0.0, -6.5), "Двери")
+	var door_set := [
+		{"n": "DoorWood", "f": "wall-pane-wood-door.glb", "x": -3.5},
+		{"n": "DoorPaint", "f": "wall-paint-door.glb", "x": -1.5},
+		{"n": "DoorFort", "f": "wall-fortified-door.glb", "x": 0.5},
+		{"n": "DoorPane", "f": "wall-pane-door.glb", "x": 2.5},
+	]
+	for d in door_set:
+		_add_mesh_prop(root, str(d["n"]), MESH_KENNEY + str(d["f"]), Vector3(float(d["x"]), 0.0, -5.2), 0.0, 1.15, Vector3(1.1, 2.4, 0.35))
+	_add_mesh_prop(root, "GateSample", MESH_KENNEY + "wall-gate.glb", Vector3(-0.5, 0.0, -3.4), 0.0, 1.0, Vector3(1.2, 2.5, 0.4))
+	_add_mesh_prop(root, "DoorFortPaint", MESH_KENNEY + "wall-fortified-paint-door.glb", Vector3(2.2, 0.0, -3.5), 0.0, 1.1, Vector3(1.1, 2.4, 0.35))
+
+	# === E: Windows gallery ===
+	_zone_label(root, "ZoneWindows", Vector3(-2.5, 0.0, -1.2), "Окна")
+	var win_set := [
+		{"n": "WinWood", "f": "wall-pane-wood-window.glb", "x": -3.5},
+		{"n": "WinPaint", "f": "wall-paint-window.glb", "x": -1.5},
+		{"n": "WinFort", "f": "wall-fortified-window.glb", "x": 0.5},
+		{"n": "WinPane", "f": "wall-pane-window.glb", "x": 2.5},
+	]
+	for w in win_set:
+		_add_mesh_prop(root, str(w["n"]), MESH_KENNEY + str(w["f"]), Vector3(float(w["x"]), 0.0, -0.2), 0.0, 1.1, Vector3(1.0, 2.2, 0.35))
+	_add_window_frame(root, "WinGreybox1", Vector3(-3.2, 1.6, 1.5), Vector3(0.9, 1.0, 0.1))
+	_add_window_frame(root, "WinGreybox2", Vector3(-1.5, 1.7, 1.5), Vector3(0.7, 0.85, 0.1))
+	_add_window_frame(root, "WinGreybox3", Vector3(0.2, 1.55, 1.5), Vector3(1.1, 0.7, 0.1))
+
+	# === F: Partitions ===
+	_zone_label(root, "ZonePartitions", Vector3(-2.5, 0.0, 3.2), "Перегородки")
+	_add_partition(root, "PartA", Vector3(-3.8, 0.0, 4.5), Vector3(2.6, 2.1, 0.1), 0.0)
+	_add_partition(root, "PartB", Vector3(-0.8, 0.0, 4.5), Vector3(2.2, 1.6, 0.1), 0.0)
+	_add_partition(root, "PartAngle", Vector3(1.6, 0.0, 5.6), Vector3(2.0, 2.3, 0.12), 35.0)
+	_add_mesh_prop(root, "FenceWood", MESH_KENNEY + "fence-wood.glb", Vector3(-3.5, 0.0, 6.6), 0.0, 1.2, Vector3(1.5, 0.9, 0.2))
+	_add_mesh_prop(root, "FenceLow", MESH_KENNEY + "fence.glb", Vector3(-1.5, 0.0, 6.6), 0.0, 1.1, Vector3(1.4, 0.8, 0.2))
+	_add_mesh_prop(root, "WallLow", MESH_KENNEY + "wall-low.glb", Vector3(0.8, 0.0, 6.6), 0.0, 1.0, Vector3(1.2, 1.0, 0.3))
+	_add_mesh_prop(root, "StructWall", MESH_KENNEY + "structure-wall.glb", Vector3(2.6, 0.0, 5.0), 90.0, 1.0, Vector3(0.3, 2.2, 1.2))
+
+	# === G: Mushrooms ===
+	_zone_label(root, "ZoneMushrooms", Vector3(6.5, 0.0, -6.5), "Грибы / наросты")
+	root.add_child(_mushroom("MushTiny", Vector3(5.2, 0.0, -5.2), 0.6))
+	root.add_child(_mushroom("MushSmall", Vector3(6.0, 0.0, -5.0), 0.9))
+	root.add_child(_mushroom("MushMed", Vector3(7.0, 0.0, -5.3), 1.2))
+	root.add_child(_mushroom("MushLarge", Vector3(8.2, 0.0, -4.8), 1.7))
+	root.add_child(_mushroom("MushWall", Vector3(9.2, 1.1, -5.5), 1.0))
+	_growth_blob(root, "GrowthFloor", Vector3(5.5, 0.15, -3.8), 0.35, false)
+	_growth_blob(root, "GrowthGlow", Vector3(7.2, 0.2, -3.5), 0.45, true)
+	_growth_blob(root, "GrowthCorner", Vector3(9.0, 0.25, -3.2), 0.55, true)
+	_ink_streak(root, "InkPatch1", Vector3(6.5, 0.02, -4.2), Vector3(1.4, 0.04, 0.5))
+	_ink_streak(root, "InkPatch2", Vector3(8.0, 0.02, -3.6), Vector3(0.8, 0.04, 0.9))
+
+	# === H: Vegetation ===
+	_zone_label(root, "ZoneVeg", Vector3(6.5, 0.0, -1.0), "Растительность")
+	_add_mesh_prop(root, "TreeLarge", MESH_KENNEY + "tree-large.glb", Vector3(5.5, 0.0, 0.5), 20.0, 1.0, Vector3(1.2, 2.5, 1.2))
+	_add_mesh_prop(root, "TreeShrub1", MESH_KENNEY + "tree-shrub.glb", Vector3(7.4, 0.0, 0.2), -15.0, 1.2, Vector3(0.8, 1.2, 0.8))
+	_add_mesh_prop(root, "TreeShrub2", MESH_KENNEY + "tree-shrub.glb", Vector3(8.6, 0.0, 1.0), 40.0, 0.9, Vector3(0.7, 1.0, 0.7))
+	_add_plant_clump(root, "PlantA", Vector3(5.0, 0.0, 2.2), 1.0)
+	_add_plant_clump(root, "PlantB", Vector3(5.8, 0.0, 2.5), 1.3)
+	_add_plant_clump(root, "PlantC", Vector3(6.7, 0.0, 2.1), 0.8)
+	_add_plant_clump(root, "PlantD", Vector3(7.8, 0.0, 2.6), 1.1)
+	# hanging vine strips
+	root.add_child(_static_box("Vine1", Vector3(0.08, 1.6, 0.08), Vector3(9.3, 2.4, 0.8), Color(0.25, 0.35, 0.2), TEX_PLASTER))
+	root.add_child(_static_box("Vine2", Vector3(0.1, 2.0, 0.08), Vector3(9.5, 2.2, 1.3), Color(0.22, 0.32, 0.18), TEX_PLASTER))
+	root.add_child(_static_box("VineLeaf", Vector3(0.35, 0.2, 0.12), Vector3(9.35, 1.7, 1.0), Color(0.3, 0.4, 0.22), TEX_PLASTER))
+
+	# === I: Modular walls / columns sample ===
+	_zone_label(root, "ZoneModular", Vector3(6.5, 0.0, 4.5), "Модули стен")
+	_add_mesh_prop(root, "ColWood", MESH_KENNEY + "column-wood.glb", Vector3(5.0, 0.0, 5.8), 0.0, 1.0, Vector3(0.45, 2.4, 0.45))
+	_add_mesh_prop(root, "ColStone", MESH_KENNEY + "column.glb", Vector3(6.2, 0.0, 5.8), 0.0, 1.0, Vector3(0.45, 2.4, 0.45))
+	_add_mesh_prop(root, "WallSample", MESH_KENNEY + "wall.glb", Vector3(8.0, 0.0, 5.5), 0.0, 1.0, Vector3(1.2, 2.4, 0.35))
+	_add_mesh_prop(root, "StairsWood", MESH_KENNEY + "stairs-wood.glb", Vector3(9.2, 0.0, 4.2), -90.0, 1.0, Vector3(1.2, 1.2, 1.5))
+	_add_mesh_prop(root, "WoodFloorTile", MESH_KENNEY + "wood-floor.glb", Vector3(7.0, 0.0, 4.0), 0.0, 1.0, Vector3.ZERO)
+
+	# Legend board near spawn
+	_poi(root, "AssetLegend", Vector3(0.0, 0.0, 6.5), Vector3(2.2, 0.15, 0.9), C_PARCHMENT,
+		"[E] Каталог ассетов",
+		PackedStringArray([
+			"Зоны: столы/стулья · кровати · интерьер · двери · окна · перегородки · грибы · растительность · модули.",
+			"Мебель пока greybox (столы/стулья/кровати/полки). Двери/окна/деревья — Kenney GLB.",
+			"Текстурный трек-лист: docs/TEXTURE_TRACK.md"
+		]))
+
+	# Exits
+	var back_pt := _make_interactable(
+		"BackPlaytest",
+		Vector3(0.0, 0.0, 7.4),
+		"[E] Назад в плейтест",
+		PackedStringArray(["Обратно в песочницу механик."]),
+		"res://scenes/playtest.tscn"
+	)
+	var back_m := _box_mesh(Vector3(1.4, 2.0, 0.2), Color(0.25, 0.3, 0.38))
+	back_m.position = Vector3(0, 1.0, 0)
+	back_pt.add_child(back_m)
+	var bcol := CollisionShape3D.new()
+	bcol.name = "Collision"
+	var bshape := BoxShape3D.new()
+	bshape.size = Vector3(1.6, 2.1, 0.5)
+	bcol.shape = bshape
+	bcol.position = Vector3(0, 1.05, 0)
+	back_pt.add_child(bcol)
+	root.add_child(back_pt)
+
+	var to_attic := _make_interactable(
+		"ToAttic",
+		Vector3(-2.5, 0.0, 7.4),
+		"[E] На чердак",
+		PackedStringArray(["Выход на чердак."]),
+		"res://scenes/attic.tscn"
+	)
+	var attic_m := _box_mesh(Vector3(1.2, 2.0, 0.2), Color(0.4, 0.32, 0.22))
+	attic_m.position = Vector3(0, 1.0, 0)
+	to_attic.add_child(attic_m)
+	var acol := CollisionShape3D.new()
+	acol.name = "Collision"
+	var ashape := BoxShape3D.new()
+	ashape.size = Vector3(1.4, 2.1, 0.5)
+	acol.shape = ashape
+	acol.position = Vector3(0, 1.05, 0)
+	to_attic.add_child(acol)
+	root.add_child(to_attic)
+
+	_add_player(root, Vector3(0.0, 0.9, 5.5))
+	_mark_owners(root, root)
+	var packed := PackedScene.new()
+	var pack_err := packed.pack(root)
+	if pack_err != OK:
+		return pack_err
+	return ResourceSaver.save(packed, "res://scenes/asset_room.tscn")
 

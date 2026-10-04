@@ -40,3 +40,5 @@ godot4 --path . --headless -s res://scripts/build_scenes.gd
 
 ## Hand-paint
 Бесшовка в Krita: [`KRITA_SEAMLESS.md`](KRITA_SEAMLESS.md).
+
+Трек-лист слотов (пол ≠ стены ≠ мебель): [`TEXTURE_TRACK.md`](TEXTURE_TRACK.md).
