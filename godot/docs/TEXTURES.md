@@ -42,3 +42,14 @@ godot4 --path . --headless -s res://scripts/build_scenes.gd
 Бесшовка в Krita: [`KRITA_SEAMLESS.md`](KRITA_SEAMLESS.md).
 
 Трек-лист слотов (пол ≠ стены ≠ мебель): [`TEXTURE_TRACK.md`](TEXTURE_TRACK.md).
+
+## PSX free packs → палитра якоря (2026-10-08)
+Сырьё (gitignore `_src/author/`):
+- `PSX_Horror_Textures_FREE_Sample`
+- `psx-textures-free`
+- `retro-64-textures-free`
+
+Структура (пиксель/швы) взята из паков; цвет перегнан скриптом
+`scripts/tools/remap_psx_palette.py` в базы якоря: пергамент / пурпур / чернила.
+Рабочие 512 снова в `assets/textures/author/` (+ зеркала attic/alley в `style/`).
+Пересборка: `python3 scripts/tools/remap_psx_palette.py` затем `build_scenes.gd`.
