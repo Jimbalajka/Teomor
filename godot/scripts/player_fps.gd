@@ -1,8 +1,8 @@
 extends CharacterBody3D
 
-@export var walk_speed: float = 4.6
-@export var sprint_speed: float = 8.0
-@export var crouch_speed: float = 2.4
+@export var walk_speed: float = 2.3
+@export var sprint_speed: float = 4.0
+@export var crouch_speed: float = 1.15
 @export var jump_velocity: float = 7.2
 @export var gravity: float = 18.0
 @export var mouse_sensitivity: float = 0.0025
@@ -37,7 +37,7 @@ func _ready() -> void:
 		controls_hint.visible = true
 		controls_hint.text = "WASD · Shift · Ctrl · Пробел · E · ЛКМ/F удар · I инв · K навыки · Esc"
 	_apply_stance(false, true)
-	floor_snap_length = 0.2
+	floor_snap_length = 0.08
 	add_to_group("player")
 	_ensure_combat_ui()
 	refresh_weapon_view()
@@ -130,8 +130,8 @@ func _physics_process(delta: float) -> void:
 
 	var basis_yaw := Basis(Vector3.UP, _look_yaw)
 	var move := (basis_yaw.x * input_dir.x + basis_yaw.z * input_dir.y)
-	velocity.x = move.x * speed
-	velocity.z = move.z * speed
+	velocity.x = move_toward(velocity.x, move.x * speed, speed * 8.0 * delta)
+	velocity.z = move_toward(velocity.z, move.z * speed, speed * 8.0 * delta)
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 	elif velocity.y < 0.0:

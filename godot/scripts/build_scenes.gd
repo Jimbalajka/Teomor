@@ -41,9 +41,13 @@ const TEX_DIR_STYLE := "res://assets/textures/style/"
 # Mapping from author: wood=floor/boards, concrete=inner walls, brick=building mass,
 # ceramic/tile=building base, metal=props/cornices, floor=concrete+ceramic mix.
 const TEX_PLASTER := "concrete_512.png"
-const TEX_WOOD := "wood_hand_512.png"  # author hand-paint preview; old: wood_weathered_512.png
+const TEX_WOOD := "wood_floor_512.png"
+const TEX_WOOD_FLOOR := "wood_floor_512.png"
+const TEX_WOOD_WALL := "wood_wall_512.png"
+const TEX_WOOD_PROP := "wood_prop_512.png"
+const TEX_WOOD_BEAM := "wood_beam_512.png"
+const TEX_CLOTH := "wood_wall_512.png"
 const TEX_STONE := "brick_broken_512.png"
-# Author hand-paint for alley walls (albedo only for now)
 const TEX_STONE_WIDE := "stone_broken_512.png"
 const TEX_STONE_PATTERN := "stone_broken2_512.png"
 const TEX_FLOOR := "floor_mix_512.png"
@@ -103,6 +107,16 @@ func _add_mesh_prop(root: Node, name: String, res_path: String, pos: Vector3, ro
 		col.position = Vector3(0, col_size.y * 0.5, 0)
 		body.add_child(col)
 		holder.add_child(body)
+	# White / missing textures → style maps (wood or metal by tint hint)
+	var paint_tex := TEX_WOOD_PROP
+	var paint_col := Color(0.72, 0.55, 0.32)
+	if tint.b > tint.r * 0.9 and tint.g < tint.r:
+		paint_tex = TEX_METAL
+		paint_col = Color(0.45, 0.4, 0.38)
+	elif tint.r + tint.g + tint.b < 2.2 and tint.b >= tint.r:
+		paint_tex = TEX_METAL
+		paint_col = Color(0.4, 0.36, 0.34)
+	_ensure_mesh_mats(holder, paint_tex, paint_col)
 	if tint != Color(1, 1, 1, 1):
 		_tint_mesh_instances(holder, tint)
 	root.add_child(holder)
@@ -132,6 +146,56 @@ func _tint_mesh_instances(node: Node, tint: Color) -> void:
 		mi.material_override = mat
 	for c in node.get_children():
 		_tint_mesh_instances(c, tint)
+
+
+
+
+func _ensure_mesh_mats(node: Node, tex_name: String, color: Color) -> void:
+	if node is MeshInstance3D:
+		var mi := node as MeshInstance3D
+		var has_tex := false
+		var src = mi.material_override
+		if src == null and mi.mesh != null and mi.mesh.get_surface_count() > 0:
+			src = mi.mesh.surface_get_material(0)
+		if src is BaseMaterial3D and (src as BaseMaterial3D).albedo_texture != null:
+			has_tex = true
+		if not has_tex:
+			mi.material_override = _style_mat(color, 0.18, 0.92, Color(0, 0, 0), 0.0, 27, tex_name, 1.05)
+	for c in node.get_children():
+		_ensure_mesh_mats(c, tex_name, color)
+
+
+func _paint_meshes(node: Node, tex_name: String, color: Color = Color(0.75, 0.65, 0.5)) -> void:
+	if node is MeshInstance3D:
+		var mi := node as MeshInstance3D
+		mi.material_override = _style_mat(color, 0.16, 0.9, Color(0, 0, 0), 0.0, 21, tex_name, 1.0)
+	for c in node.get_children():
+		_paint_meshes(c, tex_name, color)
+
+
+func _flat_wall(name: String, size: Vector3, pos: Vector3, color: Color, tex_name: String = "") -> StaticBody3D:
+	# Thin wall plane (Blood / classic FPS brush feel) — collision matches visual, no thick volume.
+	var body := StaticBody3D.new()
+	body.name = name
+	body.position = pos
+	var mi := _box_mesh(size, color, tex_name)
+	body.add_child(mi)
+	var col := CollisionShape3D.new()
+	col.name = "Collision"
+	var shape := BoxShape3D.new()
+	shape.size = size
+	col.shape = shape
+	body.add_child(col)
+	return body
+
+
+func _deco_box(root: Node, name: String, size: Vector3, pos: Vector3, color: Color, tex_name: String = "") -> void:
+	# Visual only — no collision (relief must not stop the player).
+	var mi := _box_mesh(size, color, tex_name)
+	mi.name = name
+	mi.position = pos
+	root.add_child(mi)
+
 
 
 
@@ -241,8 +305,16 @@ func _world_uv(tex_name: String, size: Vector3) -> float:
 		base = 0.42
 	elif file_name == TEX_FLOOR:
 		base = 0.4
-	elif file_name == TEX_WOOD:
-		base = 0.42  # readable planks
+	elif file_name == TEX_WOOD or file_name == TEX_WOOD_FLOOR:
+		base = 0.40
+	elif file_name == TEX_WOOD_WALL:
+		base = 0.48
+	elif file_name == TEX_WOOD_PROP:
+		base = 0.7
+	elif file_name == TEX_WOOD_BEAM:
+		base = 0.55
+	elif file_name == TEX_CLOTH:
+		base = 0.9
 	elif file_name == TEX_PLASTER:
 		base = 0.38
 	elif file_name == TEX_METAL:
@@ -275,7 +347,7 @@ func _style_mat(base: Color, ink_amt: float = 0.18, rough: float = 0.92, emit: C
 	if ntex != null:
 		mat.normal_enabled = true
 		mat.normal_texture = ntex
-		mat.normal_scale = 1.4
+		mat.normal_scale = 0.85
 	var rtex: Texture2D = _load_style_tex(_companion_name(file_name, "r"))
 	if rtex != null:
 		mat.roughness_texture = rtex
@@ -681,6 +753,18 @@ func _underground_env(bg: Color, ambient: Color, fog: Color = Color(0.2, 0.16, 0
 	env.fog_enabled = true
 	env.fog_light_color = fog
 	env.fog_density = dens
+	env.fog_sky_affect = 1.0
+	# Объёмный туман: дальше гуще, у фонарей ещё читаются силуэты
+	env.volumetric_fog_enabled = sick > 0.55
+	if env.volumetric_fog_enabled:
+		env.volumetric_fog_density = dens * 0.55
+		env.volumetric_fog_albedo = fog
+		env.volumetric_fog_emission = fog * 0.15
+		env.volumetric_fog_emission_energy = 0.35 * sick
+		env.volumetric_fog_length = 28.0
+		env.volumetric_fog_detail_spread = 0.7
+		env.volumetric_fog_gi_inject = 0.4
+		env.volumetric_fog_ambient_inject = 0.25
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	env.tonemap_exposure = exposure
 	# Sick-vision filter: dirty film look, not a cover for bad geo
@@ -731,41 +815,82 @@ func _add_omni(root: Node, name: String, pos: Vector3, color: Color, energy: flo
 	return l
 
 
-## Candle: warm parchment flame + purple sickness in the light
-func _add_candle(root: Node, name: String, pos: Vector3, energy: float = 0.85) -> void:
-	var stick := _static_box(name + "_Wax", Vector3(0.06, 0.18, 0.06), pos + Vector3(0, 0.09, 0), _col_parchment_dirty(0.2), TEX_PLASTER)
-	root.add_child(stick)
+## Candle mesh from propslite + bright purple sick light
+func _add_candle(root: Node, name: String, pos: Vector3, energy: float = 1.35) -> void:
+	var holder := Node3D.new()
+	holder.name = name
+	holder.position = pos
+	var path := MESH_PROPSLITE + "Candle_01.glb"
+	var abs_path := ProjectSettings.globalize_path(path)
+	var loaded := false
+	if FileAccess.file_exists(abs_path):
+		var doc := GLTFDocument.new()
+		var state := GLTFState.new()
+		if doc.append_from_file(abs_path, state) == OK:
+			var scn := doc.generate_scene(state)
+			if scn != null:
+				scn.scale = Vector3(0.45, 0.45, 0.45)
+				holder.add_child(scn)
+				_paint_meshes(scn, TEX_PLASTER, _col_parchment_dirty(0.15))
+				loaded = true
+	if not loaded:
+		var wax := MeshInstance3D.new()
+		var cm := CylinderMesh.new()
+		cm.top_radius = 0.03
+		cm.bottom_radius = 0.035
+		cm.height = 0.2
+		wax.mesh = cm
+		wax.position = Vector3(0, 0.1, 0)
+		wax.material_override = _style_mat(_col_parchment_dirty(0.15), 0.1, 0.85, Color(0,0,0), 0.0, 70, TEX_PLASTER, 1.4)
+		holder.add_child(wax)
 	var flame := MeshInstance3D.new()
-	flame.name = name + "_Flame"
+	flame.name = "Flame"
 	var sm := SphereMesh.new()
-	sm.radius = 0.045
-	sm.height = 0.09
+	sm.radius = 0.04
+	sm.height = 0.1
 	flame.mesh = sm
-	flame.position = pos + Vector3(0, 0.22, 0)
-	flame.material_override = _style_mat(C_PARCHMENT.lightened(0.2), 0.05, 0.7, C_PURPLE_GLOW, 0.85, 77, TEX_CAP, 2.0)
-	root.add_child(flame)
-	# purple-warm candle light
-	_add_omni(root, name + "_L", pos + Vector3(0, 0.25, 0), Color(0.85, 0.45, 0.62), energy, 3.8, 1.55, true)
+	flame.position = Vector3(0, 0.26, 0)
+	flame.material_override = _style_mat(C_PURPLE_GLOW, 0.05, 0.55, C_PURPLE_GLOW, 1.6, 77, TEX_CAP, 2.2)
+	holder.add_child(flame)
+	root.add_child(holder)
+	var L := _add_breathe_omni(root, name + "_L", pos + Vector3(0, 0.28, 0), Color(0.78, 0.32, 0.85), energy, 5.2, 1.25, true, 0.16, 1.25)
+	L.light_indirect_energy = 1.2
 
 
-## Wall torch: wood haft + purple fire
-func _add_torch(root: Node, name: String, pos: Vector3, yaw_deg: float = 0.0, energy: float = 1.15) -> void:
+## Wall torch: wood + purple fire mesh
+func _add_torch(root: Node, name: String, pos: Vector3, yaw_deg: float = 0.0, energy: float = 1.55) -> void:
 	var body := Node3D.new()
 	body.name = name
 	body.position = pos
 	body.rotation_degrees = Vector3(0, yaw_deg, 0)
-	var haft := _box_mesh(Vector3(0.07, 0.55, 0.07), C_WOOD.darkened(0.1), TEX_WOOD)
+	var haft := _box_mesh(Vector3(0.07, 0.55, 0.07), C_WOOD.darkened(0.1), TEX_WOOD_PROP)
 	haft.position = Vector3(0.12, 0.2, 0)
 	body.add_child(haft)
-	var head := MeshInstance3D.new()
-	head.name = "Head"
-	var cm := SphereMesh.new()
-	cm.radius = 0.09
-	cm.height = 0.16
-	head.mesh = cm
-	head.position = Vector3(0.12, 0.52, 0)
-	head.material_override = _style_mat(C_PURPLE_GLOW, 0.1, 0.75, C_PURPLE_GLOW, 0.9, 88, TEX_CAP, 1.8)
-	body.add_child(head)
+	var path := MESH_PROPSLITE + "Fire_01.glb"
+	var abs_path := ProjectSettings.globalize_path(path)
+	var fire_loaded := false
+	if FileAccess.file_exists(abs_path):
+		var doc := GLTFDocument.new()
+		var state := GLTFState.new()
+		if doc.append_from_file(abs_path, state) == OK:
+			var scn := doc.generate_scene(state)
+			if scn != null:
+				scn.name = "FireMesh"
+				scn.position = Vector3(0.12, 0.48, 0)
+				scn.scale = Vector3(0.35, 0.35, 0.35)
+				body.add_child(scn)
+				_paint_meshes(scn, TEX_CAP, C_PURPLE_GLOW)
+				fire_loaded = true
+	if not fire_loaded:
+		var head := MeshInstance3D.new()
+		head.name = "Head"
+		var cm := SphereMesh.new()
+		cm.radius = 0.09
+		cm.height = 0.16
+		head.mesh = cm
+		head.position = Vector3(0.12, 0.52, 0)
+		head.material_override = _style_mat(C_PURPLE_GLOW, 0.1, 0.7, C_PURPLE_GLOW, 1.4, 88, TEX_CAP, 1.8)
+		body.add_child(head)
 	var br := MeshInstance3D.new()
 	br.name = "Bracket"
 	var bm := BoxMesh.new()
@@ -777,10 +902,9 @@ func _add_torch(root: Node, name: String, pos: Vector3, yaw_deg: float = 0.0, en
 	root.add_child(body)
 	var light_off := Vector3(0.18, 0.55, 0)
 	if abs(yaw_deg) > 1.0:
-		# approximate yaw without Basis dance
 		var rad := deg_to_rad(yaw_deg)
 		light_off = Vector3(cos(rad) * 0.18, 0.55, -sin(rad) * 0.18)
-	_add_omni(root, name + "_L", pos + light_off, Color(0.78, 0.38, 0.7), energy, 5.5, 1.35, true)
+	_add_breathe_omni(root, name + "_L", pos + light_off, Color(0.72, 0.28, 0.82), energy, 7.0, 1.2, true, 0.15, 1.1)
 
 
 func _add_window_frame(root: Node, name: String, pos: Vector3, size: Vector3, rot_y: float = 0.0) -> void:
@@ -807,7 +931,7 @@ func _add_clothesline(root: Node, name: String, a: Vector3, b: Vector3, pieces: 
 		var p := a.lerp(b, t)
 		var h := 0.45 + 0.15 * float(i % 3)
 		var w := 0.35 + 0.1 * float((i * 3) % 4)
-		root.add_child(_static_box("%s_Cloth%d" % [name, i], Vector3(w, h, 0.04), p + Vector3(0, -h * 0.45, 0), _col_cloth(float(i) * 0.2), TEX_PLASTER))
+		root.add_child(_static_box("%s_Cloth%d" % [name, i], Vector3(w, h, 0.04), p + Vector3(0, -h * 0.45, 0), _col_cloth(float(i) * 0.2), TEX_CLOTH))
 
 
 
@@ -841,8 +965,8 @@ func _add_breathe_omni(root: Node, name: String, pos: Vector3, color: Color, ene
 	return l
 
 
-func _add_oil_lamp(root: Node, name: String, pos: Vector3, energy: float = 1.15) -> void:
-	# Small hanging / shelf лампадка — key warm light for attic
+func _add_oil_lamp(root: Node, name: String, pos: Vector3, energy: float = 1.65) -> void:
+	# Лампадка — фиолетовое больное свечение (лор героя)
 	var base := _static_box(name + "_Base", Vector3(0.14, 0.05, 0.14), pos, Color(0.25, 0.2, 0.16), TEX_METAL)
 	root.add_child(base)
 	var glass := MeshInstance3D.new()
@@ -853,7 +977,7 @@ func _add_oil_lamp(root: Node, name: String, pos: Vector3, energy: float = 1.15)
 	cm.height = 0.16
 	glass.mesh = cm
 	glass.position = pos + Vector3(0, 0.12, 0)
-	glass.material_override = _style_mat(Color(0.72, 0.55, 0.28), 0.08, 0.55, Color(1.0, 0.7, 0.35), 0.55, 71, TEX_CAP, 1.8)
+	glass.material_override = _style_mat(Color(0.55, 0.28, 0.5), 0.08, 0.55, C_PURPLE_GLOW, 1.1, 71, TEX_CAP, 1.8)
 	root.add_child(glass)
 	var flame := MeshInstance3D.new()
 	flame.name = name + "_Flame"
@@ -862,9 +986,9 @@ func _add_oil_lamp(root: Node, name: String, pos: Vector3, energy: float = 1.15)
 	sm.height = 0.07
 	flame.mesh = sm
 	flame.position = pos + Vector3(0, 0.2, 0)
-	flame.material_override = _style_mat(C_PARCHMENT.lightened(0.25), 0.04, 0.65, Color(1.0, 0.72, 0.4), 1.1, 73, TEX_CAP, 2.0)
+	flame.material_override = _style_mat(C_PURPLE_GLOW, 0.04, 0.55, C_PURPLE_GLOW, 1.8, 73, TEX_CAP, 2.0)
 	root.add_child(flame)
-	_add_breathe_omni(root, name + "_L", pos + Vector3(0, 0.22, 0), Color(0.92, 0.58, 0.38), energy, 4.2, 1.45, true, 0.14, 1.2)
+	_add_breathe_omni(root, name + "_L", pos + Vector3(0, 0.22, 0), Color(0.75, 0.3, 0.88), energy, 5.5, 1.25, true, 0.16, 1.15)
 
 
 func _add_wet_drape(root: Node, name: String, pos: Vector3, width: float, height: float, pieces: int = 5) -> void:
@@ -874,7 +998,7 @@ func _add_wet_drape(root: Node, name: String, pos: Vector3, width: float, height
 		var w := width / float(pieces) * (0.85 + 0.2 * float(i % 2))
 		var h := height * (0.75 + 0.2 * float((i * 2) % 3) / 2.0)
 		var damp := _col_cloth(0.35 + float(i) * 0.08).lerp(C_DAMP, 0.45)
-		var cloth := _static_box("%s_%d" % [name, i], Vector3(w, h, 0.035), pos + Vector3(t * width, -h * 0.42, 0.02 * float(i % 3)), damp, TEX_PLASTER)
+		var cloth := _static_box("%s_%d" % [name, i], Vector3(w, h, 0.035), pos + Vector3(t * width, -h * 0.42, 0.02 * float(i % 3)), damp, TEX_CLOTH)
 		cloth.rotation_degrees = Vector3(4.0 * float(i % 3 - 1), 0, 3.0 * float(i - pieces / 2))
 		root.add_child(cloth)
 
@@ -898,23 +1022,25 @@ func _save_attic() -> Error:
 
 	# Тусклый подземный ночлег — пергамент доминирует, без "солнца"
 	root.add_child(_underground_env(
-		Color(0.06, 0.04, 0.05),
-		Color(0.38, 0.26, 0.24),
-		Color(0.28, 0.16, 0.18),
-		0.034,
-		0.38,
-		0.92,
-		0.95
+		Color(0.07, 0.045, 0.06),
+		Color(0.44, 0.3, 0.28),
+		Color(0.3, 0.16, 0.22),
+		0.03,
+		0.48,
+		1.08,
+		0.9
 	))
 
 	var wood := C_WOOD.darkened(0.04)
 	var plaster := C_PARCHMENT.darkened(0.08)
 	var damp := C_DAMP
-	var attic_wood := "tex_attic_wood_512.png"
-	var attic_plaster := "tex_attic_plaster_512.png"
+	var attic_wood := "wood_floor_512.png"
+	var attic_plaster := "concrete_512.png"
 	# Prefer author attic maps when present; _load_style_tex falls back via paths
-	var tw := attic_wood if _load_style_tex(attic_wood) != null else TEX_WOOD
+	var tw := attic_wood if _load_style_tex(attic_wood) != null else TEX_WOOD_FLOOR
 	var tp := attic_plaster if _load_style_tex(attic_plaster) != null else TEX_PLASTER
+	var tb := TEX_WOOD_BEAM
+	var tprop := TEX_WOOD_PROP
 
 	# --- Пол: несущая плита + видимые щели/ямы сверху ---
 	root.add_child(_static_box("FloorBase", Vector3(6.0, 0.14, 5.0), Vector3(0, -0.2, 0), wood.darkened(0.15), tw))
@@ -931,21 +1057,28 @@ func _save_attic() -> Error:
 	_add_rotated_box(root, "LoosePlank", Vector3(1.2, 0.06, 0.22), Vector3(0.9, 0.06, 1.55), Vector3(0, 18, 8), wood.darkened(0.05), tw)
 
 	# --- Стены: низкие бока + пролом спереди ---
-	root.add_child(_static_box("WallBack", Vector3(6.0, 1.85, 0.18), Vector3(0, 0.92, -2.45), plaster, tp))
-	# Передняя стена разорвана проломом ~1.5 м
-	root.add_child(_static_box("WallFrontL", Vector3(2.15, 1.75, 0.18), Vector3(-1.95, 0.88, 2.45), damp, tp))
-	root.add_child(_static_box("WallFrontR", Vector3(2.15, 1.75, 0.18), Vector3(1.95, 0.88, 2.45), plaster, tp))
-	root.add_child(_static_box("WallFrontTop", Vector3(1.7, 0.35, 0.16), Vector3(0.0, 1.55, 2.44), plaster.darkened(0.05), tp))
-	root.add_child(_static_box("WallLeft", Vector3(0.18, 1.45, 5.0), Vector3(-3.0, 0.72, 0), damp, tp))
-	root.add_child(_static_box("WallRight", Vector3(0.18, 1.45, 5.0), Vector3(3.0, 0.72, 0), plaster, tp))
-	# Обломки пролома
-	root.add_child(_static_box("BreachJaggL", Vector3(0.22, 1.2, 0.2), Vector3(-0.85, 0.7, 2.35), plaster.darkened(0.1), tp))
-	root.add_child(_static_box("BreachJaggR", Vector3(0.2, 1.05, 0.18), Vector3(0.9, 0.65, 2.36), wood.darkened(0.08), tw))
-	root.add_child(_static_box("BreachRubble", Vector3(1.3, 0.28, 0.55), Vector3(0.1, 0.14, 2.05), Color(0.32, 0.28, 0.24), TEX_STONE))
+	# Плоские стены (тонкий brush) + дерево внизу / штукатурка сверху — без артефактов толщины
+	var wall_t := 0.05
+	root.add_child(_flat_wall("WallBack", Vector3(6.0, 1.9, wall_t), Vector3(0, 0.95, -2.48), plaster, tp))
+	root.add_child(_flat_wall("WallFrontL", Vector3(2.15, 1.8, wall_t), Vector3(-1.95, 0.9, 2.48), damp, tp))
+	root.add_child(_flat_wall("WallFrontR", Vector3(2.15, 1.8, wall_t), Vector3(1.95, 0.9, 2.48), plaster, tp))
+	root.add_child(_flat_wall("WallFrontTop", Vector3(1.7, 0.4, wall_t), Vector3(0.0, 1.6, 2.48), plaster.darkened(0.05), tp))
+	root.add_child(_flat_wall("WallLeft", Vector3(wall_t, 1.55, 5.0), Vector3(-2.98, 0.78, 0), damp, tp))
+	root.add_child(_flat_wall("WallRight", Vector3(wall_t, 1.55, 5.0), Vector3(2.98, 0.78, 0), plaster, tp))
+	# Деревянная обшивка (wainscot) — смесь с бетоном/штукатуркой
+	root.add_child(_flat_wall("WoodBack", Vector3(6.0, 0.75, 0.04), Vector3(0, 0.38, -2.45), wood, TEX_WOOD_WALL))
+	root.add_child(_flat_wall("WoodLeft", Vector3(0.04, 0.7, 5.0), Vector3(-2.95, 0.35, 0), wood.darkened(0.05), TEX_WOOD_WALL))
+	root.add_child(_flat_wall("WoodRight", Vector3(0.04, 0.7, 5.0), Vector3(2.95, 0.35, 0), wood, TEX_WOOD_WALL))
+	root.add_child(_flat_wall("BreachJaggL", Vector3(0.18, 1.15, 0.05), Vector3(-0.85, 0.7, 2.4), plaster.darkened(0.1), tp))
+	root.add_child(_flat_wall("BreachJaggR", Vector3(0.16, 1.0, 0.05), Vector3(0.9, 0.65, 2.4), wood.darkened(0.08), TEX_WOOD_WALL))
+	_deco_box(root, "BreachRubble", Vector3(1.3, 0.22, 0.45), Vector3(0.1, 0.12, 2.05), Color(0.32, 0.28, 0.24), TEX_STONE)
 
-	# Низкий скат — потолок давит
 	_add_rotated_box(root, "RoofL", Vector3(6.2, 0.12, 2.9), Vector3(0, 1.95, -0.85), Vector3(32, 0, 0), wood.darkened(0.1), tw)
 	_add_rotated_box(root, "RoofR", Vector3(6.2, 0.12, 2.9), Vector3(0, 1.95, 0.85), Vector3(-32, 0, 0), wood.darkened(0.12), tw)
+	# Закрыть дыры ската — без пустоты в небо
+	root.add_child(_flat_wall("RoofCap", Vector3(6.3, 0.1, 1.2), Vector3(0, 2.55, 0), wood.darkened(0.18), TEX_WOOD_BEAM))
+	root.add_child(_flat_wall("GableBack", Vector3(6.1, 0.9, 0.05), Vector3(0, 2.2, -2.35), wood.darkened(0.12), TEX_WOOD_BEAM))
+	root.add_child(_flat_wall("GableFront", Vector3(1.8, 0.7, 0.05), Vector3(0, 2.1, 2.35), wood.darkened(0.1), TEX_WOOD_BEAM))
 	root.add_child(_static_box("Ridge", Vector3(6.0, 0.12, 0.2), Vector3(0, 2.45, 0), wood.darkened(0.08), tw))
 	for i in range(4):
 		var z := -1.7 + float(i) * 1.15
@@ -972,8 +1105,11 @@ func _save_attic() -> Error:
 	_ink_streak(root, "Condensation2", Vector3(0.3, 1.2, 2.4), Vector3(1.0, 0.06, 0.05))
 
 	# Свет: одна лампадка + слабая свеча у зеркала; фиолет — от героя
-	_add_oil_lamp(root, "OilLamp", Vector3(-1.05, 0.55, -1.25), 1.2)
-	_add_candle(root, "CandleMirror", Vector3(1.55, 0.75, -1.45), 0.55)
+	_add_oil_lamp(root, "OilLamp", Vector3(-1.05, 0.55, -1.25), 1.85)
+	_add_candle(root, "CandleBed", Vector3(-1.6, 0.4, -1.45), 1.45)
+	_add_candle(root, "CandleCrate", Vector3(-2.1, 0.55, 1.25), 1.3)
+	_add_candle(root, "CandleMirror", Vector3(1.55, 0.75, -1.45), 1.4)
+	_add_candle(root, "CandleHatch", Vector3(1.7, 0.35, 1.2), 1.25)
 	# Подмена света свечи на дыхание
 	var candle_l := root.get_node_or_null("CandleMirror_L")
 	if candle_l is OmniLight3D:
@@ -1079,10 +1215,16 @@ func _save_attic() -> Error:
 	_add_mesh_prop(root, "MeshCrateRopes", MESH_KENNEY + "detail-crate-ropes.glb", Vector3(-2.3, 0.0, 1.4), 20.0, 1.0, Vector3(0.65, 0.5, 0.65))
 	_add_mesh_prop(root, "MeshBarrelAttic", MESH_KENNEY + "detail-barrel.glb", Vector3(1.85, 0.0, 1.55), -30.0, 1.0, Vector3(0.55, 0.7, 0.55))
 	_add_mesh_prop(root, "MeshPlanks", MESH_KENNEY + "fence-wood.glb", Vector3(0.55, 0.0, -2.0), 90.0, 1.0, Vector3(1.1, 0.12, 0.32))
-	root.add_child(_mushroom("Mushroom_Attic1", Vector3(-2.75, 0.75, -0.35), 0.9))
-	root.add_child(_mushroom("Mushroom_Attic2", Vector3(2.75, 1.15, 0.25), 1.05))
-	root.add_child(_mushroom_cluster("Growth_AtticBig", Vector3(-2.55, 0.0, 1.45), 1.4, true))
-	_growth_blob(root, "Growth_AtticWall", Vector3(2.9, 0.95, 0.35), 0.16, false)
+	var m1 := _mushroom("Mushroom_Attic1", Vector3(-2.92, 0.55, -0.35), 0.85)
+	m1.rotation_degrees = Vector3(0, 0, -55)
+	root.add_child(m1)
+	var m2 := _mushroom("Mushroom_Attic2", Vector3(2.92, 0.9, 0.25), 0.95)
+	m2.rotation_degrees = Vector3(0, 0, 50)
+	root.add_child(m2)
+	var mc := _mushroom_cluster("Growth_AtticBig", Vector3(-2.7, -0.05, 1.45), 1.25, true)
+	mc.rotation_degrees = Vector3(8, 20, -25)
+	root.add_child(mc)
+	_growth_blob(root, "Growth_AtticWall", Vector3(2.95, 0.85, 0.35), 0.16, false)
 	_ink_streak(root, "InkSeam1", Vector3(0.0, 1.1, -2.4), Vector3(2.0, 0.07, 0.05))
 
 	# Дневник у кровати
@@ -1155,7 +1297,7 @@ func _npc_stub(name: String, pos: Vector3, sitting: bool, prompt: String, lines:
 	var body := _make_interactable(name, pos, prompt, lines)
 	# Standing NPCs use Base Humanoid (~1.80 m GLB, already meters). Sitting keeps compact stub.
 	if not sitting:
-		var hum := _instance_glb(MESH_HUMANOID + "Humanoid.glb", 1.0)
+		var hum := _instance_glb(MESH_HUMANOID + "Humanoid.glb", 0.82)
 		hum.name = "Humanoid"
 		_hide_named_meshes(hum, "Overlapping")
 		var skin := _load_image_tex(MESH_HUMANOID + "NonOverlapping.png")
@@ -1168,8 +1310,8 @@ func _npc_stub(name: String, pos: Vector3, sitting: bool, prompt: String, lines:
 		var torso := MeshInstance3D.new()
 		torso.name = "Torso"
 		var torso_mesh := CylinderMesh.new()
-		torso_mesh.height = 0.75
-		torso.position = Vector3(0, 0.48, 0)
+		torso_mesh.height = 0.62
+		torso.position = Vector3(0, 0.4, 0)
 		torso_mesh.top_radius = 0.22
 		torso_mesh.bottom_radius = 0.24
 		torso.mesh = torso_mesh
@@ -1181,7 +1323,7 @@ func _npc_stub(name: String, pos: Vector3, sitting: bool, prompt: String, lines:
 		head_mesh.radius = 0.17
 		head_mesh.height = 0.34
 		head.mesh = head_mesh
-		head.position = Vector3(0, 1.08, 0)
+		head.position = Vector3(0, 0.92, 0)
 		head.material_override = mat
 		body.add_child(head)
 	var col := CollisionShape3D.new()
@@ -1317,12 +1459,12 @@ func _save_alley() -> Error:
 
 	# Подземное ущелье: тускло, туман вверх, без дневного неба
 	root.add_child(_underground_env(
-		Color(0.04, 0.03, 0.05),
-		Color(0.28, 0.12, 0.26),
-		Color(0.22, 0.1, 0.2),
-		0.028,
-		0.36,
-		0.9,
+		Color(0.05, 0.03, 0.07),
+		Color(0.32, 0.14, 0.3),
+		Color(0.3, 0.12, 0.32),
+		0.045,
+		0.42,
+		1.0,
 		1.05
 	))
 
@@ -1339,8 +1481,8 @@ func _save_alley() -> Error:
 	var wide_z1 := 1.15
 	var wide_x0 := -7.5
 	var wide_x1 := 7.5
-	var nar_x0 := -0.55
-	var nar_x1 := 0.55
+	var nar_x0 := -0.72
+	var nar_x1 := 0.72
 	var nar_z0 := wide_z1
 	var nar_z1 := 13.2
 
@@ -1348,15 +1490,15 @@ func _save_alley() -> Error:
 	_slab(root, "WideFloor", Vector3(wide_x1 - wide_x0, 0.2, wide_z1 - wide_z0), Vector3(0, -0.1, 0), floor_c, tf)
 	_slab(root, "NarFloor", Vector3(nar_x1 - nar_x0, 0.2, nar_z1 - nar_z0), Vector3(0, -0.1, (nar_z0 + nar_z1) * 0.5), floor_c, tf)
 	# Заплаты керамики и сырого бетона (читаются отдельно от стен)
-	_slab(root, "FloorPatchW1", Vector3(3.2, 0.04, 1.1), Vector3(-3.2, 0.01, -0.15), C_STONE.lightened(0.05), TEX_BASE)
-	_slab(root, "FloorPatchW2", Vector3(2.4, 0.035, 0.9), Vector3(3.6, 0.01, 0.2), C_STONE.darkened(0.02), TEX_BASE)
-	_slab(root, "FloorPatchN1", Vector3(0.85, 0.035, 3.4), Vector3(0.0, 0.01, 4.8), C_STONE.darkened(0.08), tf)
-	_slab(root, "FloorPatchN2", Vector3(0.9, 0.03, 2.6), Vector3(0.05, 0.012, 9.4), C_DAMP, TEX_BASE)
+	_deco_box(root, "FloorPatchW1", Vector3(3.2, 0.04, 1.1), Vector3(-3.2, 0.01, -0.15), C_STONE.lightened(0.05), TEX_BASE)
+	_deco_box(root, "FloorPatchW2", Vector3(2.4, 0.035, 0.9), Vector3(3.6, 0.01, 0.2), C_STONE.darkened(0.02), TEX_BASE)
+	_deco_box(root, "FloorPatchN1", Vector3(0.85, 0.035, 3.4), Vector3(0.0, 0.01, 4.8), C_STONE.darkened(0.08), tf)
+	_deco_box(root, "FloorPatchN2", Vector3(0.9, 0.03, 2.6), Vector3(0.05, 0.012, 9.4), C_DAMP, TEX_BASE)
 	# Центральный сток / лужа
-	_slab(root, "GutterWide", Vector3(wide_x1 - wide_x0 - 1.5, 0.025, 0.28), Vector3(0.0, 0.015, 0.0), C_INK.lightened(0.08), TEX_INK)
-	_slab(root, "GutterNar", Vector3(0.22, 0.025, nar_z1 - nar_z0 - 0.8), Vector3(0.0, 0.015, (nar_z0 + nar_z1) * 0.5), C_INK.lightened(0.06), TEX_INK)
-	_slab(root, "Puddle1", Vector3(1.1, 0.02, 0.7), Vector3(-1.8, 0.018, 0.35), C_PURPLE.darkened(0.35), TEX_INK)
-	_slab(root, "Puddle2", Vector3(0.7, 0.02, 1.0), Vector3(0.05, 0.018, 11.2), C_PURPLE.darkened(0.4), TEX_INK)
+	_deco_box(root, "GutterWide", Vector3(wide_x1 - wide_x0 - 1.5, 0.025, 0.28), Vector3(0.0, 0.015, 0.0), C_INK.lightened(0.08), TEX_INK)
+	_deco_box(root, "GutterNar", Vector3(0.22, 0.025, nar_z1 - nar_z0 - 0.8), Vector3(0.0, 0.015, (nar_z0 + nar_z1) * 0.5), C_INK.lightened(0.06), TEX_INK)
+	_deco_box(root, "Puddle1", Vector3(1.1, 0.02, 0.7), Vector3(-1.8, 0.018, 0.35), C_PURPLE.darkened(0.35), TEX_INK)
+	_deco_box(root, "Puddle2", Vector3(0.7, 0.02, 1.0), Vector3(0.05, 0.018, 11.2), C_PURPLE.darkened(0.4), TEX_INK)
 
 	# Нижние стены + высокие фасады (мегаструктура)
 	_add_facade_stack(root, "WideWallSouth", Vector3(wide_x1 - wide_x0, 3.8, 0.22), Vector3(0, 0, wide_z0), stone2, ts, 7)
@@ -1369,28 +1511,28 @@ func _save_alley() -> Error:
 	_add_facade_stack(root, "NarDeadEnd", Vector3(1.4, 3.8, 0.22), Vector3(0, 0, nar_z1), stone, ts, 6)
 
 	# Цоколь — керамика/плитка отдельно от каменных стен; двойной пояс
-	var plinth_h := 0.95
+	var plinth_h := 0.7
 	var plinth_c := C_STONE.lightened(0.12)
 	var mud_c := C_DAMP.darkened(0.05)
-	_slab(root, "WideBaseSouth", Vector3(wide_x1 - wide_x0, plinth_h, 0.24), Vector3(0, plinth_h * 0.5, wide_z0 + 0.03), plinth_c, TEX_BASE)
-	_slab(root, "WideBaseNorthL", Vector3(6.7, plinth_h, 0.24), Vector3(-3.9, plinth_h * 0.5, wide_z1 - 0.03), plinth_c, TEX_BASE)
-	_slab(root, "WideBaseNorthR", Vector3(6.7, plinth_h, 0.24), Vector3(3.9, plinth_h * 0.5, wide_z1 - 0.03), plinth_c, TEX_BASE)
-	_slab(root, "WideBaseWest", Vector3(0.24, plinth_h, wide_z1 - wide_z0), Vector3(wide_x0 + 0.03, plinth_h * 0.5, 0), plinth_c, TEX_BASE)
-	_slab(root, "WideBaseEast", Vector3(0.24, plinth_h, wide_z1 - wide_z0), Vector3(wide_x1 - 0.03, plinth_h * 0.5, 0), plinth_c, TEX_BASE)
-	_slab(root, "NarBaseL", Vector3(0.24, plinth_h, nar_z1 - nar_z0), Vector3(nar_x0 + 0.03, plinth_h * 0.5, (nar_z0 + nar_z1) * 0.5), C_STONE.lightened(0.08), TEX_BASE)
-	_slab(root, "NarBaseR", Vector3(0.24, plinth_h, nar_z1 - nar_z0), Vector3(nar_x1 - 0.03, plinth_h * 0.5, (nar_z0 + nar_z1) * 0.5), C_STONE.lightened(0.08), TEX_BASE)
-	_slab(root, "NarBaseEnd", Vector3(1.4, plinth_h, 0.24), Vector3(0, plinth_h * 0.5, nar_z1 - 0.03), plinth_c, TEX_BASE)
+	_slab(root, "WideBaseSouth", Vector3(wide_x1 - wide_x0, plinth_h, 0.10), Vector3(0, plinth_h * 0.5, wide_z0 + 0.04), plinth_c, TEX_BASE)
+	_slab(root, "WideBaseNorthL", Vector3(6.7, plinth_h, 0.10), Vector3(-3.9, plinth_h * 0.5, wide_z1 - 0.04), plinth_c, TEX_BASE)
+	_slab(root, "WideBaseNorthR", Vector3(6.7, plinth_h, 0.10), Vector3(3.9, plinth_h * 0.5, wide_z1 - 0.04), plinth_c, TEX_BASE)
+	_slab(root, "WideBaseWest", Vector3(0.10, plinth_h, wide_z1 - wide_z0), Vector3(wide_x0 + 0.04, plinth_h * 0.5, 0), plinth_c, TEX_BASE)
+	_slab(root, "WideBaseEast", Vector3(0.10, plinth_h, wide_z1 - wide_z0), Vector3(wide_x1 - 0.04, plinth_h * 0.5, 0), plinth_c, TEX_BASE)
+	_slab(root, "NarBaseL", Vector3(0.10, plinth_h, nar_z1 - nar_z0), Vector3(nar_x0 + 0.04, plinth_h * 0.5, (nar_z0 + nar_z1) * 0.5), C_STONE.lightened(0.08), TEX_BASE)
+	_slab(root, "NarBaseR", Vector3(0.10, plinth_h, nar_z1 - nar_z0), Vector3(nar_x1 - 0.04, plinth_h * 0.5, (nar_z0 + nar_z1) * 0.5), C_STONE.lightened(0.08), TEX_BASE)
+	_slab(root, "NarBaseEnd", Vector3(1.4, plinth_h, 0.10), Vector3(0, plinth_h * 0.5, nar_z1 - 0.04), plinth_c, TEX_BASE)
 	# Верхний карниз цоколя
 	var cap_y := plinth_h + 0.06
-	_slab(root, "WideCapSouth", Vector3(wide_x1 - wide_x0, 0.1, 0.3), Vector3(0, cap_y, wide_z0 + 0.08), C_STONE.darkened(0.02), TEX_BASE)
-	_slab(root, "NarCapL", Vector3(0.28, 0.1, nar_z1 - nar_z0), Vector3(nar_x0 + 0.08, cap_y, (nar_z0 + nar_z1) * 0.5), C_STONE.darkened(0.04), TEX_BASE)
-	_slab(root, "NarCapR", Vector3(0.28, 0.1, nar_z1 - nar_z0), Vector3(nar_x1 - 0.08, cap_y, (nar_z0 + nar_z1) * 0.5), C_STONE.darkened(0.04), TEX_BASE)
+	_deco_box(root, "WideCapSouth", Vector3(wide_x1 - wide_x0, 0.1, 0.3), Vector3(0, cap_y, wide_z0 + 0.08), C_STONE.darkened(0.02), TEX_BASE)
+	_deco_box(root, "NarCapL", Vector3(0.28, 0.1, nar_z1 - nar_z0), Vector3(nar_x0 + 0.08, cap_y, (nar_z0 + nar_z1) * 0.5), C_STONE.darkened(0.04), TEX_BASE)
+	_deco_box(root, "NarCapR", Vector3(0.28, 0.1, nar_z1 - nar_z0), Vector3(nar_x1 - 0.08, cap_y, (nar_z0 + nar_z1) * 0.5), C_STONE.darkened(0.04), TEX_BASE)
 	# Грязевой плинтус у ног — третий слой
-	_slab(root, "MudSkirtS", Vector3(wide_x1 - wide_x0 - 0.4, 0.16, 0.18), Vector3(0, 0.08, wide_z0 + 0.14), mud_c, tf)
-	_slab(root, "MudSkirtNL", Vector3(6.2, 0.16, 0.18), Vector3(-3.9, 0.08, wide_z1 - 0.14), mud_c, tf)
-	_slab(root, "MudSkirtNR", Vector3(6.2, 0.16, 0.18), Vector3(3.9, 0.08, wide_z1 - 0.14), mud_c, tf)
-	_slab(root, "MudSkirtNarL", Vector3(0.16, 0.14, nar_z1 - nar_z0 - 0.5), Vector3(nar_x0 + 0.12, 0.07, (nar_z0 + nar_z1) * 0.5), mud_c, tf)
-	_slab(root, "MudSkirtNarR", Vector3(0.16, 0.14, nar_z1 - nar_z0 - 0.5), Vector3(nar_x1 - 0.12, 0.07, (nar_z0 + nar_z1) * 0.5), mud_c, tf)
+	_deco_box(root, "MudSkirtS", Vector3(wide_x1 - wide_x0 - 0.4, 0.16, 0.18), Vector3(0, 0.08, wide_z0 + 0.14), mud_c, tf)
+	_deco_box(root, "MudSkirtNL", Vector3(6.2, 0.16, 0.18), Vector3(-3.9, 0.08, wide_z1 - 0.14), mud_c, tf)
+	_deco_box(root, "MudSkirtNR", Vector3(6.2, 0.16, 0.18), Vector3(3.9, 0.08, wide_z1 - 0.14), mud_c, tf)
+	_deco_box(root, "MudSkirtNarL", Vector3(0.16, 0.14, nar_z1 - nar_z0 - 0.5), Vector3(nar_x0 + 0.12, 0.07, (nar_z0 + nar_z1) * 0.5), mud_c, tf)
+	_deco_box(root, "MudSkirtNarR", Vector3(0.16, 0.14, nar_z1 - nar_z0 - 0.5), Vector3(nar_x1 - 0.12, 0.07, (nar_z0 + nar_z1) * 0.5), mud_c, tf)
 
 	# Ритм опор
 	for i in range(4):
@@ -1426,10 +1568,18 @@ func _save_alley() -> Error:
 	_add_mesh_prop(root, "MeshOverhangS", MESH_KENNEY + "overhang.glb", Vector3(-2.0, 2.2, wide_z0 + 0.05), 0.0, 1.15, Vector3.ZERO)
 	root.add_child(_static_box("CrateA", Vector3(0.7, 0.55, 0.55), Vector3(-4.9, 0.28, wide_z0 + 0.5), Color(0.34, 0.24, 0.15), TEX_WOOD))
 	root.add_child(_static_box("Rubble1", Vector3(0.8, 0.2, 0.5), Vector3(4.6, 0.12, wide_z1 - 0.5), stone, ts))
-	root.add_child(_mushroom("Mush1", Vector3(nar_x0 + 0.12, 1.1, 4.0), 1.0))
-	root.add_child(_mushroom("Mush2", Vector3(nar_x1 - 0.12, 1.6, 8.0), 1.2))
-	root.add_child(_mushroom("Mush3", Vector3(nar_x0 + 0.12, 1.4, 11.0), 1.1))
-	root.add_child(_mushroom("Mush4", Vector3(-2.8, 1.5, wide_z1 - 0.12), 1.25))
+	var am1 := _mushroom("Mush1", Vector3(nar_x0 + 0.02, 1.0, 4.0), 0.95)
+	am1.rotation_degrees = Vector3(0, 0, -60)
+	root.add_child(am1)
+	var am2 := _mushroom("Mush2", Vector3(nar_x1 - 0.02, 1.45, 8.0), 1.1)
+	am2.rotation_degrees = Vector3(0, 0, 55)
+	root.add_child(am2)
+	var am3 := _mushroom("Mush3", Vector3(nar_x0 + 0.02, 1.25, 11.0), 1.0)
+	am3.rotation_degrees = Vector3(10, 15, -50)
+	root.add_child(am3)
+	var am4 := _mushroom("Mush4", Vector3(-2.8, 1.35, wide_z1 - 0.05), 1.15)
+	am4.rotation_degrees = Vector3(-50, 0, 0)
+	root.add_child(am4)
 	_add_rat(root, "Rat1", Vector3(0.25, 0.0, nar_z1 - 1.1))
 	_add_rat(root, "Rat2", Vector3(-0.3, 0.0, nar_z1 - 1.8))
 	_add_rat(root, "Rat3", Vector3(4.4, 0.0, wide_z0 + 0.55))
@@ -1446,6 +1596,14 @@ func _save_alley() -> Error:
 			_attach_light_breathe(tl as OmniLight3D, e, 0.13, 1.15)
 	# слабый общий фиолет — только fill, не ключ
 	_add_omni(root, "PurpleFill", Vector3(0.0, 3.5, 4.0), Color(0.45, 0.18, 0.42), 0.18, 10.0, 1.3, false)
+
+	# Двери / окна / намётки крылец (раньше отсутствовали)
+	_add_mesh_prop(root, "MeshDoorAlleyShop", MESH_KENNEY + "wall-door.glb", Vector3(-7.15, 0.0, 0.0), 90.0, 1.15, Vector3(0.25, 2.2, 1.1), Color(1.05, 0.9, 0.7))
+	_add_mesh_prop(root, "MeshDoorAlleyLib", MESH_KENNEY + "wall-pane-wood-door.glb", Vector3(7.15, 0.0, 0.55), -90.0, 1.1, Vector3(0.25, 2.2, 1.1), Color(0.85, 0.75, 1.05))
+	_add_mesh_prop(root, "MeshWinAlleyS1", MESH_KENNEY + "wall-window.glb", Vector3(-1.2, 1.7, wide_z0 + 0.02), 0.0, 1.0, Vector3.ZERO, Color(0.9, 0.8, 0.7))
+	_add_mesh_prop(root, "MeshWinAlleyS2", MESH_KENNEY + "wall-paint-window.glb", Vector3(3.5, 1.75, wide_z0 + 0.02), 0.0, 1.0, Vector3.ZERO, Color(0.85, 0.75, 0.95))
+	_add_mesh_prop(root, "MeshPorchS", MESH_KENNEY + "overhang.glb", Vector3(-5.0, 2.15, wide_z0 + 0.05), 0.0, 1.05, Vector3.ZERO, Color(1.0, 0.9, 0.7))
+	_add_mesh_prop(root, "MeshPorchN", MESH_KENNEY + "overhang-fence.glb", Vector3(2.2, 2.2, wide_z1 - 0.05), 180.0, 1.0, Vector3.ZERO, Color(0.9, 0.8, 0.85))
 
 	_add_window_frame(root, "WinS1", Vector3(-1.0, 2.2, wide_z0 + 0.1), Vector3(0.8, 0.95, 0.08))
 	_add_window_frame(root, "WinNar1", Vector3(nar_x1 - 0.08, 2.15, 7.0), Vector3(0.08, 0.8, 0.5))

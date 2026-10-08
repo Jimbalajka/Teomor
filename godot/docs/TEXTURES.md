@@ -58,3 +58,13 @@ godot4 --path . --headless -s res://scripts/build_scenes.gd
 - **Камень стен переулка** (`stone_broken`, `stone_broken2`, `tex_alley_stone`) — **авторский**, без PSX-подмены.
 - Скрипт: `scripts/tools/remap_psx_palette.py` (+ oil bake из рефов).
 - В переулке: слои пола (заплаты/сток/лужи) + двойной цоколь + грязевой плинтус.
+
+## Дерево-слоты v1.9 (2026-10-08)
+Авторский hand-paint: `wood_floor` / `wood_wall` / `wood_prop` / `wood_beam` (пары 1+2 сшиты).
+Сырьё: `assets/textures/_src/author/wood_handpaint_20261008/`.
+В сценах слоты разделены; камень стен переулка по-прежнему авторский.
+
+## Дерево-слоты v1.9 (2026-10-08)
+Авторский hand-paint: `wood_floor` / `wood_wall` / `wood_prop` / `wood_beam` (пары 1+2 сшиты).
+Сырьё: `assets/textures/_src/author/wood_handpaint_20261008/`.
+В сценах слоты разделены; камень стен переулка по-прежнему авторский.
