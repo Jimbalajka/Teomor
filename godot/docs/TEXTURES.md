@@ -53,3 +53,8 @@ godot4 --path . --headless -s res://scripts/build_scenes.gd
 `scripts/tools/remap_psx_palette.py` в базы якоря: пергамент / пурпур / чернила.
 Рабочие 512 снова в `assets/textures/author/` (+ зеркала attic/alley в `style/`).
 Пересборка: `python3 scripts/tools/remap_psx_palette.py` затем `build_scenes.gd`.
+## Масляный ремап v1.8 (2026-10-08)
+- Дерево / штукатурка / пол / плитка / кирпич / металл: PSX-структура + палитра из `Стиль мои рисунки*` (масло).
+- **Камень стен переулка** (`stone_broken`, `stone_broken2`, `tex_alley_stone`) — **авторский**, без PSX-подмены.
+- Скрипт: `scripts/tools/remap_psx_palette.py` (+ oil bake из рефов).
+- В переулке: слои пола (заплаты/сток/лужи) + двойной цоколь + грязевой плинтус.

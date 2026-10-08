@@ -1344,9 +1344,19 @@ func _save_alley() -> Error:
 	var nar_z0 := wide_z1
 	var nar_z1 := 13.2
 
-	# Пол
+	# Пол — несколько слоёв: грязь / плитка / сток
 	_slab(root, "WideFloor", Vector3(wide_x1 - wide_x0, 0.2, wide_z1 - wide_z0), Vector3(0, -0.1, 0), floor_c, tf)
 	_slab(root, "NarFloor", Vector3(nar_x1 - nar_x0, 0.2, nar_z1 - nar_z0), Vector3(0, -0.1, (nar_z0 + nar_z1) * 0.5), floor_c, tf)
+	# Заплаты керамики и сырого бетона (читаются отдельно от стен)
+	_slab(root, "FloorPatchW1", Vector3(3.2, 0.04, 1.1), Vector3(-3.2, 0.01, -0.15), C_STONE.lightened(0.05), TEX_BASE)
+	_slab(root, "FloorPatchW2", Vector3(2.4, 0.035, 0.9), Vector3(3.6, 0.01, 0.2), C_STONE.darkened(0.02), TEX_BASE)
+	_slab(root, "FloorPatchN1", Vector3(0.85, 0.035, 3.4), Vector3(0.0, 0.01, 4.8), C_STONE.darkened(0.08), tf)
+	_slab(root, "FloorPatchN2", Vector3(0.9, 0.03, 2.6), Vector3(0.05, 0.012, 9.4), C_DAMP, TEX_BASE)
+	# Центральный сток / лужа
+	_slab(root, "GutterWide", Vector3(wide_x1 - wide_x0 - 1.5, 0.025, 0.28), Vector3(0.0, 0.015, 0.0), C_INK.lightened(0.08), TEX_INK)
+	_slab(root, "GutterNar", Vector3(0.22, 0.025, nar_z1 - nar_z0 - 0.8), Vector3(0.0, 0.015, (nar_z0 + nar_z1) * 0.5), C_INK.lightened(0.06), TEX_INK)
+	_slab(root, "Puddle1", Vector3(1.1, 0.02, 0.7), Vector3(-1.8, 0.018, 0.35), C_PURPLE.darkened(0.35), TEX_INK)
+	_slab(root, "Puddle2", Vector3(0.7, 0.02, 1.0), Vector3(0.05, 0.018, 11.2), C_PURPLE.darkened(0.4), TEX_INK)
 
 	# Нижние стены + высокие фасады (мегаструктура)
 	_add_facade_stack(root, "WideWallSouth", Vector3(wide_x1 - wide_x0, 3.8, 0.22), Vector3(0, 0, wide_z0), stone2, ts, 7)
@@ -1358,11 +1368,29 @@ func _save_alley() -> Error:
 	_add_facade_stack(root, "NarWallR", Vector3(0.22, 3.8, nar_z1 - nar_z0), Vector3(nar_x1, 0, (nar_z0 + nar_z1) * 0.5), stone, ts2, 8)
 	_add_facade_stack(root, "NarDeadEnd", Vector3(1.4, 3.8, 0.22), Vector3(0, 0, nar_z1), stone, ts, 6)
 
-	# Цоколь
-	var plinth_h := 0.85
-	_slab(root, "WideBaseSouth", Vector3(wide_x1 - wide_x0, plinth_h, 0.22), Vector3(0, plinth_h * 0.5, wide_z0 + 0.02), C_STONE.lightened(0.1), TEX_BASE)
-	_slab(root, "NarBaseL", Vector3(0.22, plinth_h, nar_z1 - nar_z0), Vector3(nar_x0 + 0.02, plinth_h * 0.5, (nar_z0 + nar_z1) * 0.5), C_STONE.lightened(0.08), TEX_BASE)
-	_slab(root, "NarBaseR", Vector3(0.22, plinth_h, nar_z1 - nar_z0), Vector3(nar_x1 - 0.02, plinth_h * 0.5, (nar_z0 + nar_z1) * 0.5), C_STONE.lightened(0.08), TEX_BASE)
+	# Цоколь — керамика/плитка отдельно от каменных стен; двойной пояс
+	var plinth_h := 0.95
+	var plinth_c := C_STONE.lightened(0.12)
+	var mud_c := C_DAMP.darkened(0.05)
+	_slab(root, "WideBaseSouth", Vector3(wide_x1 - wide_x0, plinth_h, 0.24), Vector3(0, plinth_h * 0.5, wide_z0 + 0.03), plinth_c, TEX_BASE)
+	_slab(root, "WideBaseNorthL", Vector3(6.7, plinth_h, 0.24), Vector3(-3.9, plinth_h * 0.5, wide_z1 - 0.03), plinth_c, TEX_BASE)
+	_slab(root, "WideBaseNorthR", Vector3(6.7, plinth_h, 0.24), Vector3(3.9, plinth_h * 0.5, wide_z1 - 0.03), plinth_c, TEX_BASE)
+	_slab(root, "WideBaseWest", Vector3(0.24, plinth_h, wide_z1 - wide_z0), Vector3(wide_x0 + 0.03, plinth_h * 0.5, 0), plinth_c, TEX_BASE)
+	_slab(root, "WideBaseEast", Vector3(0.24, plinth_h, wide_z1 - wide_z0), Vector3(wide_x1 - 0.03, plinth_h * 0.5, 0), plinth_c, TEX_BASE)
+	_slab(root, "NarBaseL", Vector3(0.24, plinth_h, nar_z1 - nar_z0), Vector3(nar_x0 + 0.03, plinth_h * 0.5, (nar_z0 + nar_z1) * 0.5), C_STONE.lightened(0.08), TEX_BASE)
+	_slab(root, "NarBaseR", Vector3(0.24, plinth_h, nar_z1 - nar_z0), Vector3(nar_x1 - 0.03, plinth_h * 0.5, (nar_z0 + nar_z1) * 0.5), C_STONE.lightened(0.08), TEX_BASE)
+	_slab(root, "NarBaseEnd", Vector3(1.4, plinth_h, 0.24), Vector3(0, plinth_h * 0.5, nar_z1 - 0.03), plinth_c, TEX_BASE)
+	# Верхний карниз цоколя
+	var cap_y := plinth_h + 0.06
+	_slab(root, "WideCapSouth", Vector3(wide_x1 - wide_x0, 0.1, 0.3), Vector3(0, cap_y, wide_z0 + 0.08), C_STONE.darkened(0.02), TEX_BASE)
+	_slab(root, "NarCapL", Vector3(0.28, 0.1, nar_z1 - nar_z0), Vector3(nar_x0 + 0.08, cap_y, (nar_z0 + nar_z1) * 0.5), C_STONE.darkened(0.04), TEX_BASE)
+	_slab(root, "NarCapR", Vector3(0.28, 0.1, nar_z1 - nar_z0), Vector3(nar_x1 - 0.08, cap_y, (nar_z0 + nar_z1) * 0.5), C_STONE.darkened(0.04), TEX_BASE)
+	# Грязевой плинтус у ног — третий слой
+	_slab(root, "MudSkirtS", Vector3(wide_x1 - wide_x0 - 0.4, 0.16, 0.18), Vector3(0, 0.08, wide_z0 + 0.14), mud_c, tf)
+	_slab(root, "MudSkirtNL", Vector3(6.2, 0.16, 0.18), Vector3(-3.9, 0.08, wide_z1 - 0.14), mud_c, tf)
+	_slab(root, "MudSkirtNR", Vector3(6.2, 0.16, 0.18), Vector3(3.9, 0.08, wide_z1 - 0.14), mud_c, tf)
+	_slab(root, "MudSkirtNarL", Vector3(0.16, 0.14, nar_z1 - nar_z0 - 0.5), Vector3(nar_x0 + 0.12, 0.07, (nar_z0 + nar_z1) * 0.5), mud_c, tf)
+	_slab(root, "MudSkirtNarR", Vector3(0.16, 0.14, nar_z1 - nar_z0 - 0.5), Vector3(nar_x1 - 0.12, 0.07, (nar_z0 + nar_z1) * 0.5), mud_c, tf)
 
 	# Ритм опор
 	for i in range(4):
