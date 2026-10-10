@@ -1020,113 +1020,121 @@ func _save_attic() -> Error:
 	var root := Node3D.new()
 	root.name = "Attic"
 
-	# Тусклый подземный ночлег — пергамент доминирует, без "солнца"
+	# Тусклее: форма читается, не заливка
 	root.add_child(_underground_env(
-		Color(0.07, 0.045, 0.06),
-		Color(0.44, 0.3, 0.28),
-		Color(0.3, 0.16, 0.22),
-		0.03,
-		0.48,
-		1.08,
-		0.9
+		Color(0.055, 0.035, 0.05),
+		Color(0.34, 0.22, 0.24),
+		Color(0.24, 0.12, 0.2),
+		0.038,
+		0.34,
+		0.86,
+		0.95
 	))
 
 	var wood := C_WOOD.darkened(0.04)
 	var plaster := C_PARCHMENT.darkened(0.08)
 	var damp := C_DAMP
-	var attic_wood := "wood_floor_512.png"
-	var attic_plaster := "concrete_512.png"
-	# Prefer author attic maps when present; _load_style_tex falls back via paths
-	var tw := attic_wood if _load_style_tex(attic_wood) != null else TEX_WOOD_FLOOR
-	var tp := attic_plaster if _load_style_tex(attic_plaster) != null else TEX_PLASTER
+	var tw := TEX_WOOD_FLOOR if _load_style_tex(TEX_WOOD_FLOOR) != null else TEX_WOOD
+	var tp := TEX_PLASTER
 	var tb := TEX_WOOD_BEAM
 	var tprop := TEX_WOOD_PROP
+	var twall := TEX_WOOD_WALL
 
-	# --- Пол: несущая плита + видимые щели/ямы сверху ---
-	root.add_child(_static_box("FloorBase", Vector3(6.0, 0.14, 5.0), Vector3(0, -0.2, 0), wood.darkened(0.15), tw))
-	root.add_child(_static_box("FloorA", Vector3(2.4, 0.16, 2.2), Vector3(-1.6, -0.08, -1.3), wood, tw))
-	root.add_child(_static_box("FloorB", Vector3(2.6, 0.16, 2.0), Vector3(1.5, -0.08, -1.4), wood, tw))
-	root.add_child(_static_box("FloorC", Vector3(2.2, 0.16, 2.1), Vector3(-1.5, -0.08, 1.2), wood, tw))
-	root.add_child(_static_box("FloorD", Vector3(2.4, 0.16, 2.0), Vector3(1.55, -0.08, 1.25), wood, tw))
-	root.add_child(_static_box("FloorMid", Vector3(1.5, 0.14, 1.3), Vector3(0.05, -0.09, -0.05), wood.darkened(0.06), tw))
-	# Яма / провал досок
-	root.add_child(_static_box("PitRim", Vector3(1.1, 0.12, 0.9), Vector3(-0.2, -0.18, 0.85), wood.darkened(0.12), tw))
-	root.add_child(_static_box("PitDark", Vector3(0.85, 0.08, 0.7), Vector3(-0.2, -0.05, 0.85), C_INK, TEX_INK))
-	root.add_child(_static_box("PlankGap1", Vector3(0.9, 0.05, 0.12), Vector3(0.7, 0.02, 0.35), wood.darkened(0.1), tw))
-	root.add_child(_static_box("PlankGap2", Vector3(0.7, 0.05, 0.1), Vector3(-0.9, 0.02, -0.2), wood.darkened(0.08), tw))
-	_add_rotated_box(root, "LoosePlank", Vector3(1.2, 0.06, 0.22), Vector3(0.9, 0.06, 1.55), Vector3(0, 18, 8), wood.darkened(0.05), tw)
+	# --- Пол: сплошной настил, без «дыр в пустоту» ---
+	root.add_child(_static_box("Floor", Vector3(6.0, 0.18, 5.0), Vector3(0, -0.09, 0), wood, tw))
+	_deco_box(root, "FloorSeam1", Vector3(5.6, 0.02, 0.06), Vector3(0.0, 0.01, -0.6), wood.darkened(0.1), tw)
+	_deco_box(root, "FloorSeam2", Vector3(5.6, 0.02, 0.06), Vector3(0.0, 0.01, 0.7), wood.darkened(0.08), tw)
+	_deco_box(root, "LoosePlank", Vector3(1.1, 0.05, 0.2), Vector3(0.85, 0.05, 1.55), wood.darkened(0.05), tw)
 
-	# --- Стены: низкие бока + пролом спереди ---
-	# Плоские стены (тонкий brush) + дерево внизу / штукатурка сверху — без артефактов толщины
+	# --- Стены до ската (закрытый объём) ---
 	var wall_t := 0.05
-	root.add_child(_flat_wall("WallBack", Vector3(6.0, 1.9, wall_t), Vector3(0, 0.95, -2.48), plaster, tp))
-	root.add_child(_flat_wall("WallFrontL", Vector3(2.15, 1.8, wall_t), Vector3(-1.95, 0.9, 2.48), damp, tp))
-	root.add_child(_flat_wall("WallFrontR", Vector3(2.15, 1.8, wall_t), Vector3(1.95, 0.9, 2.48), plaster, tp))
-	root.add_child(_flat_wall("WallFrontTop", Vector3(1.7, 0.4, wall_t), Vector3(0.0, 1.6, 2.48), plaster.darkened(0.05), tp))
-	root.add_child(_flat_wall("WallLeft", Vector3(wall_t, 1.55, 5.0), Vector3(-2.98, 0.78, 0), damp, tp))
-	root.add_child(_flat_wall("WallRight", Vector3(wall_t, 1.55, 5.0), Vector3(2.98, 0.78, 0), plaster, tp))
-	# Деревянная обшивка (wainscot) — смесь с бетоном/штукатуркой
-	root.add_child(_flat_wall("WoodBack", Vector3(6.0, 0.75, 0.04), Vector3(0, 0.38, -2.45), wood, TEX_WOOD_WALL))
-	root.add_child(_flat_wall("WoodLeft", Vector3(0.04, 0.7, 5.0), Vector3(-2.95, 0.35, 0), wood.darkened(0.05), TEX_WOOD_WALL))
-	root.add_child(_flat_wall("WoodRight", Vector3(0.04, 0.7, 5.0), Vector3(2.95, 0.35, 0), wood, TEX_WOOD_WALL))
-	root.add_child(_flat_wall("BreachJaggL", Vector3(0.18, 1.15, 0.05), Vector3(-0.85, 0.7, 2.4), plaster.darkened(0.1), tp))
-	root.add_child(_flat_wall("BreachJaggR", Vector3(0.16, 1.0, 0.05), Vector3(0.9, 0.65, 2.4), wood.darkened(0.08), TEX_WOOD_WALL))
-	_deco_box(root, "BreachRubble", Vector3(1.3, 0.22, 0.45), Vector3(0.1, 0.12, 2.05), Color(0.32, 0.28, 0.24), TEX_STONE)
+	root.add_child(_flat_wall("WallBack", Vector3(6.0, 2.35, wall_t), Vector3(0, 1.15, -2.48), plaster, tp))
+	root.add_child(_flat_wall("WallFrontL", Vector3(2.1, 2.2, wall_t), Vector3(-1.95, 1.1, 2.48), damp, tp))
+	root.add_child(_flat_wall("WallFrontR", Vector3(2.1, 2.2, wall_t), Vector3(1.95, 1.1, 2.48), plaster, tp))
+	root.add_child(_flat_wall("WallFrontTop", Vector3(1.55, 0.55, wall_t), Vector3(0.0, 1.95, 2.48), plaster.darkened(0.05), tp))
+	# Боковые стены выше — стык со скатом
+	root.add_child(_flat_wall("WallLeft", Vector3(wall_t, 2.35, 5.0), Vector3(-2.98, 1.15, 0), damp, tp))
+	root.add_child(_flat_wall("WallRight", Vector3(wall_t, 2.35, 5.0), Vector3(2.98, 1.15, 0), plaster, tp))
+	# Обшивка низа
+	root.add_child(_flat_wall("WoodBack", Vector3(6.0, 0.8, 0.04), Vector3(0, 0.4, -2.45), wood, twall))
+	root.add_child(_flat_wall("WoodLeft", Vector3(0.04, 0.75, 5.0), Vector3(-2.95, 0.38, 0), wood.darkened(0.05), twall))
+	root.add_child(_flat_wall("WoodRight", Vector3(0.04, 0.75, 5.0), Vector3(2.95, 0.38, 0), wood, twall))
+	# Пролом спереди: рваные края, не доски
+	root.add_child(_flat_wall("BreachJaggL", Vector3(0.18, 1.35, 0.05), Vector3(-0.8, 0.75, 2.42), plaster.darkened(0.1), tp))
+	root.add_child(_flat_wall("BreachJaggR", Vector3(0.16, 1.2, 0.05), Vector3(0.85, 0.7, 2.42), wood.darkened(0.08), twall))
+	_deco_box(root, "BreachRubble", Vector3(1.1, 0.18, 0.4), Vector3(0.05, 0.1, 2.05), Color(0.3, 0.26, 0.22), TEX_STONE)
 
-	_add_rotated_box(root, "RoofL", Vector3(6.2, 0.12, 2.9), Vector3(0, 1.95, -0.85), Vector3(32, 0, 0), wood.darkened(0.1), tw)
-	_add_rotated_box(root, "RoofR", Vector3(6.2, 0.12, 2.9), Vector3(0, 1.95, 0.85), Vector3(-32, 0, 0), wood.darkened(0.12), tw)
-	# Закрыть дыры ската — без пустоты в небо
-	root.add_child(_flat_wall("RoofCap", Vector3(6.3, 0.1, 1.2), Vector3(0, 2.55, 0), wood.darkened(0.18), TEX_WOOD_BEAM))
-	root.add_child(_flat_wall("GableBack", Vector3(6.1, 0.9, 0.05), Vector3(0, 2.2, -2.35), wood.darkened(0.12), TEX_WOOD_BEAM))
-	root.add_child(_flat_wall("GableFront", Vector3(1.8, 0.7, 0.05), Vector3(0, 2.1, 2.35), wood.darkened(0.1), TEX_WOOD_BEAM))
-	root.add_child(_static_box("Ridge", Vector3(6.0, 0.12, 0.2), Vector3(0, 2.45, 0), wood.darkened(0.08), tw))
+	# --- Крыша: перекрывающиеся скаты + торцы + боковые свесы ---
+	_add_rotated_box(root, "RoofL", Vector3(6.4, 0.14, 3.35), Vector3(0, 2.05, -0.95), Vector3(30, 0, 0), wood.darkened(0.12), tb)
+	_add_rotated_box(root, "RoofR", Vector3(6.4, 0.14, 3.35), Vector3(0, 2.05, 0.95), Vector3(-30, 0, 0), wood.darkened(0.14), tb)
+	root.add_child(_static_box("Ridge", Vector3(6.35, 0.16, 0.22), Vector3(0, 2.72, 0), wood.darkened(0.18), tb))
+	# Внутренний потолочный слой — убивает дыры между скатами
+	root.add_child(_static_box("RoofUnder", Vector3(6.1, 0.08, 4.6), Vector3(0, 2.35, 0), wood.darkened(0.22), tb))
+	# Фронтоны / торцы
+	root.add_child(_flat_wall("GableBack", Vector3(6.2, 1.35, 0.06), Vector3(0, 2.35, -2.42), wood.darkened(0.14), tb))
+	root.add_child(_flat_wall("GableFrontL", Vector3(2.15, 1.0, 0.06), Vector3(-1.95, 2.25, 2.42), wood.darkened(0.12), tb))
+	root.add_child(_flat_wall("GableFrontR", Vector3(2.15, 1.0, 0.06), Vector3(1.95, 2.25, 2.42), wood.darkened(0.12), tb))
+	root.add_child(_flat_wall("GableFrontMid", Vector3(1.5, 0.55, 0.06), Vector3(0.0, 2.45, 2.42), wood.darkened(0.1), tb))
+	# Боковые «уши» крыши — стык со стеной
+	root.add_child(_flat_wall("EaveL", Vector3(0.08, 1.1, 5.1), Vector3(-3.0, 2.15, 0), wood.darkened(0.16), tb))
+	root.add_child(_flat_wall("EaveR", Vector3(0.08, 1.1, 5.1), Vector3(3.0, 2.15, 0), wood.darkened(0.16), tb))
+	# Балки опираются на стойки
+	root.add_child(_static_box("PostL", Vector3(0.14, 2.1, 0.14), Vector3(-2.7, 1.05, -2.1), wood.darkened(0.08), tb))
+	root.add_child(_static_box("PostR", Vector3(0.14, 2.1, 0.14), Vector3(2.7, 1.05, -2.1), wood.darkened(0.08), tb))
+	root.add_child(_static_box("PostFL", Vector3(0.14, 1.9, 0.14), Vector3(-2.7, 0.95, 2.05), wood.darkened(0.08), tb))
+	root.add_child(_static_box("PostFR", Vector3(0.14, 1.9, 0.14), Vector3(2.7, 0.95, 2.05), wood.darkened(0.08), tb))
 	for i in range(4):
-		var z := -1.7 + float(i) * 1.15
-		root.add_child(_static_box("Beam_%d" % i, Vector3(5.5, 0.14, 0.16), Vector3(0, 1.75, z), wood, tw))
-	root.add_child(_static_box("PostL", Vector3(0.16, 1.7, 0.16), Vector3(-2.75, 0.85, -2.05), wood, tw))
-	root.add_child(_static_box("PostR", Vector3(0.16, 1.7, 0.16), Vector3(2.75, 0.85, -2.05), wood, tw))
-	root.add_child(_static_box("JoistBrace", Vector3(0.12, 0.8, 1.5), Vector3(-2.8, 1.4, 0.15), wood, tw))
+		var z := -1.65 + float(i) * 1.1
+		root.add_child(_static_box("Beam_%d" % i, Vector3(5.5, 0.14, 0.14), Vector3(0, 2.05, z), wood.darkened(0.05), tb))
 
-	# Выбитые окна (дыры + осколки рамы)
-	_add_window_frame(root, "WinBrokenR", Vector3(2.95, 1.05, -0.55), Vector3(0.08, 0.75, 0.65))
-	root.add_child(_static_box("GlassShard1", Vector3(0.04, 0.22, 0.18), Vector3(2.7, 0.2, -0.35), Color(0.55, 0.6, 0.62), TEX_METAL))
-	root.add_child(_static_box("GlassShard2", Vector3(0.05, 0.12, 0.25), Vector3(2.55, 0.12, -0.7), Color(0.5, 0.55, 0.58), TEX_METAL))
-	_add_window_frame(root, "WinBrokenB", Vector3(-1.1, 1.15, -2.4), Vector3(0.7, 0.7, 0.08))
-	root.add_child(_static_box("WinBoard", Vector3(0.85, 0.12, 0.06), Vector3(-1.1, 0.85, -2.32), wood.darkened(0.05), tw))
+	# --- Тонкие оконные проёмы: снаружи стена + фиолет, не пустота ---
+	var win_purple := Color(0.28, 0.12, 0.32)
+	# Правое окно
+	var wr := Vector3(2.97, 1.15, -0.55)
+	root.add_child(_static_box("WinR_Hole", Vector3(0.04, 0.7, 0.55), wr, C_INK.lightened(0.02), TEX_INK))
+	root.add_child(_static_box("WinR_FT", Vector3(0.05, 0.04, 0.62), wr + Vector3(0, 0.37, 0), wood.darkened(0.05), twall))
+	root.add_child(_static_box("WinR_FB", Vector3(0.05, 0.04, 0.62), wr + Vector3(0, -0.37, 0), wood.darkened(0.05), twall))
+	root.add_child(_static_box("WinR_FL", Vector3(0.05, 0.7, 0.04), wr + Vector3(0, 0, -0.3), wood.darkened(0.05), twall))
+	root.add_child(_static_box("WinR_FR", Vector3(0.05, 0.7, 0.04), wr + Vector3(0, 0, 0.3), wood.darkened(0.05), twall))
+	# Внешняя плоскость за проёмом + слабый фиолет
+	_deco_box(root, "WinR_Outside", Vector3(0.08, 1.6, 1.4), Vector3(3.25, 1.1, -0.55), win_purple, TEX_STONE_WIDE)
+	_add_omni(root, "WinR_Glow", Vector3(3.4, 1.15, -0.55), Color(0.55, 0.22, 0.6), 0.35, 2.8, 1.6, false)
+	# Заднее окно
+	var wb := Vector3(-1.1, 1.25, -2.46)
+	root.add_child(_static_box("WinB_Hole", Vector3(0.6, 0.65, 0.04), wb, C_INK.lightened(0.02), TEX_INK))
+	root.add_child(_static_box("WinB_FT", Vector3(0.68, 0.04, 0.05), wb + Vector3(0, 0.35, 0), wood.darkened(0.05), twall))
+	root.add_child(_static_box("WinB_FB", Vector3(0.68, 0.04, 0.05), wb + Vector3(0, -0.35, 0), wood.darkened(0.05), twall))
+	root.add_child(_static_box("WinB_FL", Vector3(0.04, 0.65, 0.05), wb + Vector3(-0.32, 0, 0), wood.darkened(0.05), twall))
+	root.add_child(_static_box("WinB_FR", Vector3(0.04, 0.65, 0.05), wb + Vector3(0.32, 0, 0), wood.darkened(0.05), twall))
+	_deco_box(root, "WinB_Outside", Vector3(1.5, 1.5, 0.08), Vector3(-1.1, 1.2, -2.75), win_purple, TEX_STONE_WIDE)
+	_add_omni(root, "WinB_Glow", Vector3(-1.1, 1.25, -2.9), Color(0.55, 0.22, 0.6), 0.3, 2.6, 1.6, false)
 
-	# Сырая занавесь на проломе
-	_add_wet_drape(root, "BreachCloth", Vector3(0.0, 1.35, 2.28), 1.45, 1.55, 6)
-	_add_clothesline(root, "AtticLine", Vector3(-1.9, 1.55, -2.1), Vector3(1.4, 1.5, -2.05), 4)
+	# Выход = тряпка на проломе (не доски)
+	_add_wet_drape(root, "BreachCloth", Vector3(0.0, 1.45, 2.35), 1.5, 1.7, 7)
+	# Снаружи за проломом — стена двора + фиолетовое свечение
+	_deco_box(root, "BreachOutside", Vector3(2.2, 2.4, 0.1), Vector3(0.0, 1.2, 2.9), win_purple.darkened(0.05), TEX_STONE_WIDE)
+	_add_omni(root, "BreachGlow", Vector3(0.0, 1.1, 3.1), Color(0.5, 0.2, 0.55), 0.4, 3.2, 1.5, false)
 
-	# Капли / конденсат
-	_add_drip_streak(root, "Drip1", Vector3(-1.2, 1.55, 0.9))
-	_add_drip_streak(root, "Drip2", Vector3(1.6, 1.6, -0.4))
-	_ink_streak(root, "Condensation1", Vector3(-2.95, 0.9, 0.5), Vector3(0.05, 1.0, 0.1))
-	_ink_streak(root, "Condensation2", Vector3(0.3, 1.2, 2.4), Vector3(1.0, 0.06, 0.05))
-
-	# Свет: одна лампадка + слабая свеча у зеркала; фиолет — от героя
-	_add_oil_lamp(root, "OilLamp", Vector3(-1.05, 0.55, -1.25), 1.85)
-	_add_candle(root, "CandleBed", Vector3(-1.6, 0.4, -1.45), 1.45)
-	_add_candle(root, "CandleCrate", Vector3(-2.1, 0.55, 1.25), 1.3)
-	_add_candle(root, "CandleMirror", Vector3(1.55, 0.75, -1.45), 1.4)
-	_add_candle(root, "CandleHatch", Vector3(1.7, 0.35, 1.2), 1.25)
-	# Подмена света свечи на дыхание
+	# Свет: тусклее, меньше источников
+	_add_oil_lamp(root, "OilLamp", Vector3(-1.05, 0.55, -1.25), 1.15)
+	_add_candle(root, "CandleBed", Vector3(-1.6, 0.4, -1.45), 0.85)
+	_add_candle(root, "CandleMirror", Vector3(1.55, 0.75, -1.45), 0.75)
 	var candle_l := root.get_node_or_null("CandleMirror_L")
 	if candle_l is OmniLight3D:
-		_attach_light_breathe(candle_l as OmniLight3D, 0.55, 0.1, 1.6)
+		_attach_light_breathe(candle_l as OmniLight3D, 0.55, 0.08, 1.5)
 
-	# Кровать-ночлег
-	root.add_child(_static_box("Bed", Vector3(2.0, 0.28, 0.95), Vector3(-1.55, 0.16, -1.55), Color(0.32, 0.27, 0.24), tw))
+	# Кровать
+	root.add_child(_static_box("Bed", Vector3(2.0, 0.28, 0.95), Vector3(-1.55, 0.16, -1.55), Color(0.32, 0.27, 0.24), tprop))
 	root.add_child(_static_box("BedPillow", Vector3(0.45, 0.12, 0.35), Vector3(-2.15, 0.38, -1.55), _col_parchment_dirty(0.2), tp))
-	root.add_child(_static_box("BedRag", Vector3(1.1, 0.06, 0.7), Vector3(-1.3, 0.34, -1.5), _col_cloth(0.5).lerp(C_DAMP, 0.3), tp))
+	root.add_child(_static_box("BedRag", Vector3(1.1, 0.06, 0.7), Vector3(-1.3, 0.34, -1.5), _col_cloth(0.5).lerp(C_DAMP, 0.3), TEX_CLOTH))
 
-	# Разбитое зеркало
+	# Зеркало
 	var mirror := StaticBody3D.new()
 	mirror.name = "Mirror"
 	mirror.position = Vector3(2.15, 0.0, -1.75)
 	mirror.set_script(load("res://scripts/mirror_interactable.gd"))
 	mirror.set("prompt_text", "[E] Посмотреть в разбитое зеркало")
-	var frame := _box_mesh(Vector3(0.12, 1.25, 0.8), Color(0.22, 0.18, 0.14), tw)
+	var frame := _box_mesh(Vector3(0.12, 1.25, 0.8), Color(0.22, 0.18, 0.14), tprop)
 	frame.position = Vector3(-0.02, 1.05, 0)
 	mirror.add_child(frame)
 	var shard_a := _box_mesh(Vector3(0.05, 0.55, 0.35), Color(0.55, 0.6, 0.65))
@@ -1137,9 +1145,6 @@ func _save_attic() -> Error:
 	shard_b.position = Vector3(0.03, 0.85, 0.18)
 	shard_b.rotation_degrees = Vector3(0, 0, -18)
 	mirror.add_child(shard_b)
-	var shard_floor := _box_mesh(Vector3(0.2, 0.03, 0.15), Color(0.55, 0.6, 0.62))
-	shard_floor.position = Vector3(0.25, 0.04, 0.35)
-	mirror.add_child(shard_floor)
 	var mcol := CollisionShape3D.new()
 	mcol.name = "Collision"
 	var mshape := BoxShape3D.new()
@@ -1149,10 +1154,10 @@ func _save_attic() -> Error:
 	mirror.add_child(mcol)
 	root.add_child(mirror)
 
-	# Лестница в проломе стены → переулок
+	# Лестница уходит наружу через пролом (наклон + ступени ниже пола)
 	var ladder := _make_interactable(
 		"WallLadder",
-		Vector3(0.0, 0.0, 2.15),
+		Vector3(0.0, -0.35, 2.35),
 		"[E] Спуститься через пролом",
 		PackedStringArray([
 			"Откидываешь мокрую ткань. Холодный воздух бьёт в лицо.",
@@ -1161,32 +1166,33 @@ func _save_attic() -> Error:
 		]),
 		"res://scenes/alley.tscn"
 	)
-	for i in range(6):
-		var step := _box_mesh(Vector3(0.55, 0.05, 0.12), Color(0.3, 0.22, 0.15), tw)
+	ladder.rotation_degrees = Vector3(-18, 0, 0)
+	for i in range(8):
+		var step := _box_mesh(Vector3(0.5, 0.05, 0.11), Color(0.3, 0.22, 0.15), tprop)
 		step.name = "Step_%d" % i
-		step.position = Vector3(0, 0.25 + i * 0.28, 0.05)
+		step.position = Vector3(0, 0.2 + i * 0.32, 0.02)
 		ladder.add_child(step)
-	var rail_l := _box_mesh(Vector3(0.05, 1.9, 0.05), Color(0.26, 0.18, 0.12), tw)
+	var rail_l := _box_mesh(Vector3(0.05, 2.7, 0.05), Color(0.26, 0.18, 0.12), tb)
 	rail_l.name = "RailL"
-	rail_l.position = Vector3(-0.28, 1.0, 0.05)
+	rail_l.position = Vector3(-0.26, 1.25, 0.02)
 	ladder.add_child(rail_l)
-	var rail_r := _box_mesh(Vector3(0.05, 1.9, 0.05), Color(0.26, 0.18, 0.12), tw)
+	var rail_r := _box_mesh(Vector3(0.05, 2.7, 0.05), Color(0.26, 0.18, 0.12), tb)
 	rail_r.name = "RailR"
-	rail_r.position = Vector3(0.28, 1.0, 0.05)
+	rail_r.position = Vector3(0.26, 1.25, 0.02)
 	ladder.add_child(rail_r)
 	var lcol := CollisionShape3D.new()
 	lcol.name = "Collision"
 	var lshape := BoxShape3D.new()
-	lshape.size = Vector3(0.9, 2.2, 0.7)
+	lshape.size = Vector3(0.85, 2.6, 0.7)
 	lcol.shape = lshape
-	lcol.position = Vector3(0, 1.0, 0)
+	lcol.position = Vector3(0, 1.15, 0)
 	ladder.add_child(lcol)
 	root.add_child(ladder)
 
-	# Плейтест — спрятан у боковой стены, не в главном кадре
+	# Плейтест — в стороне
 	var to_pt := _make_interactable(
 		"GoPlaytest",
-		Vector3(-2.7, 0.0, 1.9),
+		Vector3(-2.7, 0.0, 1.7),
 		"[E] В комнату механик",
 		PackedStringArray([
 			"Занавеска в сторону — серый короб для проверки механик.",
@@ -1206,34 +1212,31 @@ func _save_attic() -> Error:
 	to_pt.add_child(ptcol)
 	root.add_child(to_pt)
 
-	# Вещи с историей
-	root.add_child(_static_box("Trunk", Vector3(1.0, 0.5, 0.65), Vector3(2.05, 0.26, -1.35), Color(0.32, 0.22, 0.14), tw))
-	root.add_child(_static_box("Crate", Vector3(0.65, 0.45, 0.65), Vector3(-2.25, 0.22, 1.25), Color(0.36, 0.26, 0.16), tw))
-	root.add_child(_static_box("BoardStack", Vector3(1.3, 0.22, 0.5), Vector3(-0.35, 0.12, 1.85), wood, tw))
-	root.add_child(_static_box("ShelfNiche", Vector3(1.0, 0.07, 0.32), Vector3(-2.6, 1.15, 0.7), wood, tw))
-	root.add_child(_static_box("PipeRun", Vector3(0.07, 0.07, 2.2), Vector3(2.8, 1.55, 0.15), Color(0.3, 0.28, 0.26), TEX_METAL))
-	_add_mesh_prop(root, "MeshCrateRopes", MESH_KENNEY + "detail-crate-ropes.glb", Vector3(-2.3, 0.0, 1.4), 20.0, 1.0, Vector3(0.65, 0.5, 0.65))
-	_add_mesh_prop(root, "MeshBarrelAttic", MESH_KENNEY + "detail-barrel.glb", Vector3(1.85, 0.0, 1.55), -30.0, 1.0, Vector3(0.55, 0.7, 0.55))
-	_add_mesh_prop(root, "MeshPlanks", MESH_KENNEY + "fence-wood.glb", Vector3(0.55, 0.0, -2.0), 90.0, 1.0, Vector3(1.1, 0.12, 0.32))
+	# Понятные пропы у стен (без висячих верёвок/заборных досок)
+	root.add_child(_static_box("Trunk", Vector3(1.0, 0.5, 0.65), Vector3(2.05, 0.26, -1.35), Color(0.32, 0.22, 0.14), tprop))
+	root.add_child(_static_box("Crate", Vector3(0.65, 0.45, 0.65), Vector3(-2.25, 0.22, 1.15), Color(0.36, 0.26, 0.16), tprop))
+	root.add_child(_static_box("ShelfNiche", Vector3(1.0, 0.07, 0.32), Vector3(-2.6, 1.15, 0.55), wood, tprop))
+	root.add_child(_static_box("PipeRun", Vector3(0.07, 0.07, 2.0), Vector3(2.85, 1.7, -0.1), Color(0.3, 0.28, 0.26), TEX_METAL))
+	_add_mesh_prop(root, "MeshCrateRopes", MESH_KENNEY + "detail-crate-ropes.glb", Vector3(-2.3, 0.0, 1.3), 20.0, 1.0, Vector3(0.65, 0.5, 0.65))
+	_add_mesh_prop(root, "MeshBarrelAttic", MESH_KENNEY + "detail-barrel.glb", Vector3(1.9, 0.0, 1.35), -25.0, 1.0, Vector3(0.55, 0.7, 0.55))
 	var m1 := _mushroom("Mushroom_Attic1", Vector3(-2.92, 0.55, -0.35), 0.85)
 	m1.rotation_degrees = Vector3(0, 0, -55)
 	root.add_child(m1)
 	var m2 := _mushroom("Mushroom_Attic2", Vector3(2.92, 0.9, 0.25), 0.95)
 	m2.rotation_degrees = Vector3(0, 0, 50)
 	root.add_child(m2)
-	var mc := _mushroom_cluster("Growth_AtticBig", Vector3(-2.7, -0.05, 1.45), 1.25, true)
+	var mc := _mushroom_cluster("Growth_AtticBig", Vector3(-2.7, -0.05, 1.35), 1.15, true)
 	mc.rotation_degrees = Vector3(8, 20, -25)
 	root.add_child(mc)
 	_growth_blob(root, "Growth_AtticWall", Vector3(2.95, 0.85, 0.35), 0.16, false)
-	_ink_streak(root, "InkSeam1", Vector3(0.0, 1.1, -2.4), Vector3(2.0, 0.07, 0.05))
 
-	# Дневник у кровати
+	# Дневник
 	var diary := StaticBody3D.new()
 	diary.name = "Diary"
 	diary.position = Vector3(-1.15, 0.0, -1.35)
 	diary.set_script(load("res://scripts/diary_interactable.gd"))
 	diary.set("prompt_text", "[E] Листать дневник")
-	var diary_mesh := _box_mesh(Vector3(0.35, 0.08, 0.28), Color(0.55, 0.45, 0.3), tw)
+	var diary_mesh := _box_mesh(Vector3(0.35, 0.08, 0.28), Color(0.55, 0.45, 0.3), tprop)
 	diary_mesh.position = Vector3(0, 0.42, 0.1)
 	diary.add_child(diary_mesh)
 	var dcol := CollisionShape3D.new()
@@ -1251,7 +1254,11 @@ func _save_attic() -> Error:
 			"В трещине стены — чужой двор и бледные грибы на кирпиче.",
 			"Где-то внизу кашляет дес. Воздух густой, как тряпка."
 		]), "", PackedStringArray(["vsegrib", "des"]))
-	_add_pickup(root, "WetRags", Vector3(1.35, 0.0, 1.65), Vector3(0.65, 0.18, 0.45), Color(0.28, 0.34, 0.36),
+	# За щелью — тоже не пустота
+	_deco_box(root, "CrackOutside", Vector3(0.1, 1.4, 1.0), Vector3(-3.2, 0.9, 0.55), win_purple, TEX_STONE_WIDE)
+	_add_omni(root, "CrackGlow", Vector3(-3.35, 0.9, 0.55), Color(0.5, 0.2, 0.55), 0.22, 2.2, 1.7, false)
+
+	_add_pickup(root, "WetRags", Vector3(1.45, 0.0, 1.4), Vector3(0.65, 0.18, 0.45), Color(0.28, 0.34, 0.36),
 		"[E] Взять сырую тряпку",
 		PackedStringArray([
 			"Мокрые тряпки никогда не сохнут. Чердак дышит влагой.",
@@ -1259,7 +1266,7 @@ func _save_attic() -> Error:
 		]),
 		"damp_rag", "Сырая тряпка", "Пахнет плесенью. Можно вытереть стекло или рану.", true, false,
 		PackedStringArray())
-	_add_pickup(root, "MoldBread", Vector3(-0.1, 0.0, 1.7), Vector3(0.25, 0.12, 0.25), Color(0.42, 0.38, 0.26),
+	_add_pickup(root, "MoldBread", Vector3(-0.35, 0.0, 1.35), Vector3(0.25, 0.12, 0.25), Color(0.42, 0.38, 0.26),
 		"[E] Поднять чёрствый хлеб",
 		PackedStringArray([
 			"Краюха с зелёной кромкой. Есть можно — жалеть себя незачем."
@@ -1269,15 +1276,14 @@ func _save_attic() -> Error:
 
 	_add_scene_ambience(root, -12.0)
 	_add_player(root, Vector3(0.1, 0.9, 0.1))
-	# Слабое нейтрально-фиолетовое свечение героя
 	var player := root.get_node("Player")
 	var glow := OmniLight3D.new()
 	glow.name = "HeroSickGlow"
 	glow.position = Vector3(0, 1.0, 0)
-	glow.light_color = Color(0.62, 0.42, 0.72)
-	glow.light_energy = 0.28
-	glow.omni_range = 3.2
-	glow.omni_attenuation = 1.7
+	glow.light_color = Color(0.58, 0.38, 0.68)
+	glow.light_energy = 0.18
+	glow.omni_range = 2.8
+	glow.omni_attenuation = 1.8
 	glow.shadow_enabled = false
 	player.add_child(glow)
 
