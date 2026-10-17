@@ -7,6 +7,7 @@
   - `mushrooms/` — **PS1 Mushroom Asset Pack** (FBX→GLB + PNG)
   - `character/Dummy.*`, `humanoid/Humanoid.*` — референс роста ~1.8 м
 - `modular/` — двери/забор proto (CC0)
+- `locations/oddity_shop.glb` — авторская лавка странностей (ч/б + цвет костюм/шляпа/очки)
 - `env/` — HDRI
 
 В сценах: `build_scenes.gd` → `_add_mesh_prop` / `_mushroom` / `_mushroom_cluster`.

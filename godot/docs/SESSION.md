@@ -3,20 +3,20 @@
 **Дата:** 2026-10-17  
 **Репо:** `Jimbalajka/Teomor` → папка `godot/`  
 **Ветка:** `main`  
-**Как смотреть лавку:** `git pull` → открыть `oddity_shop_bw.blend` в Blender 5 (или импорт в Godot позже)
+**Как смотреть:** `git pull` → Godot 4.3 открыть `godot/` → **F5** (main = лавка)
 
 ---
 
 ## Где мы
 
-Пасс: **лавка странностей → ч/б окрас**.
+Лавка странностей в игре:
+- GLB: `assets/meshes/locations/oddity_shop.glb`
+- Сцена: `scenes/shop.tscn` (main_scene)
+- Сборка: `godot4 --path . --headless -s res://scripts/build_oddity_shop.gd`
+- Экспорт из blend: `blender --background --python scripts/tools/export_oddity_shop.py`
 
-- Исходник автора: `oddity shop (2).blend`
-- Результат: `oddity_shop_bw.blend`
-- Текстуры: `godot/assets/textures/author/oddity_*.png`
-- Цвет оставлен только у **костюма / шляпы / очков**; остальное — ч/б (тёмное→серое→белое)
+Ч/б окрас; цвет — костюм / шляпа / очки.
 
 ### Не трогать без OK
 - склад / библиотека «под финал»
 - бой / sis / open world
-- подмена `stone_broken*`

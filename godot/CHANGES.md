@@ -1,3 +1,13 @@
+## 2026-10-17 — oddity shop в Godot (F5)
+
+**Запрос:** сразу добавить лавку в Godot, чтобы открывалось.
+
+**Сделано:**
+- `assets/meshes/locations/oddity_shop.glb` из `oddity_shop_bw.blend`
+- `scripts/build_oddity_shop.gd` → playable `scenes/shop.tscn` (модель + collision + player + выборы)
+- `project.godot` main_scene = `res://scenes/shop.tscn`
+- экспорт: `scripts/tools/export_oddity_shop.py`
+
 ## 2026-10-17 — oddity shop ч/б + цвет костюм/шляпа/очки
 
 **Запрос:** стиль лавки ок; всё в ч/б (красиво тёмное→серое→белое); оригинал цвета только у модельек костюма, шляпы и очков.
