@@ -60,6 +60,17 @@ func open_lockpick(lock_id: String, title: String = "Замок", success_lines:
 		if dlg and dlg.has_method("start"):
 			dlg.call("start", PackedStringArray(["Этот замок уже открыт."]))
 		return
+	if not practice and gs:
+		var have := 0
+		if gs.has_method("item_count"):
+			have = int(gs.call("item_count", "lockpick"))
+		elif gs.has_method("has_item") and bool(gs.call("has_item", "lockpick")):
+			have = 1
+		if have <= 0:
+			var dlg0 := get_node_or_null("/root/Dialogue")
+			if dlg0 and dlg0.has_method("start"):
+				dlg0.call("start", PackedStringArray(["Нет отмычки. Без неё замок только глумится."]))
+			return
 	_lock_id = lock_id
 	_lock_title = title if not title.is_empty() else "Замок"
 	_success_lines = success_lines
@@ -274,14 +285,22 @@ func _on_fail() -> void:
 	_resolved = true
 	_refresh()
 	_status.text = "Провал. Попытки кончились. %d-%d-%d" % [_values[0], _values[1], _values[2]]
+	var gs := _game_state()
+	var broke := false
+	if not _practice and gs and gs.has_method("break_lockpick"):
+		broke = bool(gs.call("break_lockpick"))
 	var lines := PackedStringArray([
 		"Штифты не встали. Пальцы заныли.",
-		"Пока замок держится — можно подойти снова позже." if _practice else "Замок молчит. Попробуешь ещё — с холодной головой."
 	])
+	if broke:
+		lines.append("Отмычка хрустнула и осталась в замке.")
+	elif not _practice and gs and gs.has_method("item_count") and int(gs.call("item_count", "lockpick")) <= 0:
+		lines.append("Отмычек больше нет — только пальцы и злость.")
+	else:
+		lines.append("Пока замок держится — можно подойти снова позже." if _practice else "Замок молчит. Попробуешь ещё — с холодной головой.")
 	# в плейтесте и в мире разрешаем повторный подход (не ставим permanent jam)
 	_resolved = false
 	if _practice:
-		var gs := _game_state()
 		_attempts_left = int(gs.call("lockpick_max_attempts")) if gs and gs.has_method("lockpick_max_attempts") else 3
 	close_lockpick()
 	var dlg := get_node_or_null("/root/Dialogue")

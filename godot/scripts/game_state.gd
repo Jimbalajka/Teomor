@@ -12,9 +12,12 @@ var flags: Dictionary = {}
 var diary_notes: Array = []  # {id, text}
 var diary_quests: Array = []  # {id, name, description, status}
 
-## Phase 4 inventory / glossary
-const INV_CAPACITY := 12
-var inventory: Array = []  # {id, name, description, consumable}
+## Phase 4 inventory / glossary — сетка как в Deus Ex (маленькая)
+const INV_COLS := 6
+const INV_ROWS := 4
+## Устарело как «число предметов»; оставлено для старых вызовов = число клеток.
+const INV_CAPACITY := INV_COLS * INV_ROWS
+var inventory: Array = []  # {id,name,description,consumable,kind,w,h,gx,gy,count,stackable,weapon_damage}
 var quest_items: Array = []  # {id, name, description}
 var money_nb: int = 10
 var money_vb: int = 0
@@ -118,6 +121,28 @@ func _seed_inventory() -> void:
 		"id": "diary_book",
 		"name": "Потёртый дневник",
 		"description": "Сырые страницы. Без него легко забыть, зачем вообще вставал.",
+	})
+	add_item({
+		"id": "lockpick",
+		"name": "Отмычка",
+		"description": "Тонкая сталь. При провале взлома ломается.",
+		"consumable": true,
+		"stackable": true,
+		"count": 3,
+		"kind": "tool",
+		"w": 1,
+		"h": 1,
+	})
+	add_item({
+		"id": "cheap_bandage",
+		"name": "Грязный бинт",
+		"description": "Заматывает рану на ходу. Один раз.",
+		"consumable": true,
+		"stackable": true,
+		"count": 1,
+		"kind": "consumable",
+		"w": 1,
+		"h": 1,
 	})
 
 
@@ -259,23 +284,223 @@ func has_item(item_id: String) -> bool:
 	return false
 
 
-func add_item(item: Dictionary) -> bool:
-	if item.is_empty():
-		return false
+func item_count(item_id: String) -> int:
+	var total := 0
+	for it in inventory:
+		if str(it.get("id", "")) == item_id:
+			total += maxi(1, int(it.get("count", 1)))
+	return total
+
+
+func _default_item_size(kind: String, w_in: int, h_in: int) -> Vector2i:
+	var w := maxi(1, w_in)
+	var h := maxi(1, h_in)
+	if w_in <= 0 or h_in <= 0:
+		match kind:
+			"weapon":
+				w = 2
+				h = 1
+			_:
+				w = 1
+				h = 1
+	return Vector2i(w, h)
+
+
+func _normalize_item(item: Dictionary) -> Dictionary:
 	var iid := str(item.get("id", ""))
-	if iid.is_empty():
-		return false
-	if has_item(iid):
-		return false
-	if inventory.size() >= INV_CAPACITY:
-		return false
-	inventory.append({
+	var kind := str(item.get("kind", ""))
+	if kind.is_empty():
+		if bool(item.get("consumable", false)):
+			kind = "consumable"
+		elif int(item.get("weapon_damage", 0)) > 0 or str(item.get("id", "")).begins_with("weapon_"):
+			kind = "weapon"
+		else:
+			kind = "misc"
+	var size := _default_item_size(kind, int(item.get("w", 0)), int(item.get("h", 0)))
+	var count := maxi(1, int(item.get("count", 1)))
+	var stackable := bool(item.get("stackable", bool(item.get("consumable", false)) and kind != "weapon"))
+	return {
 		"id": iid,
 		"name": str(item.get("name", iid)),
 		"description": str(item.get("description", "")),
 		"consumable": bool(item.get("consumable", false)),
-	})
+		"stackable": stackable,
+		"count": count,
+		"kind": kind,
+		"w": size.x,
+		"h": size.y,
+		"gx": int(item.get("gx", -1)),
+		"gy": int(item.get("gy", -1)),
+		"weapon_damage": int(item.get("weapon_damage", 0)),
+	}
+
+
+func _item_index(item_id: String) -> int:
+	for i in range(inventory.size()):
+		if str(inventory[i].get("id", "")) == item_id:
+			return i
+	return -1
+
+
+func _occupancy(ignore_id: String = "") -> PackedByteArray:
+	var cells := PackedByteArray()
+	cells.resize(INV_COLS * INV_ROWS)
+	for i in range(cells.size()):
+		cells[i] = 0
+	for it in inventory:
+		var iid := str(it.get("id", ""))
+		if iid == ignore_id:
+			continue
+		var gx := int(it.get("gx", -1))
+		var gy := int(it.get("gy", -1))
+		var w := maxi(1, int(it.get("w", 1)))
+		var h := maxi(1, int(it.get("h", 1)))
+		if gx < 0 or gy < 0:
+			continue
+		for yy in range(h):
+			for xx in range(w):
+				var cx := gx + xx
+				var cy := gy + yy
+				if cx < 0 or cy < 0 or cx >= INV_COLS or cy >= INV_ROWS:
+					continue
+				cells[cy * INV_COLS + cx] = 1
+	return cells
+
+
+func can_place_item(w: int, h: int, gx: int, gy: int, ignore_id: String = "") -> bool:
+	if w < 1 or h < 1:
+		return false
+	if gx < 0 or gy < 0 or gx + w > INV_COLS or gy + h > INV_ROWS:
+		return false
+	var cells := _occupancy(ignore_id)
+	for yy in range(h):
+		for xx in range(w):
+			if cells[(gy + yy) * INV_COLS + (gx + xx)] != 0:
+				return false
 	return true
+
+
+func find_free_slot(w: int, h: int, ignore_id: String = "") -> Vector2i:
+	for y in range(INV_ROWS - h + 1):
+		for x in range(INV_COLS - w + 1):
+			if can_place_item(w, h, x, y, ignore_id):
+				return Vector2i(x, y)
+	return Vector2i(-1, -1)
+
+
+func occupied_cells() -> int:
+	var n := 0
+	var cells := _occupancy()
+	for i in range(cells.size()):
+		if cells[i] != 0:
+			n += 1
+	return n
+
+
+func add_item(item: Dictionary) -> bool:
+	if item.is_empty():
+		return false
+	var norm := _normalize_item(item)
+	var iid: String = str(norm["id"])
+	if iid.is_empty():
+		return false
+	# стопка расходников / отмычек
+	if bool(norm.get("stackable", false)):
+		var idx := _item_index(iid)
+		if idx >= 0:
+			inventory[idx]["count"] = int(inventory[idx].get("count", 1)) + int(norm.get("count", 1))
+			return true
+	elif has_item(iid):
+		return false
+	var gx := int(norm.get("gx", -1))
+	var gy := int(norm.get("gy", -1))
+	var w := int(norm["w"])
+	var h := int(norm["h"])
+	if gx < 0 or gy < 0 or not can_place_item(w, h, gx, gy):
+		var slot := find_free_slot(w, h)
+		if slot.x < 0:
+			return false
+		gx = slot.x
+		gy = slot.y
+	norm["gx"] = gx
+	norm["gy"] = gy
+	inventory.append(norm)
+	return true
+
+
+func remove_item(item_id: String, amount: int = 1) -> bool:
+	var idx := _item_index(item_id)
+	if idx < 0:
+		return false
+	var left := maxi(1, amount)
+	var count := maxi(1, int(inventory[idx].get("count", 1)))
+	if count > left:
+		inventory[idx]["count"] = count - left
+		return true
+	inventory.remove_at(idx)
+	return true
+
+
+func move_item(item_id: String, gx: int, gy: int) -> bool:
+	var idx := _item_index(item_id)
+	if idx < 0:
+		return false
+	var it: Dictionary = inventory[idx]
+	var w := maxi(1, int(it.get("w", 1)))
+	var h := maxi(1, int(it.get("h", 1)))
+	if not can_place_item(w, h, gx, gy, item_id):
+		return false
+	inventory[idx]["gx"] = gx
+	inventory[idx]["gy"] = gy
+	return true
+
+
+func rotate_item(item_id: String) -> bool:
+	var idx := _item_index(item_id)
+	if idx < 0:
+		return false
+	var it: Dictionary = inventory[idx]
+	var w := maxi(1, int(it.get("w", 1)))
+	var h := maxi(1, int(it.get("h", 1)))
+	if w == h:
+		return true
+	var gx := int(it.get("gx", 0))
+	var gy := int(it.get("gy", 0))
+	if not can_place_item(h, w, gx, gy, item_id):
+		# попробовать найти новое место под повёрнутый
+		var slot := find_free_slot(h, w, item_id)
+		if slot.x < 0:
+			return false
+		inventory[idx]["gx"] = slot.x
+		inventory[idx]["gy"] = slot.y
+	inventory[idx]["w"] = h
+	inventory[idx]["h"] = w
+	return true
+
+
+func use_consumable(item_id: String) -> Dictionary:
+	var idx := _item_index(item_id)
+	if idx < 0:
+		return {"ok": false, "msg": "Нет такой вещи."}
+	var it: Dictionary = inventory[idx]
+	if not bool(it.get("consumable", false)):
+		return {"ok": false, "msg": "Это не расходник."}
+	var name := str(it.get("name", item_id))
+	remove_item(item_id, 1)
+	# простые эффекты главы 1
+	match item_id:
+		"cheap_bandage":
+			return {"ok": true, "msg": "Замотал %s. Боль чуть стихла." % name}
+		"lockpick":
+			return {"ok": false, "msg": "Отмычка для замков, не для кармана."}
+		_:
+			return {"ok": true, "msg": "Использовано: %s." % name}
+
+
+func break_lockpick() -> bool:
+	if item_count("lockpick") <= 0:
+		return false
+	return remove_item("lockpick", 1)
 
 
 func add_quest_item(item: Dictionary) -> bool:
@@ -315,8 +540,8 @@ func unlock_glossary_many(ids: PackedStringArray) -> void:
 
 
 func inventory_status_line() -> String:
-	return "Слоты %d/%d · Квест. %d · Глоссарий %d · НБ %d" % [
-		inventory.size(), INV_CAPACITY, quest_items.size(), glossary.size(), money_nb
+	return "Сетка %dx%d · занято %d/%d · вещей %d · квест. %d · НБ %d" % [
+		INV_COLS, INV_ROWS, occupied_cells(), INV_CAPACITY, inventory.size(), quest_items.size(), money_nb
 	]
 
 
@@ -448,9 +673,12 @@ func set_lock_open(lock_id: String, value: bool = true) -> void:
 	locks_open[lock_id] = value
 	if value:
 		add_note("lock_" + lock_id, "Замок «%s» поддался. Щёлкнуло тихо, как сырой сустав." % lock_id)
+		if first:
+			skill_points += 1
+			add_note("prog_lock_" + lock_id, "За взлом — очко. Теперь их %d." % skill_points)
 		if first and lock_id == "alley_chest":
-			add_item({"id": "nb_token_alley", "name": "Жетон НБ", "description": "Из сундука в Грибном. Счётный жетон Биржи.", "consumable": false})
-			add_item({"id": "damp_wrap", "name": "Сырой свёрток", "description": "Тряпка с чем-то твёрдым внутри. Пока не разворачивал.", "consumable": false})
+			add_item({"id": "nb_token_alley", "name": "Жетон НБ", "description": "Из сундука в Грибном. Счётный жетон Биржи.", "consumable": false, "kind": "misc", "w": 1, "h": 1})
+			add_item({"id": "damp_wrap", "name": "Сырой свёрток", "description": "Тряпка с чем-то твёрдым внутри. Пока не разворачивал.", "consumable": false, "kind": "misc", "w": 1, "h": 2})
 			money_nb += 2
 
 
@@ -465,6 +693,19 @@ func equip_weapon(wid: String, wname: String, dmg: int) -> void:
 	weapon_id = wid
 	weapon_name = wname if not wname.is_empty() else wid
 	weapon_damage = maxi(1, dmg)
+	# оружие также лежит в сетке, если ещё нет
+	if not has_item(wid):
+		add_item({
+			"id": wid,
+			"name": weapon_name,
+			"description": "Оружие. Можно держать в руках.",
+			"consumable": false,
+			"stackable": false,
+			"kind": "weapon",
+			"w": 2,
+			"h": 1,
+			"weapon_damage": weapon_damage,
+		})
 	add_note("weapon_equip", "Взял в руки: %s." % weapon_name)
 
 
